@@ -1,30 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VemVindo Frontend
 
-## Getting Started
+Interfaces web do VemVindo, plataforma multitenant de rastreamento de entregas.
+Construído com Next.js 16 (App Router).
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router)
+- React com Tailwind CSS
+- Consumo da API do backend via `fetch`
+
+## Pré-requisitos
+
+- Docker e Docker Compose
+- Node 24 (apenas se for rodar fora de container)
+
+## Ambiente de desenvolvimento
 
 ```bash
-docker compose watch nextjs-dev
+docker compose up
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O frontend fica em `http://localhost:3000`. Ele espera o backend em
+`http://localhost:8000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Para hot reload refletindo no container em execução, use o Compose Watch:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker compose watch
+```
 
-## Learn More
+### Serviços do Compose
 
-To learn more about Next.js, take a look at the following resources:
+- `nextjs-dev`: frontend em modo dev. Sobe no `up` padrão.
+- `nextjs-prod`: imagem de produção, sob o profile `prod`
+  (`docker compose --profile prod up`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Conexão com o backend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+A URL do backend é injetada em build time pela variável `NEXT_PUBLIC_API_URL`
+(default `http://localhost:8000`). Variáveis com o prefixo `NEXT_PUBLIC_` são
+expostas ao navegador pelo Next.
 
-## Deploy on Vercel
+As chamadas à API ficam concentradas em `app/lib/api.ts` (`checkHealth`,
+`loginEmpresa`). A página inicial (`app/page.tsx`) mostra o status da conexão com
+o backend e um formulário de login de empresa para teste da integração.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Variáveis de ambiente
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `NEXT_PUBLIC_API_URL`: URL pública do backend usada pelo navegador.
+
+## Scripts úteis
+
+```bash
+npm run dev     # dev com hot reload (fora de container)
+npm run build   # build de producao
+npm run start   # serve o build
+npm run lint    # eslint
+```
+
+## Nota sobre a versão do Next
+
+Este projeto usa Next.js 16, que traz mudanças de API e convenções em relação a
+versões anteriores. Ao escrever código, consulte os guias em
+`node_modules/next/dist/docs/` antes de assumir comportamentos de versões antigas.
