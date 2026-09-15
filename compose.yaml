@@ -1,0 +1,35 @@
+services:
+  nextjs-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vemvindo-frontend:prod
+    container_name: vemvindo-frontend-prod
+    # Opt-in: so sobe com --profile prod. Fora do "up" padrao (evita colisao na 3000).
+    profiles: ["prod"]
+    ports:
+      - "3000:3000"
+
+  nextjs-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: vemvindo-frontend:dev
+    container_name: vemvindo-frontend-dev
+    ports:
+      - "3000:3000"
+    # URL do backend usada pelo browser (NEXT_PUBLIC_ e inlined pelo Next).
+    # O browser roda no host, entao aponta pra porta publicada do backend.
+    environment:
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: package.json
