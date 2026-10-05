@@ -2,7 +2,7 @@
   # Stage 1: Dependencies Installation Stage
   # ============================================
 
-  ARG NODE_VERSION=24.14.0-slim
+  ARG NODE_VERSION=24.21.0-slim
 
   FROM node:${NODE_VERSION} AS dependencies
 
