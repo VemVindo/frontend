@@ -1,12 +1,12 @@
-type Variante = 'escuro' | 'claro' | 'marca';
+export type VarianteAvatar = 'escuro' | 'claro' | 'marca';
 
-interface AvatarProps {
+export interface AvatarProps {
   iniciais: string;
-  variante?: Variante;
+  variante?: VarianteAvatar;
   tamanho?: number;
 }
 
-const estilosPorVariante: Record<Variante, string> = {
+const estilosPorVariante: Record<VarianteAvatar, string> = {
   escuro: 'rounded-full bg-primaria-escura text-white',
   claro: 'rounded-full bg-primaria-clara text-primaria-escura',
   marca: 'rounded-[11px] bg-texto text-white',

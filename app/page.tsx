@@ -56,7 +56,7 @@ export default function Home() {
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar
         </BotaoLogin>
-        <Link href="/login/entregador" className="text-center text-[13px] text-[#6C5DD3] font-medium">
+        <Link href="/login/entregador" className="text-center text-[13px] text-primaria font-medium">
           Sou entregador
         </Link>
       </form>

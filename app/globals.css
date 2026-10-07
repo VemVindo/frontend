@@ -29,6 +29,8 @@
   --color-alerta: #f5a524;
   --color-erro: #e5484d;
 
+  --color-sobreposicao: #29243a;
+
   --font-sans: var(--font-inter);
   --font-titulo: var(--font-sora);
 }

@@ -1,6 +1,6 @@
 import Avatar from '@/app/components/ui/Avatar';
 
-interface CabecalhoRecebedorProps {
+export interface CabecalhoRecebedorProps {
   nomeEstabelecimento: string;
   iniciaisEstabelecimento: string;
   numeroPedido: string;

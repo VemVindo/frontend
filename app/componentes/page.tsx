@@ -1,17 +1,13 @@
+import IconeCheck from '@/app/components/icones/IconeCheck';
 import Avatar from '@/app/components/ui/Avatar';
 import Botao from '@/app/components/ui/Botao';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import Card from '@/app/components/ui/Card';
 import Etiqueta from '@/app/components/ui/Etiqueta';
 import Logo from '@/app/components/ui/Logo';
+import LogoCompleta from '@/app/components/ui/LogoCompleta';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-
-const cores = [
-  'fundo', 'superficie', 'superficie-suave', 'borda',
-  'primaria', 'primaria-escura', 'primaria-media', 'primaria-clara', 'lilas', 'destaque',
-  'texto', 'texto-corpo', 'texto-apoio', 'texto-suave',
-  'sucesso', 'sucesso-texto', 'sucesso-fundo', 'alerta', 'erro',
-];
+import { CORES_DO_TEMA } from './cores';
 
 export default function PaginaComponentes() {
   return (
@@ -24,7 +20,7 @@ export default function PaginaComponentes() {
 
       <Card titulo="Cores">
         <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {cores.map((cor) => (
+          {CORES_DO_TEMA.map((cor) => (
             <li key={cor} className="flex items-center gap-2 text-xs">
               <span
                 className="size-8 rounded-lg border border-borda"
@@ -37,8 +33,8 @@ export default function PaginaComponentes() {
       </Card>
 
       <Card titulo="Tipografia">
-        <p className="font-titulo font-bold text-[26px]">Sora · títulos</p>
-        <p className="text-[13px]">Inter · textos corridos, rótulos e campos</p>
+        <p className="font-titulo font-bold text-[26px]">Sora: títulos</p>
+        <p className="text-[13px]">Inter: textos corridos, rótulos e campos</p>
       </Card>
 
       <Card titulo="Botões">
@@ -62,11 +58,12 @@ export default function PaginaComponentes() {
           <Avatar iniciais="MV" variante="escuro" />
           <Avatar iniciais="MV" variante="claro" />
           <Avatar iniciais="CM" variante="marca" tamanho={38} />
-          <Etiqueta tom="sucesso">✓ Concluída</Etiqueta>
+          <Etiqueta tom="sucesso"><IconeCheck className="size-3" />Concluída</Etiqueta>
           <Etiqueta tom="alerta">Pendente</Etiqueta>
           <Etiqueta tom="erro">Cancelada</Etiqueta>
           <Etiqueta>Em rota</Etiqueta>
           <Logo />
+          <LogoCompleta className="w-[160px] h-auto" />
         </div>
       </Card>
     </main>

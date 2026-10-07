@@ -1,6 +1,12 @@
+'use client';
+
 import NavPainel from '@/app/components/layout/NavPainel';
+import { useSessao } from '@/app/lib/useSessao';
 
 export default function LayoutPainel({ children }: LayoutProps<'/painel'>) {
+  const empresa = useSessao('ESTABELECIMENTO');
+  if (!empresa) return null;
+
   return (
     <>
       <NavPainel />

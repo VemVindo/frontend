@@ -3,16 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import IconeFechar from '@/app/components/icones/IconeFechar';
+import IconeMenu from '@/app/components/icones/IconeMenu';
+import BotaoSair from '@/app/components/layout/BotaoSair';
 import Logo from '@/app/components/ui/Logo';
-
-const itensMenu = [
-  { rotulo: 'Dashboard', href: '/painel' },
-  { rotulo: 'Pedidos', href: '/painel/pedidos' },
-  { rotulo: 'Frota', href: '/painel/frota' },
-  { rotulo: 'Remuneração', href: '/painel/remuneracao' },
-  { rotulo: 'Avaliações', href: '/painel/avaliacoes' },
-  { rotulo: 'Empresa', href: '/painel/empresa' },
-];
+import { MENU_PAINEL, TELA_INICIAL } from '@/app/lib/rotas';
 
 export default function NavPainel() {
   const caminhoAtual = usePathname();
@@ -30,12 +25,12 @@ export default function NavPainel() {
   return (
     <header className="bg-superficie">
       <div className="mx-auto flex h-[62px] md:h-[68px] max-w-[1280px] items-center justify-between px-4 md:px-1">
-        <Link href="/painel" className="md:w-[216px]">
+        <Link href={TELA_INICIAL.ESTABELECIMENTO} className="md:w-[216px]">
           <Logo />
         </Link>
 
         <nav aria-label="Menu principal" className="hidden md:flex flex-1 h-full">
-          {itensMenu.map((item) => {
+          {MENU_PAINEL.map((item) => {
             const ativo = caminhoAtual === item.href;
             return (
               <Link
@@ -50,15 +45,19 @@ export default function NavPainel() {
           })}
         </nav>
 
+        <div className="hidden md:block pr-4">
+          <BotaoSair cargo="ESTABELECIMENTO" />
+        </div>
+
         <button
           type="button"
           aria-label="Abrir menu"
           aria-expanded={menuAberto}
           aria-controls="menu-lateral"
           onClick={() => setMenuAberto(true)}
-          className="md:hidden flex size-[38px] items-center justify-center rounded-full bg-primaria-clara text-primaria-escura font-bold cursor-pointer"
+          className="md:hidden flex size-[38px] items-center justify-center rounded-full bg-primaria-clara text-primaria-escura cursor-pointer"
         >
-          ☰
+          <IconeMenu className="size-5" />
         </button>
       </div>
 
@@ -67,7 +66,7 @@ export default function NavPainel() {
           <div
             aria-hidden
             onClick={() => setMenuAberto(false)}
-            className="absolute inset-0 bg-[#29243a]/35"
+            className="absolute inset-0 bg-sobreposicao/35"
           />
           <nav
             id="menu-lateral"
@@ -80,13 +79,13 @@ export default function NavPainel() {
                 type="button"
                 aria-label="Fechar menu"
                 onClick={() => setMenuAberto(false)}
-                className="flex size-9 items-center justify-center rounded-full bg-primaria-clara text-texto-suave text-lg cursor-pointer"
+                className="flex size-9 items-center justify-center rounded-full bg-primaria-clara text-texto-suave cursor-pointer"
               >
-                ×
+                <IconeFechar className="size-5" />
               </button>
             </div>
             <ul className="mt-8 flex flex-col">
-              {itensMenu.map((item) => {
+              {MENU_PAINEL.map((item) => {
                 const ativo = caminhoAtual === item.href;
                 return (
                   <li key={item.href}>
@@ -102,6 +101,9 @@ export default function NavPainel() {
                 );
               })}
             </ul>
+            <div className="mt-8">
+              <BotaoSair cargo="ESTABELECIMENTO" larguraTotal />
+            </div>
           </nav>
         </div>
       )}
