@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { BOTAO_SECUNDARIO } from '@/app/components/estilos';
 import { sair } from '@/app/lib/api';
 
 interface AreaLogadaProps {
@@ -32,7 +33,7 @@ export default function AreaLogada({ titulo, usuario, telaDeLogin, children }: A
           type="button"
           onClick={handleSair}
           disabled={saindo}
-          className="hover:cursor-pointer rounded-xl border border-[#6C5DD3] px-4 py-2 text-sm font-medium text-[#6C5DD3] disabled:opacity-50"
+          className={BOTAO_SECUNDARIO}
         >
           Sair
         </button>

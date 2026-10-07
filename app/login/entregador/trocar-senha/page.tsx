@@ -3,27 +3,23 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import BotaoLogin from '@/app/components/auth/BotaoLogin';
+import CaixaConfirmacao from '@/app/components/auth/CaixaConfirmacao';
 import CampoLogin from '@/app/components/auth/CampoLogin';
 import TelaLogin from '@/app/components/auth/TelaLogin';
+import PainelDadosCompartilhados from '@/app/components/entregador/PainelDadosCompartilhados';
 import { ApiError, buscarUsuarioAtual, trocarSenhaEntregador } from '@/app/lib/api';
-
-const TAMANHO_MINIMO = 8;
-const TAMANHO_MAXIMO = 72;
-
-function validar(senhaAtual: string, novaSenha: string, confirmacao: string): string | null {
-  if (novaSenha.length < TAMANHO_MINIMO) return `A nova senha precisa ter pelo menos ${TAMANHO_MINIMO} caracteres`;
-  if (novaSenha.length > TAMANHO_MAXIMO) return `A nova senha pode ter no máximo ${TAMANHO_MAXIMO} caracteres`;
-  if (novaSenha === senhaAtual) return 'A nova senha precisa ser diferente da temporária';
-  if (novaSenha !== confirmacao) return 'As senhas não conferem';
-  return null;
-}
+import { TELA_DE_LOGIN, TELA_INICIAL } from '@/app/lib/rotas';
+import { usePrivacidadeEntregador } from '@/app/lib/usePrivacidadeEntregador';
+import { TAMANHO_MAXIMO, TAMANHO_MINIMO, validarNovaSenha } from './validacao';
 
 export default function TrocarSenhaEntregador() {
   const router = useRouter();
   const [liberado, setLiberado] = useState(false);
+  const { dados, vinculos } = usePrivacidadeEntregador(liberado);
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmacao, setConfirmacao] = useState('');
+  const [ciente, setCiente] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -32,16 +28,16 @@ export default function TrocarSenhaEntregador() {
     buscarUsuarioAtual()
       .then((usuario) => {
         if (cancelado) return;
-        if (usuario.role !== 'ENTREGADOR') {
-          router.replace('/login/entregador');
+        if (usuario.cargo !== 'ENTREGADOR') {
+          router.replace(TELA_DE_LOGIN.ENTREGADOR);
         } else if (!usuario.senhaTemporaria) {
-          router.replace('/entregador');
+          router.replace(TELA_INICIAL.ENTREGADOR);
         } else {
           setLiberado(true);
         }
       })
       .catch(() => {
-        if (!cancelado) router.replace('/login/entregador');
+        if (!cancelado) router.replace(TELA_DE_LOGIN.ENTREGADOR);
       });
     return () => {
       cancelado = true;
@@ -51,16 +47,20 @@ export default function TrocarSenhaEntregador() {
   async function handleTroca(event: FormEvent) {
     event.preventDefault();
 
-    const erroValidacao = validar(senhaAtual, novaSenha, confirmacao);
+    const erroValidacao = validarNovaSenha(senhaAtual, novaSenha, confirmacao);
     if (erroValidacao) {
       setErro(erroValidacao);
+      return;
+    }
+    if (!ciente) {
+      setErro('Confirme que viu os dados que as empresas veem');
       return;
     }
 
     setCarregando(true);
     try {
-      await trocarSenhaEntregador(senhaAtual, novaSenha);
-      router.replace('/entregador');
+      await trocarSenhaEntregador(senhaAtual, novaSenha, ciente);
+      router.replace(TELA_INICIAL.ENTREGADOR);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         setErro('Senha temporária incorreta');
@@ -81,6 +81,8 @@ export default function TrocarSenhaEntregador() {
   }
 
   if (!liberado) return null;
+
+  const convites = vinculos?.filter((v) => v.status === 'PENDENTE') ?? [];
 
   return (
     <TelaLogin titulo="Crie sua senha">
@@ -106,6 +108,9 @@ export default function TrocarSenhaEntregador() {
           value={novaSenha}
           onChange={alterar(setNovaSenha)}
         />
+        <p className="-mt-1 text-[12px] text-[#8B8A9A]">
+          De {TAMANHO_MINIMO} a {TAMANHO_MAXIMO} caracteres: letras sem acento, números e símbolos, sem espaços.
+        </p>
         <CampoLogin
           rotulo="CONFIRMAR NOVA SENHA"
           type="password"
@@ -114,6 +119,16 @@ export default function TrocarSenhaEntregador() {
           value={confirmacao}
           onChange={alterar(setConfirmacao)}
         />
+        {dados && <PainelDadosCompartilhados dados={dados} />}
+        {convites.length > 0 && (
+          <p className="text-[13px] text-[#8B8A9A]">
+            Convites esperando sua resposta: <strong className="text-[#1D1B2E]">{convites.map((v) => v.empresa).join(', ')}</strong>.
+            Você aceita ou recusa cada um depois de criar a senha.
+          </p>
+        )}
+        <CaixaConfirmacao marcado={ciente} onAlterar={(valor) => { setCiente(valor); setErro(null); }}>
+          Vi quais dados as empresas veem sobre mim depois que eu aceitar um convite.
+        </CaixaConfirmacao>
         <BotaoLogin carregando={carregando} erro={erro}>
           Salvar nova senha
         </BotaoLogin>

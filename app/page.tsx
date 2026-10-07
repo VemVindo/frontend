@@ -7,6 +7,7 @@ import BotaoLogin from '@/app/components/auth/BotaoLogin';
 import CampoLogin from '@/app/components/auth/CampoLogin';
 import TelaLogin from '@/app/components/auth/TelaLogin';
 import { ApiError, loginEmpresa } from '@/app/lib/api';
+import { TELA_INICIAL } from '@/app/lib/rotas';
 
 export default function Home() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function Home() {
     setCarregando(true);
     try {
       await loginEmpresa(email, senha);
-      router.replace('/painel');
+      router.replace(TELA_INICIAL.ESTABELECIMENTO);
     } catch (e) {
       setErro(
         e instanceof ApiError && e.status === 401

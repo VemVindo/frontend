@@ -1,22 +1,12 @@
+import type {
+  DadosCompartilhados,
+  Empresa,
+  Entregador,
+  RespostaLogin,
+  Vinculo,
+} from '@/app/lib/tipos';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
-
-export interface Empresa {
-  id: number;
-  nomeFantasia: string;
-  email: string;
-  role: 'ESTABELECIMENTO';
-}
-
-export interface Entregador {
-  cpf: string;
-  nome: string;
-  role: 'ENTREGADOR';
-  senhaTemporaria: boolean;
-}
-
-export interface LoginResponse<Usuario> {
-  user: Usuario;
-}
 
 export class ApiError extends Error {
   constructor(
@@ -56,7 +46,7 @@ export async function checkHealth(): Promise<{ database: string }> {
 export async function loginEmpresa(
   email: string,
   senha: string,
-): Promise<LoginResponse<Empresa>> {
+): Promise<RespostaLogin<Empresa>> {
   return requisitar('/auth/login/empresa', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
@@ -66,7 +56,7 @@ export async function loginEmpresa(
 export async function loginEntregador(
   cpf: string,
   senha: string,
-): Promise<LoginResponse<Entregador>> {
+): Promise<RespostaLogin<Entregador>> {
   return requisitar('/auth/login/entregador', {
     method: 'POST',
     body: JSON.stringify({ cpf, senha }),
@@ -74,21 +64,42 @@ export async function loginEntregador(
 }
 
 export async function buscarUsuarioAtual(): Promise<Empresa | Entregador> {
-  return requisitar('/auth/me', { method: 'GET' });
+  return requisitar('/auth/minhas-infos', { method: 'GET' });
 }
 
 export async function trocarSenhaEntregador(
   senhaAtual: string,
   novaSenha: string,
-): Promise<LoginResponse<Entregador>> {
+  cienteDadosCompartilhados: boolean,
+): Promise<RespostaLogin<Entregador>> {
   return requisitar('/auth/entregador/trocar-senha', {
     method: 'POST',
-    body: JSON.stringify({ senhaAtual, novaSenha }),
+    body: JSON.stringify({ senhaAtual, novaSenha, cienteDadosCompartilhados }),
   });
 }
 
 export async function sair(): Promise<void> {
-  return requisitar('/auth/logout', { method: 'POST' });
+  return requisitar('/auth/sair', { method: 'POST' });
+}
+
+export async function buscarDadosCompartilhados(): Promise<{ dados: DadosCompartilhados }> {
+  return requisitar('/entregador/dados-compartilhados', { method: 'GET' });
+}
+
+export async function listarVinculos(): Promise<Vinculo[]> {
+  return requisitar('/entregador/vinculos', { method: 'GET' });
+}
+
+export async function aceitarVinculo(id: number): Promise<void> {
+  return requisitar(`/entregador/vinculos/${id}/aceitar`, { method: 'POST' });
+}
+
+export async function recusarVinculo(id: number): Promise<void> {
+  return requisitar(`/entregador/vinculos/${id}/recusar`, { method: 'POST' });
+}
+
+export async function encerrarVinculo(id: number): Promise<void> {
+  return requisitar(`/entregador/vinculos/${id}/encerrar`, { method: 'POST' });
 }
 
 export { API_URL };

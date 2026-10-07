@@ -2,40 +2,36 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { buscarUsuarioAtual, type Empresa, type Entregador } from '@/app/lib/api';
+import { buscarUsuarioAtual } from '@/app/lib/api';
+import { TELA_DE_LOGIN, TELA_TROCAR_SENHA } from '@/app/lib/rotas';
+import type { Cargo, Empresa, Entregador } from '@/app/lib/tipos';
 
-type Papel = Empresa['role'] | Entregador['role'];
-type UsuarioDo<P extends Papel> = P extends 'ESTABELECIMENTO' ? Empresa : Entregador;
+type UsuarioDo<C extends Cargo> = C extends 'ESTABELECIMENTO' ? Empresa : Entregador;
 
-export const TELA_DE_LOGIN: Record<Papel, string> = {
-  ESTABELECIMENTO: '/',
-  ENTREGADOR: '/login/entregador',
-};
-
-export function useSessao<P extends Papel>(papel: P): UsuarioDo<P> | null {
+export function useSessao<C extends Cargo>(cargo: C): UsuarioDo<C> | null {
   const router = useRouter();
-  const [usuario, setUsuario] = useState<UsuarioDo<P> | null>(null);
+  const [usuario, setUsuario] = useState<UsuarioDo<C> | null>(null);
 
   useEffect(() => {
     let cancelado = false;
     buscarUsuarioAtual()
       .then((atual) => {
         if (cancelado) return;
-        if (atual.role !== papel) {
-          router.replace(TELA_DE_LOGIN[papel]);
-        } else if (atual.role === 'ENTREGADOR' && atual.senhaTemporaria) {
-          router.replace('/login/entregador/trocar-senha');
+        if (atual.cargo !== cargo) {
+          router.replace(TELA_DE_LOGIN[cargo]);
+        } else if (atual.cargo === 'ENTREGADOR' && atual.senhaTemporaria) {
+          router.replace(TELA_TROCAR_SENHA);
         } else {
-          setUsuario(atual as UsuarioDo<P>);
+          setUsuario(atual as UsuarioDo<C>);
         }
       })
       .catch(() => {
-        if (!cancelado) router.replace(TELA_DE_LOGIN[papel]);
+        if (!cancelado) router.replace(TELA_DE_LOGIN[cargo]);
       });
     return () => {
       cancelado = true;
     };
-  }, [papel, router]);
+  }, [cargo, router]);
 
   return usuario;
 }

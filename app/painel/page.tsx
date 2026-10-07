@@ -1,7 +1,8 @@
 'use client';
 
 import AreaLogada from '@/app/components/AreaLogada';
-import { TELA_DE_LOGIN, useSessao } from '@/app/lib/useSessao';
+import { TELA_DE_LOGIN } from '@/app/lib/rotas';
+import { useSessao } from '@/app/lib/useSessao';
 
 export default function Painel() {
   const empresa = useSessao('ESTABELECIMENTO');
