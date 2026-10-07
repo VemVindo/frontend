@@ -6,26 +6,31 @@ import { useRouter } from 'next/navigation';
 import BotaoLogin from '@/app/components/auth/BotaoLogin';
 import CampoLogin from '@/app/components/auth/CampoLogin';
 import TelaLogin from '@/app/components/auth/TelaLogin';
-import { ApiError, loginEmpresa } from '@/app/lib/api';
-import { TELA_INICIAL } from '@/app/lib/rotas';
+import { ApiError, loginEntregador } from '@/app/lib/api';
+import { cpfValido, somenteDigitosCpf } from '@/app/lib/cpf';
+import { TELA_INICIAL, TELA_TROCAR_SENHA } from '@/app/lib/rotas';
 
-export default function Home() {
+export default function LoginEntregador() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   async function handleLogin(event: FormEvent) {
     event.preventDefault();
+    if (!cpfValido(cpf)) {
+      setErro('CPF inválido. Confira os 11 dígitos');
+      return;
+    }
     setCarregando(true);
     try {
-      await loginEmpresa(email, senha);
-      router.replace(TELA_INICIAL.ESTABELECIMENTO);
+      const { usuario } = await loginEntregador(cpf, senha);
+      router.replace(usuario.senhaTemporaria ? TELA_TROCAR_SENHA : TELA_INICIAL.ENTREGADOR);
     } catch (e) {
       setErro(
         e instanceof ApiError && e.status === 401
-          ? 'Senha incorreta ou conta inexistente'
+          ? 'CPF ou senha incorretos'
           : 'Não foi possível entrar agora. Tente novamente.',
       );
       setCarregando(false);
@@ -33,16 +38,18 @@ export default function Home() {
   }
 
   return (
-    <TelaLogin titulo="Entrar na sua conta">
+    <TelaLogin titulo="Entrar como entregador">
       <form onSubmit={handleLogin} className="flex flex-col gap-3 xl:gap-6 w-full">
         <CampoLogin
-          rotulo="EMAIL"
-          type="email"
-          autoComplete="email"
+          rotulo="CPF"
+          type="text"
+          inputMode="numeric"
+          autoComplete="username"
           required
-          value={email}
-          placeholder='example@mail.com'
-          onChange={(e) => { setEmail(e.target.value); setErro(null); }}
+          maxLength={11}
+          value={cpf}
+          placeholder='Somente números'
+          onChange={(e) => { setCpf(somenteDigitosCpf(e.target.value)); setErro(null); }}
         />
         <CampoLogin
           rotulo="SENHA"
@@ -56,8 +63,8 @@ export default function Home() {
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar
         </BotaoLogin>
-        <Link href="/login/entregador" className="text-center text-[13px] text-primaria font-medium">
-          Sou entregador
+        <Link href="/" className="text-center text-[13px] text-primaria font-medium">
+          Sou empresa
         </Link>
       </form>
     </TelaLogin>
