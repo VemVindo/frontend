@@ -1,11 +1,16 @@
-import Card from '@/app/components/ui/Card';
-import TituloPagina from '@/app/components/ui/TituloPagina';
+'use client';
 
-export default function PaginaDashboard() {
+import AreaLogada from '@/app/components/AreaLogada';
+import { TELA_DE_LOGIN } from '@/app/lib/rotas';
+import { useSessao } from '@/app/lib/useSessao';
+
+export default function Painel() {
+  const empresa = useSessao('ESTABELECIMENTO');
+  if (!empresa) return null;
+
   return (
-    <>
-      <TituloPagina titulo="Dashboard" subtitulo="Visão geral das entregas do estabelecimento" />
-      <Card titulo="Em construção" descricao="Os indicadores do dashboard entram em uma próxima sprint." />
-    </>
+    <AreaLogada titulo="Painel" usuario={empresa.nomeFantasia} telaDeLogin={TELA_DE_LOGIN.ESTABELECIMENTO}>
+      <p className="text-[#1D1B2E]">Pedidos, frota e métricas do estabelecimento vão aparecer aqui.</p>
+    </AreaLogada>
   );
 }
