@@ -1,6 +1,4 @@
-import EtapasDaEntrega from '@/app/components/pedidos/EtapasDaEntrega';
-import Card from '@/app/components/ui/Card';
-import { formatarDataHora, rotuloDoStatus } from '@/app/lib/pedidos';
+import { formatarDataHora } from '@/app/lib/pedidos';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 
 export interface DetalhePedidoEntregadorProps {
@@ -18,29 +16,44 @@ export default function DetalhePedidoEntregador({ pedido }: DetalhePedidoEntrega
   ].filter((linha) => linha.valor);
 
   return (
-    <div className="flex flex-col gap-5 md:flex-row md:items-start">
-      <section aria-label="Status do pedido" className="flex-1 rounded-[22px] bg-primaria p-5 text-white">
-        <p className="font-titulo text-[10px] font-bold uppercase text-lilas">Status do pedido</p>
-        <p role="status" className="mt-3 font-titulo text-xl font-bold md:text-2xl">
-          {rotuloDoStatus(pedido.status)}
-        </p>
-        {pedido.status !== 'CANCELADO' && (
-          <div className="mt-6">
-            <EtapasDaEntrega status={pedido.status} />
-          </div>
-        )}
-      </section>
+    <div className="flex flex-col gap-5">
+      <div className="grid gap-5 lg:grid-cols-[1.3fr_0.9fr]">
+        <div className="overflow-hidden rounded-[20px] border border-borda bg-[#0a0a0c] p-0" aria-label="Mapa do percurso">
+          <div className="h-[360px] w-full bg-black" />
+        </div>
 
-      <Card titulo="Dados da entrega" className="md:w-[470px]">
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
-          {linhas.map(({ rotulo, valor }) => (
-            <div key={rotulo} className="contents">
-              <dt className="text-texto-suave">{rotulo}</dt>
-              <dd className="font-medium text-texto">{valor}</dd>
-            </div>
-          ))}
-        </dl>
-      </Card>
+        <div className="flex flex-col rounded-[18px] bg-superficie p-4 shadow-sm ring-1 ring-borda">
+          <h2 className="text-[15px] md:text-[18px] font-bold text-texto">{pedido.recebedor}</h2>
+          <p className="mt-2 text-[14px] text-texto-apoio">{pedido.endereco}</p>
+
+          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
+            {linhas.map(({ rotulo, valor }) => (
+              <div key={rotulo} className="contents">
+                <dt className="text-texto-suave">{rotulo}</dt>
+                <dd className="font-medium text-texto">{valor}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-auto pt-6">
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-[16px] bg-primaria px-4 py-3 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-primaria-escura"
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">💬</span>
+              Abrir chat
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="flex w-full items-center justify-center gap-2 rounded-[18px] bg-primaria px-4 py-4 text-[18px] font-bold text-white shadow-sm transition-colors hover:bg-primaria-escura"
+      >
+        <span className="text-[18px]">✓</span>
+        Cheguei ao destino
+      </button>
     </div>
   );
 }

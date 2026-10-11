@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import IconeEmpresa from '@/app/components/icones/IconeEmpresa';
 import Botao from '@/app/components/ui/Botao';
@@ -54,10 +55,13 @@ export default function ListaVinculos({ vinculos, ocupado, onResponder }: ListaV
           <ul className="flex flex-col gap-2">
             {ativos.map((v) => (
               <li key={v.id} className={ITEM}>
-                <span className="flex items-center gap-2 text-[13px] font-semibold">
+                <Link
+                  href={`/entregador/pedidos?empresa=${encodeURIComponent(v.empresa)}`}
+                  className="flex items-center gap-2 text-[13px] font-semibold text-texto transition-colors hover:text-primaria"
+                >
                   <IconeEmpresa className="size-5 text-primaria" />
                   {v.empresa}
-                </span>
+                </Link>
                 {confirmandoSaida === v.id ? (
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-texto-apoio">Sair da frota?</span>
