@@ -2,6 +2,7 @@ import type {
   DadosCompartilhados,
   Empresa,
   Entregador,
+  PedidoDoEntregador,
   RespostaLogin,
   Vinculo,
 } from '@/app/lib/tipos';
@@ -100,6 +101,14 @@ export async function recusarVinculo(id: number): Promise<void> {
 
 export async function encerrarVinculo(id: number): Promise<void> {
   return requisitar(`/entregador/vinculos/${id}/encerrar`, { method: 'POST' });
+}
+
+export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]> {
+  return requisitar('/entregador/pedidos', { method: 'GET' });
+}
+
+export async function listarFrota(): Promise<DadosCompartilhados[]> {
+  return requisitar('/entregadores', { method: 'GET' });
 }
 
 export { API_URL };

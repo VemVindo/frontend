@@ -36,3 +36,24 @@ export interface Vinculo {
   convidadoEm: string;
   aceitoEm: string | null;
 }
+
+export type StatusPedido = 'PENDENTE' | 'ATRIBUIDO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+
+export interface PedidoDoEntregador {
+  id: number;
+  status: StatusPedido;
+  empresa: string;
+  recebedor: string;
+  endereco: string;
+  criadoEm: string;
+  iniciadoEm: string | null;
+  finalizadoEm: string | null;
+}
+
+export interface PedidoAtivo {
+  id: number;
+  recebedor: string;
+  entregador: string | null;
+  status: StatusPedido;
+  criadoEm: string;
+}
