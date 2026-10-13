@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
+import { pedidoEmAberto } from '@/app/lib/pedidos';
 import { telaPedidoDoPainel } from '@/app/lib/rotas';
 import type { PedidoAtivo } from '@/app/lib/tipos';
 
@@ -37,7 +38,7 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
                 <Link href={telaPedidoDoPainel(pedido.id)} className={ACAO}>
                   Ver detalhes
                 </Link>
-                {pedido.status !== 'CONCLUIDO' && pedido.status !== 'CANCELADO' && (
+                {pedidoEmAberto(pedido.status) && (
                   <button type="button" onClick={() => onAtribuir(pedido)} className={ACAO}>
                     {pedido.entregador ? 'Reatribuir' : 'Atribuir'}
                   </button>
@@ -61,7 +62,7 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
                 <Link href={telaPedidoDoPainel(pedido.id)} className={ACAO}>
                   Ver detalhes
                 </Link>
-                {pedido.status !== 'CONCLUIDO' && pedido.status !== 'CANCELADO' && (
+                {pedidoEmAberto(pedido.status) && (
                   <button type="button" onClick={() => onAtribuir(pedido)} className={ACAO}>
                     {pedido.entregador ? 'Reatribuir' : 'Atribuir'}
                   </button>

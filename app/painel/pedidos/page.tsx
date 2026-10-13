@@ -6,7 +6,8 @@ import ModalAtribuirEntregador from '@/app/components/pedidos/ModalAtribuirEntre
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-import { listarPedidosAtivos } from '@/app/lib/pedidosAtivos';
+import { listarPedidosDaEmpresa } from '@/app/lib/api';
+import { pedidoEmAberto } from '@/app/lib/pedidos';
 import type { PedidoAtivo } from '@/app/lib/tipos';
 
 export default function PaginaPedidosAtivos() {
@@ -18,7 +19,7 @@ export default function PaginaPedidosAtivos() {
 
   useEffect(() => {
     let cancelado = false;
-    listarPedidosAtivos()
+    listarPedidosDaEmpresa()
       .then((lista) => {
         if (!cancelado) setPedidos(lista);
       })
@@ -30,12 +31,9 @@ export default function PaginaPedidosAtivos() {
     };
   }, []);
 
-  const pedidosFiltrados = pedidos?.filter((pedido) => {
-    if (abaAtiva === 'finalizados') {
-      return pedido.status === 'CONCLUIDO';
-    }
-    return pedido.status !== 'CONCLUIDO' && pedido.status !== 'CANCELADO';
-  });
+  const pedidosFiltrados = pedidos?.filter((pedido) =>
+    abaAtiva === 'ativos' ? pedidoEmAberto(pedido.status) : !pedidoEmAberto(pedido.status),
+  );
 
   const fecharModal = useCallback(() => setPedidoParaAtribuir(null), []);
 

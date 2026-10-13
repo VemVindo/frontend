@@ -37,23 +37,39 @@ export interface Vinculo {
   aceitoEm: string | null;
 }
 
-export type StatusPedido = 'PENDENTE' | 'ATRIBUIDO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+// Espelha o enum StatusPedido do Prisma: PENDENTE e o unico status sem entregador.
+export type StatusPedido = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADO' | 'CANCELADO';
 
+// GET /pedidos/minhas-entregas. Valor em centavos e distancia em metros.
 export interface PedidoDoEntregador {
   id: number;
   status: StatusPedido;
   empresa: string;
   recebedor: string;
   endereco: string;
+  valorEntrega: number;
+  distancia: number;
   criadoEm: string;
   iniciadoEm: string | null;
   finalizadoEm: string | null;
 }
 
+// GET /pedidos e respostas de PATCH /pedidos/:id/entregador e /status.
 export interface PedidoAtivo {
   id: number;
   recebedor: string;
   entregador: string | null;
   status: StatusPedido;
   criadoEm: string;
+}
+
+export interface TrocaDeEntregador {
+  anterior: string | null;
+  novo: string;
+  data: string;
+}
+
+export interface StatusDisponiveis {
+  statusAtual: StatusPedido;
+  statusDisponiveis: StatusPedido[];
 }

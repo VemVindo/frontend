@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import IconeFechar from '@/app/components/icones/IconeFechar';
 import Avatar from '@/app/components/ui/Avatar';
 import Botao from '@/app/components/ui/Botao';
-import { ApiError, listarFrota } from '@/app/lib/api';
+import { ApiError, atribuirEntregadorAoPedido, listarFrota } from '@/app/lib/api';
 import { rotuloDoVeiculo } from '@/app/lib/dadosCompartilhados';
-import { atribuirEntregador, reatribuirEntregador } from '@/app/lib/pedidosAtivos';
 import { iniciais } from '@/app/lib/texto';
 import type { DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
 
@@ -53,20 +52,9 @@ export default function ModalAtribuirEntregador({
     setAtribuindo(true);
     setErro(null);
     try {
-      onAtribuido(await atribuirEntregador(pedido, entregador));
-    } catch {
-      setErro('Não foi possível atribuir o entregador agora.');
-      setAtribuindo(false);
-    }
-  }
-
-  async function reatribuir(entregador: DadosCompartilhados) {
-    setAtribuindo(true);
-    setErro(null);
-    try {
-      onAtribuido(await reatribuirEntregador(pedido, entregador));
+      onAtribuido(await atribuirEntregadorAoPedido(pedido.id, entregador.cpf));
     } catch (err) {
-      setErro(err instanceof ApiError ? err.message : 'Não foi possível reatribuir o entregador agora.');
+      setErro(err instanceof ApiError ? err.message : `Não foi possível ${modo} o entregador agora.`);
       setAtribuindo(false);
     }
   }
@@ -118,11 +106,7 @@ export default function ModalAtribuirEntregador({
                 <button
                   type="button"
                   disabled={atribuindo}
-                  onClick={() => 
-                    modo === 'reatribuir'
-                      ? reatribuir(entregador)
-                      : atribuir(entregador)
-                  }
+                  onClick={() => atribuir(entregador)}
                   className="cursor-pointer text-xs font-semibold text-destaque hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {modo === 'reatribuir' ? 'Reatribuir' : 'Atribuir'}

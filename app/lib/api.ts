@@ -2,10 +2,13 @@ import type {
   DadosCompartilhados,
   Empresa,
   Entregador,
+  PedidoAtivo,
   PedidoDoEntregador,
   RespostaLogin,
+  StatusDisponiveis,
+  StatusPedido,
+  TrocaDeEntregador,
   Vinculo,
-  PedidoAtivo,
 } from '@/app/lib/tipos';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -104,20 +107,38 @@ export async function encerrarVinculo(id: number): Promise<void> {
   return requisitar(`/entregador/vinculos/${id}/encerrar`, { method: 'POST' });
 }
 
-export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]> {
-  return requisitar('/entregador/pedidos', { method: 'GET' });
-}
-
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
 }
 
-export async function reatribuirPedidos(
-  id: number, cpfEntregador: string
-): Promise<PedidoAtivo> {
+export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
+  return requisitar('/pedidos', { method: 'GET' });
+}
+
+// Atribui (pedido PENDENTE) ou reatribui (EM_ANDAMENTO): o backend decide pelo status.
+export async function atribuirEntregadorAoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
   return requisitar(`/pedidos/${id}/entregador`, {
     method: 'PATCH',
     body: JSON.stringify({ cpfEntregador }),
+  });
+}
+
+export async function listarHistoricoDeEntregadores(id: number): Promise<TrocaDeEntregador[]> {
+  return requisitar(`/pedidos/${id}/historico-entregadores`, { method: 'GET' });
+}
+
+export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]> {
+  return requisitar('/pedidos/minhas-entregas', { method: 'GET' });
+}
+
+export async function obterStatusDisponiveis(id: number): Promise<StatusDisponiveis> {
+  return requisitar(`/pedidos/${id}/status-disponiveis`, { method: 'GET' });
+}
+
+export async function atualizarStatusDoPedido(id: number, status: StatusPedido): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
   });
 }
 
