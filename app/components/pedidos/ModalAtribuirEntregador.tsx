@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import IconeFechar from '@/app/components/icones/IconeFechar';
 import Avatar from '@/app/components/ui/Avatar';
 import Botao from '@/app/components/ui/Botao';
-import { listarFrota } from '@/app/lib/api';
+import { ApiError, listarFrota } from '@/app/lib/api';
 import { rotuloDoVeiculo } from '@/app/lib/dadosCompartilhados';
-import { atribuirEntregador } from '@/app/lib/pedidosAtivos';
+import { atribuirEntregador, reatribuirEntregador } from '@/app/lib/pedidosAtivos';
 import { iniciais } from '@/app/lib/texto';
 import type { DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
 
@@ -60,6 +60,17 @@ export default function ModalAtribuirEntregador({
     }
   }
 
+  async function reatribuir(entregador: DadosCompartilhados) {
+    setAtribuindo(true);
+    setErro(null);
+    try {
+      onAtribuido(await reatribuirEntregador(pedido, entregador));
+    } catch (err) {
+      setErro(err instanceof ApiError ? err.message : 'Não foi possível reatribuir o entregador agora.');
+      setAtribuindo(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div aria-hidden onClick={onFechar} className="absolute inset-0 bg-sobreposicao/55" />
@@ -107,7 +118,11 @@ export default function ModalAtribuirEntregador({
                 <button
                   type="button"
                   disabled={atribuindo}
-                  onClick={() => atribuir(entregador)}
+                  onClick={() => 
+                    modo === 'reatribuir'
+                      ? reatribuir(entregador)
+                      : atribuir(entregador)
+                  }
                   className="cursor-pointer text-xs font-semibold text-destaque hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {modo === 'reatribuir' ? 'Reatribuir' : 'Atribuir'}

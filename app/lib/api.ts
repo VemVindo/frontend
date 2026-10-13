@@ -5,6 +5,7 @@ import type {
   PedidoDoEntregador,
   RespostaLogin,
   Vinculo,
+  PedidoAtivo,
 } from '@/app/lib/tipos';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -109,6 +110,15 @@ export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]>
 
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
+}
+
+export async function reatribuirPedidos(
+  id: number, cpfEntregador: string
+): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/entregador`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cpfEntregador }),
+  });
 }
 
 export { API_URL };
