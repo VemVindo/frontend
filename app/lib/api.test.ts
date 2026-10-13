@@ -1,5 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { API_URL, ApiError, buscarUsuarioAtual, loginEmpresa, sair } from './api';
+import {
+  API_URL,
+  ApiError,
+  aceitarVinculo,
+  buscarDadosCompartilhados,
+  buscarUsuarioAtual,
+  checkHealth,
+  encerrarVinculo,
+  listarFrota,
+  listarVinculos,
+  loginEmpresa,
+  loginEntregador,
+  recusarVinculo,
+  sair,
+  trocarSenhaEntregador,
+} from './api';
 
 function resposta(status: number, corpo?: unknown) {
   return new Response(corpo === undefined ? null : JSON.stringify(corpo), {
@@ -57,5 +72,29 @@ describe('api', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 204 })));
 
     await expect(sair()).resolves.toBeUndefined();
+  });
+
+  // Contrato com o backend: se uma rota mudar de um lado, o teste avisa.
+  it.each([
+    ['checkHealth', () => checkHealth(), 'GET', '/health/db'],
+    ['loginEntregador', () => loginEntregador('12345678909', 'x'), 'POST', '/auth/login/entregador'],
+    ['buscarUsuarioAtual', () => buscarUsuarioAtual(), 'GET', '/auth/minhas-infos'],
+    ['trocarSenhaEntregador', () => trocarSenhaEntregador('a', 'b', true), 'POST', '/auth/entregador/trocar-senha'],
+    ['sair', () => sair(), 'POST', '/auth/sair'],
+    ['buscarDadosCompartilhados', () => buscarDadosCompartilhados(), 'GET', '/entregador/dados-compartilhados'],
+    ['listarVinculos', () => listarVinculos(), 'GET', '/entregador/vinculos'],
+    ['aceitarVinculo', () => aceitarVinculo(3), 'POST', '/entregador/vinculos/3/aceitar'],
+    ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
+    ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
+    ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
+  ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
+    const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await chamar();
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${API_URL}${caminho}`);
+    expect(init.method).toBe(metodo);
   });
 });
