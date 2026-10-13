@@ -1,15 +1,20 @@
-import { formatarDataHora } from '@/app/lib/pedidos';
+import AcoesDeStatus from '@/app/components/entregador/AcoesDeStatus';
+import { formatarDataHora, formatarDistancia, formatarReais, rotuloDoStatus } from '@/app/lib/pedidos';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 
 export interface DetalhePedidoEntregadorProps {
   pedido: PedidoDoEntregador;
+  onStatusAlterado: () => void;
 }
 
-export default function DetalhePedidoEntregador({ pedido }: DetalhePedidoEntregadorProps) {
+export default function DetalhePedidoEntregador({ pedido, onStatusAlterado }: DetalhePedidoEntregadorProps) {
   const linhas = [
+    { rotulo: 'Status', valor: rotuloDoStatus(pedido.status) },
     { rotulo: 'Recebedor', valor: pedido.recebedor },
     { rotulo: 'Endereço', valor: pedido.endereco },
     { rotulo: 'Estabelecimento', valor: pedido.empresa },
+    { rotulo: 'Distância', valor: formatarDistancia(pedido.distancia) },
+    { rotulo: 'Valor da entrega', valor: formatarReais(pedido.valorEntrega) },
     { rotulo: 'Criado em', valor: formatarDataHora(pedido.criadoEm) },
     { rotulo: 'Saiu para entrega', valor: pedido.iniciadoEm && formatarDataHora(pedido.iniciadoEm) },
     { rotulo: 'Finalizado em', valor: pedido.finalizadoEm && formatarDataHora(pedido.finalizadoEm) },
@@ -47,13 +52,7 @@ export default function DetalhePedidoEntregador({ pedido }: DetalhePedidoEntrega
         </div>
       </div>
 
-      <button
-        type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-[18px] bg-primaria px-4 py-4 text-[18px] font-bold text-white shadow-sm transition-colors hover:bg-primaria-escura"
-      >
-        <span className="text-[18px]">✓</span>
-        Cheguei ao destino
-      </button>
+      <AcoesDeStatus idPedido={pedido.id} statusAtual={pedido.status} onAlterado={onStatusAlterado} />
     </div>
   );
 }
