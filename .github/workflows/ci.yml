@@ -24,7 +24,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar
       - run: npm run lint
 
@@ -32,7 +32,7 @@ jobs:
     name: Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar
       # Gera os tipos de rota do Next (LayoutProps, PageProps) antes do tsc.
       - run: npm run typecheck
@@ -44,7 +44,7 @@ jobs:
       contents: read
       actions: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar
 
       # Falha se algum teste falhar ou se a cobertura de linhas ficar abaixo
@@ -96,7 +96,7 @@ jobs:
     name: Seguranca de dependencias
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Bloqueia vulnerabilidade alta ou critica no que vai para producao.
       # Dependencias de desenvolvimento ficam de fora porque nao entram na imagem.
@@ -122,7 +122,7 @@ jobs:
     outputs:
       imagem: ${{ steps.nome.outputs.imagem }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Sem a variavel, a imagem publicada apontaria para localhost.
       - name: Conferir URL da API
@@ -231,9 +231,9 @@ jobs:
       checks: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.21.0
 
