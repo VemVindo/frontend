@@ -76,6 +76,12 @@
 
   FROM node:${NODE_VERSION} AS runner
 
+  # Aplica as correcoes de seguranca do Debian publicadas depois da imagem base
+  # do Node. Sem isso, o Trivy do CI barra a imagem (ex.: perl-base).
+  RUN apt-get update \
+   && apt-get upgrade -y --no-install-recommends \
+   && rm -rf /var/lib/apt/lists/*
+
   # Set working directory
   WORKDIR /app
 
