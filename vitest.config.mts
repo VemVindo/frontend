@@ -8,5 +8,14 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['app/**/*.test.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      // Cobertura da lógica (cliente da API, regras e formatação). Telas e hooks
+      // entram quando houver testes de componente.
+      include: ['app/lib/**/*.ts', 'app/**/validacao.ts'],
+      exclude: ['app/**/*.test.ts', 'app/lib/use*.ts', 'app/lib/tipos.ts', 'app/lib/exemplos.ts'],
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      thresholds: { lines: 60 },
+    },
   },
 });
