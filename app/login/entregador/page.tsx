@@ -8,6 +8,7 @@ import CampoLogin from '@/app/components/auth/CampoLogin';
 import TelaLogin from '@/app/components/auth/TelaLogin';
 import { ApiError, loginEntregador } from '@/app/lib/api';
 import { cpfValido, somenteDigitosCpf } from '@/app/lib/cpf';
+import { TELA_INICIAL, TELA_TROCAR_SENHA } from '@/app/lib/rotas';
 
 export default function LoginEntregador() {
   const router = useRouter();
@@ -24,8 +25,8 @@ export default function LoginEntregador() {
     }
     setCarregando(true);
     try {
-      const { user } = await loginEntregador(cpf, senha);
-      router.replace(user.senhaTemporaria ? '/login/entregador/trocar-senha' : '/entregador');
+      const { usuario } = await loginEntregador(cpf, senha);
+      router.replace(usuario.senhaTemporaria ? TELA_TROCAR_SENHA : TELA_INICIAL.ENTREGADOR);
     } catch (e) {
       setErro(
         e instanceof ApiError && e.status === 401
@@ -62,7 +63,7 @@ export default function LoginEntregador() {
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar
         </BotaoLogin>
-        <Link href="/" className="text-center text-[13px] text-[#6C5DD3] font-medium">
+        <Link href="/" className="text-center text-[13px] text-primaria font-medium">
           Sou empresa
         </Link>
       </form>

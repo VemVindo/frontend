@@ -21,6 +21,11 @@ describe('validarNovaSenha', () => {
     expect(validarNovaSenha(TEMPORARIA, limite, limite)).toBeNull();
   });
 
+  it('recusa espaço e caractere acentuado', () => {
+    expect(validarNovaSenha(TEMPORARIA, 'Nova Senha@1', 'Nova Senha@1')).toMatch(/sem espaços/);
+    expect(validarNovaSenha(TEMPORARIA, 'Senhaçõ@123', 'Senhaçõ@123')).toMatch(/sem espaços/);
+  });
+
   it('recusa repetir a senha temporária', () => {
     expect(validarNovaSenha(TEMPORARIA, TEMPORARIA, TEMPORARIA)).toMatch(/diferente/);
   });

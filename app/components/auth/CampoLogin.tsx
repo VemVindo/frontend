@@ -11,12 +11,12 @@ export default function CampoLogin({ rotulo, ...props }: CampoLoginProps) {
 
   return (
     <div className='flex flex-col gap-1 xl:gap-2'>
-      <label htmlFor={id} className="text-[13px] text-[#8B8A9A] font-bold">
+      <label htmlFor={id} className="text-[13px] text-texto-suave font-bold">
         {rotulo}
       </label>
       <input
         id={id}
-        className="rounded-xl px-4 py-4 bg-white xl:bg-[#F6F5FB] text-black"
+        className="rounded-xl px-4 py-4 bg-superficie xl:bg-fundo text-black"
         {...props}
       />
     </div>

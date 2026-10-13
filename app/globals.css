@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Identidade visual do VemVindo (valores tirados do Figma).
+ * Cada variável --color-* vira uma classe do Tailwind:
+ * --color-primaria -> bg-primaria, text-primaria, border-primaria...
+ */
+@theme static {
+  --color-fundo: #f6f5fb;
+  --color-superficie: #ffffff;
+  --color-superficie-suave: #f9f8fb;
+  --color-borda: #e3e3eb;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primaria: #6c5dd3;
+  --color-primaria-escura: #4b3fc0;
+  --color-primaria-media: #8175dd;
+  --color-primaria-clara: #efedfc;
+  --color-lilas: #dad6ff;
+  --color-destaque: #5c2ead;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-texto: #1d1b2e;
+  --color-texto-corpo: #292933;
+  --color-texto-apoio: #6e7080;
+  --color-texto-suave: #8b8a9a;
+
+  --color-sucesso: #22b07d;
+  --color-sucesso-texto: #2e8c57;
+  --color-sucesso-fundo: #edfaf2;
+  --color-alerta: #f5a524;
+  --color-erro: #e5484d;
+
+  --color-sobreposicao: #29243a;
+
+  --font-sans: var(--font-inter);
+  --font-titulo: var(--font-sora);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-fundo);
+  color: var(--color-texto);
 }
