@@ -1,13 +1,13 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type Variante = 'primario' | 'secundario' | 'claro';
+export type VarianteBotao = 'primario' | 'secundario' | 'claro';
 
-interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variante?: Variante;
+export interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variante?: VarianteBotao;
   larguraTotal?: boolean;
 }
 
-const estilosPorVariante: Record<Variante, string> = {
+const estilosPorVariante: Record<VarianteBotao, string> = {
   primario: 'bg-primaria text-white hover:bg-primaria-escura',
   secundario: 'bg-superficie text-texto border border-borda hover:bg-superficie-suave',
   claro: 'bg-primaria-clara text-primaria-escura hover:bg-lilas',

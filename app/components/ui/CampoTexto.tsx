@@ -2,7 +2,7 @@
 
 import { useId, type InputHTMLAttributes } from 'react';
 
-interface CampoTextoProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface CampoTextoProps extends InputHTMLAttributes<HTMLInputElement> {
   rotulo: string;
   descricao?: string;
   erro?: string;

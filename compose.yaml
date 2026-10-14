@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     image: vemvindo-frontend:prod
+    # Imagem so existe localmente: sempre builda, nunca tenta pull do Docker Hub.
+    pull_policy: build
     container_name: vemvindo-frontend-prod
     # Opt-in: so sobe com --profile prod. Fora do "up" padrao (evita colisao na 3000).
     profiles: ["prod"]
@@ -15,6 +17,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     image: vemvindo-frontend:dev
+    # Imagem so existe localmente: sempre builda, nunca tenta pull do Docker Hub.
+    pull_policy: build
     container_name: vemvindo-frontend-dev
     ports:
       - "3000:3000"

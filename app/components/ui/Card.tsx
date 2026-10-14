@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-interface CardProps {
+export interface CardProps {
   titulo?: string;
   descricao?: string;
   acao?: ReactNode;

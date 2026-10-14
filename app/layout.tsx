@@ -14,7 +14,7 @@ const sora = Sora({
 
 export const metadata: Metadata = {
   title: "VemVindo",
-  description: "Acompanhamento de entregas para estabelecimentos com frota própria",
+  description: "Rastreamento de entregas para estabelecimentos com frota própria",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

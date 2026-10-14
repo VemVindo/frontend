@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-interface TituloPaginaProps {
+export interface TituloPaginaProps {
   titulo: string;
   subtitulo?: string;
   acao?: ReactNode;

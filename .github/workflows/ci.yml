@@ -1,0 +1,313 @@
+name: CI/CD
+
+# PR para a main: valida tudo e publica o relatorio; nada e publicado.
+# Push na main: valida, publica a imagem no GHCR, faz o deploy no Render e
+# guarda a cobertura como referencia para os proximos PRs.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Um push novo no mesmo PR cancela a execucao antiga. Na main nada e
+# cancelado, para nao interromper um deploy no meio.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - run: npm run lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      # Gera os tipos de rota do Next (LayoutProps, PageProps) antes do tsc.
+      - run: npm run typecheck
+
+  testes:
+    name: Testes unitarios e cobertura
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+
+      # Falha se algum teste falhar ou se a cobertura de linhas ficar abaixo
+      # do thresholds do vitest.config.mts.
+      - name: Testes com cobertura
+        run: npm run test:ci
+
+      # Referencia: cobertura do ultimo push verde na main.
+      - name: Baixar cobertura da main
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main \
+            --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name cobertura-main --dir baseline
+          fi
+
+      - name: Cobertura nao pode cair mais de 1 ponto
+        if: github.event_name == 'pull_request'
+        run: >
+          node scripts/ci/relatorio.mjs cobertura
+          --atual coverage/coverage-summary.json
+          --base baseline/coverage-summary.json
+          --max-queda 1
+
+      - name: Publicar resultados
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes
+          path: |
+            reports/
+            coverage/coverage-summary.json
+            baseline/
+          retention-days: 7
+
+      - name: Guardar cobertura da main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: cobertura-main
+          path: coverage/coverage-summary.json
+          retention-days: 90
+
+  seguranca:
+    name: Seguranca de dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Bloqueia vulnerabilidade alta ou critica no que vai para producao.
+      # Dependencias de desenvolvimento ficam de fora porque nao entram na imagem.
+      - name: Auditoria de dependencias de producao
+        run: npm audit --omit=dev --audit-level=high
+
+      # So no PR: barra dependencia nova com vulnerabilidade alta ou licenca
+      # que nao permite uso comercial.
+      - name: Revisao de dependencias do PR
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  imagem:
+    name: Imagem Docker
+    needs: [lint, typecheck, testes, seguranca]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      imagem: ${{ steps.nome.outputs.imagem }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Sem a variavel, a imagem publicada apontaria para localhost.
+      - name: Conferir URL da API
+        if: github.event_name == 'push'
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          if [ -z "$API_URL" ]; then
+            echo "::error::Defina a variavel API_URL em Settings > Secrets and variables > Actions > Variables"
+            exit 1
+          fi
+
+      # O GHCR exige nome em minusculas (VemVindo -> vemvindo).
+      - name: Nome da imagem
+        id: nome
+        run: echo "imagem=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+
+      # Primeiro build local, so para a varredura. Em PR sem a variavel, a URL
+      # da API cai no default do Dockerfile (localhost).
+      - name: Build para varredura
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: vemvindo-frontend:ci
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.API_URL || 'http://localhost:8000' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Falha em vulnerabilidade CRITICAL que ja tem correcao publicada.
+      - name: Varredura da imagem (Trivy)
+        uses: aquasecurity/trivy-action@v0.36.0
+        # So a tabela dos achados, sem o resumo de cada package.json da imagem.
+        env:
+          TRIVY_TABLE_MODE: detailed
+          TRIVY_SKIP_VERSION_CHECK: 'true'
+          TRIVY_DISABLE_VEX_NOTICE: 'true'
+        with:
+          image-ref: vemvindo-frontend:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - id: meta
+        if: github.event_name == 'push'
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.nome.outputs.imagem }}
+          tags: |
+            type=sha,prefix=sha-,format=long
+            type=raw,value=main,enable={{is_default_branch}}
+
+      - uses: docker/login-action@v4
+        if: github.event_name == 'push'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Mesmo build (vem do cache), agora publicado com SBOM e proveniencia.
+      - name: Publicar no GHCR
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha
+          provenance: true
+          sbom: true
+
+  # Unico check do CI exigido pelo ruleset da main: assim, adicionar ou
+  # renomear um job nao exige mexer na protecao da branch.
+  ci-ok:
+    name: CI ok
+    needs: [lint, typecheck, testes, seguranca, imagem]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir os jobs
+        env:
+          RESULTADOS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Resultados: $RESULTADOS"
+          for resultado in $RESULTADOS; do
+            if [ "$resultado" != success ]; then
+              echo "::error::Algum job obrigatorio terminou como $resultado"
+              exit 1
+            fi
+          done
+
+  relatorio:
+    name: Relatorio
+    needs: [lint, typecheck, testes, seguranca, imagem]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.21.0
+
+      # Um download por artifact, cada um na sua pasta. Com "pattern", um
+      # artifact sozinho e extraido sem a subpasta e os caminhos mudam.
+      - name: Baixar resultados dos testes
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: resultados-testes
+          path: resultados/testes
+
+      - name: Montar resumo
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: >
+          node scripts/ci/relatorio.mjs resumo
+          --projeto frontend
+          --etapas "$NEEDS"
+          --testes resultados/testes/reports/vitest-results.json
+          --cobertura resultados/testes/coverage/coverage-summary.json
+          --base resultados/testes/baseline/coverage-summary.json
+          --saida relatorio.md
+
+      # PR de fork recebe token so de leitura: o relatorio fica so no resumo.
+      - name: Comentario no PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: ci-frontend
+          path: relatorio.md
+
+      - name: Testes com anotacoes
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: dorny/test-reporter@v3
+        with:
+          name: Testes unitarios (detalhe)
+          path: resultados/testes/reports/junit.xml
+          reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
+
+  deploy:
+    name: Deploy no Render
+    needs: [imagem, ci-ok]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      # Sobe exatamente a imagem testada neste commit, e nao "a ultima".
+      - name: Disparar deploy hook
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}:sha-${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error --get \
+            --data-urlencode "imgURL=${IMAGEM}" \
+            "${RENDER_DEPLOY_HOOK}"
+
+      # O Render leva alguns minutos para trocar o container: tenta por ate 10 min.
+      - name: Smoke test
+        env:
+          WEB_PUBLIC_URL: ${{ vars.WEB_PUBLIC_URL }}
+        run: |
+          if [ -z "$WEB_PUBLIC_URL" ]; then
+            echo "::warning::Defina a variavel WEB_PUBLIC_URL para conferir o deploy."
+            exit 0
+          fi
+          for tentativa in $(seq 1 40); do
+            if curl --silent --fail --output /dev/null "$WEB_PUBLIC_URL/"; then
+              echo "Front respondendo."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::O front nao respondeu em $WEB_PUBLIC_URL. Faca rollback pelo Render para o deploy anterior."
+          exit 1
