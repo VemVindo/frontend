@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-interface CampoParametroProps {
+export interface CampoParametroProps {
   id: string;
   rotulo: string;
   descricao: string;

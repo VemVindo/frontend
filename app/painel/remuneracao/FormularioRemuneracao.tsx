@@ -4,52 +4,24 @@ import { useEffect, useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-import { centavosParaReais, reaisParaCentavos } from '@/app/lib/moeda';
+import { buscarParametrosRemuneracao, salvarParametrosRemuneracao } from '@/app/lib/parametrosRemuneracao';
 import {
-  buscarParametrosRemuneracao,
-  salvarParametrosRemuneracao,
-  type ParametrosRemuneracao,
+  CAMPOS_REMUNERACAO,
+  paraParametros,
+  paraValores,
+  validarValores,
+  type CampoRemuneracao,
+  type ErrosRemuneracao,
+  type ValoresRemuneracao,
 } from '@/app/lib/remuneracao';
 import CampoParametro from './CampoParametro';
 
-type NomeCampo = keyof ParametrosRemuneracao;
-type Valores = Record<NomeCampo, string>;
-type Erros = Partial<Record<NomeCampo, string>>;
 type Estado = 'carregando' | 'erro-carregar' | 'pronto' | 'salvando';
 type Mensagem = { tipo: 'sucesso' | 'erro'; texto: string };
 
-const campos: { nome: NomeCampo; rotulo: string; descricao: string }[] = [
-  {
-    nome: 'taxaFixa',
-    rotulo: 'Valor base por entrega',
-    descricao: 'Valor fixo pago a cada entrega concluída',
-  },
-  {
-    nome: 'coeficienteKm',
-    rotulo: 'Adicional por quilômetro',
-    descricao: 'Somado conforme a distância percorrida',
-  },
-];
-
-function paraValores(parametros: ParametrosRemuneracao): Valores {
-  return {
-    taxaFixa: centavosParaReais(parametros.taxaFixa),
-    coeficienteKm: centavosParaReais(parametros.coeficienteKm),
-  };
-}
-
-function validar(texto: string): string | undefined {
-  if (texto.trim() === '') return 'Preencha este campo';
-  if (texto.includes('-')) return 'O valor precisa ser positivo';
-  const centavos = reaisParaCentavos(texto);
-  if (centavos === null) return 'Use só números, por exemplo 8,50';
-  if (centavos === 0) return 'O valor precisa ser maior que zero';
-  return undefined;
-}
-
 export default function FormularioRemuneracao() {
-  const [valores, setValores] = useState<Valores>({ taxaFixa: '', coeficienteKm: '' });
-  const [erros, setErros] = useState<Erros>({});
+  const [valores, setValores] = useState<ValoresRemuneracao>({ taxaFixa: '', coeficienteKm: '' });
+  const [erros, setErros] = useState<ErrosRemuneracao>({});
   const [estado, setEstado] = useState<Estado>('carregando');
   const [mensagem, setMensagem] = useState<Mensagem | null>(null);
 
@@ -76,7 +48,7 @@ export default function FormularioRemuneracao() {
     setTentativa((anterior) => anterior + 1);
   }
 
-  function alterarCampo(nome: NomeCampo, valor: string) {
+  function alterarCampo(nome: CampoRemuneracao, valor: string) {
     setValores((anteriores) => ({ ...anteriores, [nome]: valor }));
     setErros((anteriores) => ({ ...anteriores, [nome]: undefined }));
     setMensagem(null);
@@ -85,14 +57,10 @@ export default function FormularioRemuneracao() {
   async function salvar(evento: FormEvent) {
     evento.preventDefault();
 
-    const novosErros: Erros = {};
-    for (const campo of campos) {
-      const erro = validar(valores[campo.nome]);
-      if (erro) novosErros[campo.nome] = erro;
-    }
+    const novosErros = validarValores(valores);
     setErros(novosErros);
 
-    const primeiroInvalido = campos.find((campo) => novosErros[campo.nome]);
+    const primeiroInvalido = CAMPOS_REMUNERACAO.find((campo) => novosErros[campo.nome]);
     if (primeiroInvalido) {
       document.getElementById(primeiroInvalido.nome)?.focus();
       return;
@@ -101,10 +69,7 @@ export default function FormularioRemuneracao() {
     setEstado('salvando');
     setMensagem(null);
     try {
-      const salvos = await salvarParametrosRemuneracao({
-        taxaFixa: reaisParaCentavos(valores.taxaFixa)!,
-        coeficienteKm: reaisParaCentavos(valores.coeficienteKm)!,
-      });
+      const salvos = await salvarParametrosRemuneracao(paraParametros(valores));
       setValores(paraValores(salvos));
       setMensagem({
         tipo: 'sucesso',
@@ -150,7 +115,7 @@ export default function FormularioRemuneracao() {
 
         {(estado === 'pronto' || estado === 'salvando') && (
           <div className="flex flex-col gap-[10px]">
-            {campos.map((campo) => (
+            {CAMPOS_REMUNERACAO.map((campo) => (
               <CampoParametro
                 key={campo.nome}
                 id={campo.nome}
@@ -168,7 +133,7 @@ export default function FormularioRemuneracao() {
                 Como o ganho é calculado
               </p>
               <p className="mt-1 text-[10px] text-texto-apoio md:mt-3 md:text-xs">
-                Valor base + (adicional por quilômetro × distância percorrida)
+                Valor base + (adicional por quilômetro x distância percorrida)
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import type { PedidoAtivo } from '@/app/lib/tipos';
+import type { ParametrosRemuneracao, PedidoAtivo } from '@/app/lib/tipos';
 
 // Dados fixos até o endpoint do link de rastreio existir.
 export const PEDIDO_EXEMPLO = {
@@ -12,3 +12,5 @@ export const PEDIDOS_ATIVOS_EXEMPLO: PedidoAtivo[] = [
   { id: 4831, recebedor: 'Rafael Nunes', entregador: 'Bruno Lima', status: 'ATRIBUIDO', criadoEm: '2026-10-07T14:20:00-03:00' },
   { id: 4832, recebedor: 'João Pereira', entregador: null, status: 'PENDENTE', criadoEm: '2026-10-07T14:31:00-03:00' },
 ];
+
+export const PARAMETROS_REMUNERACAO_EXEMPLO: ParametrosRemuneracao = { taxaFixa: 800, coeficienteKm: 150 };

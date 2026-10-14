@@ -57,3 +57,8 @@ export interface PedidoAtivo {
   status: StatusPedido;
   criadoEm: string;
 }
+
+export interface ParametrosRemuneracao {
+  taxaFixa: number;
+  coeficienteKm: number;
+}
