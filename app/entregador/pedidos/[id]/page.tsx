@@ -9,7 +9,7 @@ import { usePedidosEntregador } from '@/app/lib/usePedidosEntregador';
 
 export default function PaginaPedidoDoEntregador() {
   const { id } = useParams<{ id: string }>();
-  const { pedidos, erro } = usePedidosEntregador();
+  const { pedidos, erro, recarregar } = usePedidosEntregador();
   const pedido = pedidos?.find((item) => item.id === Number(id));
 
   return (
@@ -32,7 +32,7 @@ export default function PaginaPedidoDoEntregador() {
       )}
       {!pedidos && !erro && <p className="text-xs text-texto-apoio">Carregando pedido...</p>}
       {pedidos && !pedido && <p className="text-xs text-texto-apoio">Pedido não encontrado nas suas entregas.</p>}
-      {pedido && <DetalhePedidoEntregador pedido={pedido} />}
+      {pedido && <DetalhePedidoEntregador pedido={pedido} onStatusAlterado={recarregar} />}
     </div>
   );
 }
