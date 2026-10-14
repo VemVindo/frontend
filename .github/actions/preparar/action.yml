@@ -1,0 +1,19 @@
+name: Preparar ambiente
+description: Node com cache do npm e dependencias instaladas.
+
+inputs:
+  node-version:
+    description: Versao do Node (a mesma das imagens Docker)
+    default: 24.21.0
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Instalar dependencias
+      shell: bash
+      run: npm ci
