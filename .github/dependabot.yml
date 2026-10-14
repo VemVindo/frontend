@@ -16,9 +16,19 @@ updates:
       desenvolvimento:
         dependency-type: development
         update-types: [minor, patch]
+    # Majors que quebram o build ou fogem do runtime. Liberar quando o
+    # ecossistema acompanhar (conferir os peerDependencies citados).
+    ignore:
+      # typescript-eslint aceita typescript <6.1.0.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Os tipos acompanham o Node das imagens.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
 
+  # A action composta (.github/actions/preparar) tambem usa actions de terceiros.
   - package-ecosystem: github-actions
-    directory: /
+    directories: [/, /.github/actions/*]
     schedule:
       interval: weekly
       day: monday
@@ -35,3 +45,7 @@ updates:
       day: monday
     commit-message:
       prefix: build(deps)
+    # Node so muda de major junto com o .github/actions/preparar e o Dockerfile.dev.
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
