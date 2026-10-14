@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
-import { pedidoEmAberto } from '@/app/lib/pedidos';
+import { formatarDataHora, pedidoEmAberto } from '@/app/lib/pedidos';
 import { telaPedidoDoPainel } from '@/app/lib/rotas';
 import type { PedidoAtivo } from '@/app/lib/tipos';
 
@@ -9,8 +9,8 @@ export interface ListaPedidosAtivosProps {
   onAtribuir: (pedido: PedidoAtivo) => void;
 }
 
-const COLUNAS = 'md:grid md:grid-cols-[70px_1fr_1fr_130px_160px] md:items-center md:gap-3';
-const TITULOS = ['Pedido', 'Recebedor', 'Entregador', 'Status', 'Ação'];
+const COLUNAS = 'md:grid md:grid-cols-[70px_1fr_1fr_130px_140px_160px] md:items-center md:gap-3';
+const TITULOS = ['Pedido', 'Recebedor', 'Entregador', 'Status', 'Criação', 'Ação'];
 const ACAO = 'cursor-pointer text-xs font-semibold text-destaque hover:underline';
 
 export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidosAtivosProps) {
@@ -34,6 +34,9 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
               <span>
                 <EtiquetaStatus status={pedido.status} />
               </span>
+              <time dateTime={pedido.criadoEm} className="text-texto-apoio">
+                {formatarDataHora(pedido.criadoEm)}
+              </time>
               <span className="flex items-center gap-4">
                 <Link href={telaPedidoDoPainel(pedido.id)} className={ACAO}>
                   Ver detalhes
@@ -56,6 +59,10 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
 
               <span className={pedido.entregador ? 'text-sm text-texto-apoio' : 'text-sm text-texto-apoio'}>
                 Entregador: {pedido.entregador ?? 'Não atribuído'}
+              </span>
+
+              <span className="text-[11px] text-texto-apoio">
+                Criado em <time dateTime={pedido.criadoEm}>{formatarDataHora(pedido.criadoEm)}</time>
               </span>
 
               <div className="flex items-center justify-between gap-4 pt-1">
