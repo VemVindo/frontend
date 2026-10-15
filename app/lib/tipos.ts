@@ -66,6 +66,8 @@ export interface PedidoAtivo {
 export interface ParametrosRemuneracao {
   taxaFixa: number;
   coeficienteKm: number;
+}
+
 export interface TrocaDeEntregador {
   anterior: string | null;
   novo: string;
