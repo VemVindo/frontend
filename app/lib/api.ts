@@ -1,4 +1,6 @@
 import type {
+  CriarPedidoRequisicao,
+  CriarPedidoResposta,
   DadosCompartilhados,
   Empresa,
   Entregador,
@@ -109,6 +111,14 @@ export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]>
 
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
+}
+
+// O chamador deve fornecer valor/distância reais e idEmpresa da sessão autenticada.
+export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPedidoResposta> {
+  return requisitar('/pedido/criar', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
 }
 
 export { API_URL };

@@ -11,8 +11,11 @@ export interface NovoPedidoModalProps {
   onFechar: () => void;
 }
 
+const AVISO_INTEGRACAO = 'O cadastro está desabilitado: o cálculo do valor da entrega e a distância ainda dependem da integração. Nenhum pedido será enviado; seus dados serão mantidos neste formulário.';
+
 const FORMULARIO_INICIAL: FormularioNovoPedido = {
-  nome_recebedor: '', telefone: '', endereco_entrega: '', itens: '', observacoes: '',
+  nome_recebedor: '', telefone: '', cep: '', logradouro: '', numero: '',
+  complemento: '', bairro: '', cidade: '', uf: '', itens: '', observacoes: '',
 };
 
 export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalProps) {
@@ -20,7 +23,7 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
   const id = useId();
   const [dados, setDados] = useState<FormularioNovoPedido>(FORMULARIO_INICIAL);
   const [erros, setErros] = useState<ErrosNovoPedido>({});
-  const [aviso, setAviso] = useState('');
+  const [aviso, setAviso] = useState(AVISO_INTEGRACAO);
 
   useEffect(() => {
     if (!aberto || !dialogo.current) return;
@@ -40,21 +43,22 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
   function atualizar(campo: keyof FormularioNovoPedido, valor: string) {
     setDados((atuais) => ({ ...atuais, [campo]: valor }));
     setErros((atuais) => ({ ...atuais, [campo]: undefined }));
-    setAviso('');
+    setAviso(AVISO_INTEGRACAO);
   }
 
   function validar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     const novosErros = validarNovoPedido(dados);
     setErros(novosErros);
-    setAviso('');
+    setAviso(AVISO_INTEGRACAO);
     const primeiroCampo = Object.keys(novosErros)[0];
     if (primeiroCampo) {
       const campo = evento.currentTarget.elements.namedItem(primeiroCampo);
       if (campo instanceof HTMLElement) campo.focus();
       return;
     }
-    setAviso('O pedido ainda não foi criado. O envio depende da integração com o backend. Seus dados foram mantidos neste formulário.');
+    // Não chamar criarPedido até haver dados reais de entrega e empresa autenticada.
+    setAviso(AVISO_INTEGRACAO);
   }
 
   return (
@@ -80,7 +84,32 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
       <form noValidate onSubmit={validar} className="flex flex-col gap-3">
         <CampoTexto aparencia="modal" rotulo="Nome do recebedor" name="nome_recebedor" placeholder="Ex.: Carla Menezes" autoComplete="name" required value={dados.nome_recebedor} erro={erros.nome_recebedor} onChange={(evento) => atualizar('nome_recebedor', evento.target.value)} />
         <CampoTexto aparencia="modal" rotulo="Telefone" name="telefone" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(61) 99999-0000" required value={dados.telefone} erro={erros.telefone} onChange={(evento) => atualizar('telefone', evento.target.value)} />
-        <CampoTexto aparencia="modal" rotulo="Endereço de entrega" name="endereco_entrega" autoComplete="street-address" placeholder="Rua, número e complemento" required value={dados.endereco_entrega} erro={erros.endereco_entrega} onChange={(evento) => atualizar('endereco_entrega', evento.target.value)} />
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+          {([
+            ['cep', 'CEP', '70000-000', 'postal-code'],
+            ['logradouro', 'Logradouro', 'Rua ou avenida', 'address-line1'],
+            ['numero', 'Número', 'Ex.: 10', 'off'],
+            ['complemento', 'Complemento (opcional)', 'Apartamento, bloco', 'address-line2'],
+            ['bairro', 'Bairro', 'Ex.: Centro', 'address-level3'],
+            ['cidade', 'Cidade', 'Ex.: Brasília', 'address-level2'],
+            ['uf', 'UF', 'Ex.: DF', 'address-level1'],
+          ] as const).map(([campo, rotulo, placeholder, autoComplete]) => (
+            <CampoTexto
+              key={campo}
+              aparencia="modal"
+              rotulo={rotulo}
+              name={campo}
+              placeholder={placeholder}
+              autoComplete={autoComplete}
+              inputMode={campo === 'numero' || campo === 'cep' ? 'numeric' : undefined}
+              autoCapitalize={campo === 'uf' ? 'characters' : undefined}
+              required={campo !== 'complemento'}
+              value={dados[campo]}
+              erro={erros[campo]}
+              onChange={(evento) => atualizar(campo, evento.target.value)}
+            />
+          ))}
+        </div>
         {(['itens', 'observacoes'] as const).map((campo) => (
           <div key={campo} className="flex flex-col gap-1">
             <label htmlFor={`${id}-${campo}`} className="text-[11px] text-texto-apoio">{campo === 'itens' ? 'Itens do pedido (opcional)' : 'Observações (opcional)'}</label>
@@ -98,8 +127,8 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
             {erros[campo] && <p id={`${id}-${campo}-erro`} className="text-[11px] text-erro">{erros[campo]}</p>}
           </div>
         ))}
-        <p role="status" aria-live="polite" className="text-xs text-texto-apoio">{aviso}</p>
-        <Botao type="submit" larguraTotal className="mt-2 h-11 rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaria">Criar pedido</Botao>
+        <p id={`${id}-aviso`} role="status" aria-live="polite" className="text-xs text-texto-apoio">{aviso}</p>
+        <Botao type="submit" disabled aria-describedby={`${id}-aviso`} larguraTotal className="mt-2 h-11 rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaria">Criar pedido</Botao>
       </form>
     </dialog>
   );
