@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import IconeFechar from '@/app/components/icones/IconeFechar';
 import Avatar from '@/app/components/ui/Avatar';
 import Botao from '@/app/components/ui/Botao';
-import { listarFrota } from '@/app/lib/api';
+import { ApiError, atribuirEntregadorAoPedido, listarFrota } from '@/app/lib/api';
 import { rotuloDoVeiculo } from '@/app/lib/dadosCompartilhados';
-import { atribuirEntregador } from '@/app/lib/pedidosAtivos';
 import { iniciais } from '@/app/lib/texto';
 import type { DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
 
@@ -14,9 +13,15 @@ export interface ModalAtribuirEntregadorProps {
   pedido: PedidoAtivo;
   onFechar: () => void;
   onAtribuido: (pedido: PedidoAtivo) => void;
+  modo?: 'atribuir' | 'reatribuir';
 }
 
-export default function ModalAtribuirEntregador({ pedido, onFechar, onAtribuido }: ModalAtribuirEntregadorProps) {
+export default function ModalAtribuirEntregador({
+  pedido,
+  onFechar,
+  onAtribuido,
+  modo = 'atribuir',
+}: ModalAtribuirEntregadorProps) {
   const [disponiveis, setDisponiveis] = useState<DadosCompartilhados[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [atribuindo, setAtribuindo] = useState(false);
@@ -47,9 +52,9 @@ export default function ModalAtribuirEntregador({ pedido, onFechar, onAtribuido 
     setAtribuindo(true);
     setErro(null);
     try {
-      onAtribuido(await atribuirEntregador(pedido, entregador));
-    } catch {
-      setErro('Não foi possível atribuir o entregador agora.');
+      onAtribuido(await atribuirEntregadorAoPedido(pedido.id, entregador.cpf));
+    } catch (err) {
+      setErro(err instanceof ApiError ? err.message : `Não foi possível ${modo} o entregador agora.`);
       setAtribuindo(false);
     }
   }
@@ -65,14 +70,18 @@ export default function ModalAtribuirEntregador({ pedido, onFechar, onAtribuido 
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="titulo-atribuir-entregador" className="font-titulo text-lg font-bold">
-            Atribuir entregador #{pedido.id}
+            {modo === 'reatribuir' ? 'Reatribuir entregador' : 'Atribuir entregador'} #{pedido.id}
           </h2>
           <button type="button" aria-label="Fechar" onClick={onFechar} className="cursor-pointer text-texto">
             <IconeFechar className="size-5" />
           </button>
         </div>
 
-        <p className="text-xs text-texto-apoio">Selecione um entregador disponível para este pedido.</p>
+        <p className="text-xs text-texto-apoio">
+          {modo === 'reatribuir'
+            ? 'Selecione um entregador disponível para reassumir este pedido.'
+            : 'Selecione um entregador disponível para este pedido.'}
+        </p>
 
         {erro && <p role="alert" className="text-xs text-erro">{erro}</p>}
         {!disponiveis && !erro && <p className="text-xs text-texto-apoio">Carregando entregadores...</p>}
@@ -100,7 +109,7 @@ export default function ModalAtribuirEntregador({ pedido, onFechar, onAtribuido 
                   onClick={() => atribuir(entregador)}
                   className="cursor-pointer text-xs font-semibold text-destaque hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Atribuir
+                  {modo === 'reatribuir' ? 'Reatribuir' : 'Atribuir'}
                 </button>
               </li>
             ))}
