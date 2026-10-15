@@ -1,14 +1,18 @@
 import type {
+  ConfiguracoesDaEmpresa,
+  Coordenada,
   DadosCompartilhados,
   Empresa,
   Entregador,
   PedidoAtivo,
+  PaginaDoRecebedor,
   PedidoDoEntregador,
   RespostaLogin,
   StatusDisponiveis,
   StatusPedido,
   TrocaDeEntregador,
   Vinculo,
+  VisaoDaEntrega,
 } from '@/app/lib/tipos';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -139,6 +143,42 @@ export async function atualizarStatusDoPedido(id: number, status: StatusPedido):
   return requisitar(`/pedidos/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  });
+}
+
+export async function registrarPosicao(
+  id: number,
+  posicao: Coordenada & { precisao?: number },
+): Promise<VisaoDaEntrega> {
+  return requisitar(`/pedidos/${id}/localizacao`, {
+    method: 'PUT',
+    body: JSON.stringify(posicao),
+  });
+}
+
+export async function consultarRotaDoPedido(id: number): Promise<VisaoDaEntrega> {
+  return requisitar(`/pedidos/${id}/rota`, { method: 'GET' });
+}
+
+// O token vem do link do recebedor e vai na URL como recebido.
+export async function buscarRastreio(token: string): Promise<PaginaDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}`, { method: 'GET' });
+}
+
+export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoDaEntrega> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/localizacao`, { method: 'GET' });
+}
+
+export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {
+  return requisitar('/empresa/configuracoes', { method: 'GET' });
+}
+
+export async function atualizarConfiguracoes(
+  configuracoes: ConfiguracoesDaEmpresa,
+): Promise<ConfiguracoesDaEmpresa> {
+  return requisitar('/empresa/configuracoes', {
+    method: 'PATCH',
+    body: JSON.stringify(configuracoes),
   });
 }
 
