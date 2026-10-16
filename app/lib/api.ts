@@ -2,6 +2,7 @@ import type {
   ConfiguracoesDaEmpresa,
   Coordenada,
   DadosCompartilhados,
+  LinkDeRastreio,
   Empresa,
   Entregador,
   PedidoAtivo,
@@ -167,6 +168,10 @@ export async function buscarRastreio(token: string): Promise<PaginaDoRecebedor> 
 
 export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoDaEntrega> {
   return requisitar(`/rastreio/${encodeURIComponent(token)}/localizacao`, { method: 'GET' });
+}
+
+export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
+  return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
 }
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {

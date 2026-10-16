@@ -9,6 +9,7 @@ import {
   buscarLocalizacaoDoRastreio,
   buscarRastreio,
   consultarRotaDoPedido,
+  gerarLinkDeRastreio,
   buscarUsuarioAtual,
   checkHealth,
   encerrarVinculo,
@@ -98,6 +99,7 @@ describe('api', () => {
     ['buscarRastreio', () => buscarRastreio('abc_123'), 'GET', '/rastreio/abc_123'],
     ['buscarLocalizacaoDoRastreio', () => buscarLocalizacaoDoRastreio('abc_123'), 'GET', '/rastreio/abc_123/localizacao'],
     ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
+    ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
     const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));

@@ -122,6 +122,13 @@ export interface PaginaDoRecebedor {
   codigoRecebedor: string;
 }
 
+// POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o
+// link aparece uma vez, e gerar outro invalida o anterior.
+export interface LinkDeRastreio {
+  link: string;
+  codigoRecebedor: string;
+}
+
 // GET e PATCH /empresa/configuracoes
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
