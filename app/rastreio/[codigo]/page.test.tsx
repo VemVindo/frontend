@@ -123,6 +123,24 @@ describe('PaginaRastreio', () => {
     expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
   });
 
+  it('esconde o código quando o link foi revogado ou a entrega acabou', async () => {
+    tempoReal({ acessoNegado: 'encerrado' });
+
+    render(<PaginaRastreio />);
+
+    expect(await screen.findByText('Entrega encerrada')).toBeTruthy();
+    expect(screen.queryByText('012345')).toBeNull();
+  });
+
+  it('link revogado pela empresa vira link inválido', async () => {
+    tempoReal({ acessoNegado: 'invalido' });
+
+    render(<PaginaRastreio />);
+
+    expect(await screen.findByText('Link de rastreio inválido')).toBeTruthy();
+    expect(screen.queryByText('012345')).toBeNull();
+  });
+
   it('avisa a conexão instável', async () => {
     tempoReal({ conexao: 'reconectando' });
 
@@ -139,6 +157,8 @@ describe('PaginaRastreio', () => {
     expect(await screen.findByText('Entrega encerrada')).toBeTruthy();
     expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
     expect(screen.queryByText('Atualizando em tempo real.')).toBeNull();
+    expect(screen.queryByText('Código de recebimento')).toBeNull();
+    expect(screen.queryByText('012345')).toBeNull();
   });
 
   it.each([
