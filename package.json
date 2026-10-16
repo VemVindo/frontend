@@ -12,9 +12,11 @@
     "test:ci": "vitest run --coverage --reporter=default --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/junit.xml"
   },
   "dependencies": {
+    "@vis.gl/react-google-maps": "^1.10.1",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

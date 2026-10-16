@@ -1,4 +1,5 @@
 import AcoesDeStatus from '@/app/components/entregador/AcoesDeStatus';
+import MapaDoEntregador from '@/app/components/entregador/MapaDoEntregador';
 import { formatarDataHora, formatarDistancia, formatarReais, rotuloDoStatus } from '@/app/lib/pedidos';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 
@@ -23,9 +24,7 @@ export default function DetalhePedidoEntregador({ pedido, onStatusAlterado }: De
   return (
     <div className="flex flex-col gap-5">
       <div className="grid gap-5 lg:grid-cols-[1.3fr_0.9fr]">
-        <div className="overflow-hidden rounded-[20px] border border-borda bg-[#0a0a0c] p-0" aria-label="Mapa do percurso">
-          <div className="h-[360px] w-full bg-black" />
-        </div>
+        <MapaDoEntregador pedido={pedido} />
 
         <div className="flex flex-col rounded-[18px] bg-superficie p-4 shadow-sm ring-1 ring-borda">
           <h2 className="text-[15px] md:text-[18px] font-bold text-texto">{pedido.recebedor}</h2>
