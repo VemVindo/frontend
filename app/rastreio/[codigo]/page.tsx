@@ -105,6 +105,10 @@ export default function PaginaRastreio() {
           {textoDaConexao}
         </p>
       )}
+      <p className="text-[11px] text-texto-suave">
+        O endereço de entrega é processado pelo Google Maps para calcular a rota. A localização do entregador só aparece
+        durante a entrega e é apagada quando ela termina.
+      </p>
     </div>
   );
 

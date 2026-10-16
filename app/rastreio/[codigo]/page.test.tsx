@@ -80,6 +80,7 @@ describe('PaginaRastreio', () => {
     expect(screen.queryByText(/linha reta/)).toBeNull();
     expect(screen.getByText('012345')).toBeTruthy();
     expect(screen.getByText('Atualizando em tempo real.')).toBeTruthy();
+    expect(screen.getByText(/processado pelo Google Maps/)).toBeTruthy();
   });
 
   it('com o mapa desligado mostra só o tempo estimado', async () => {
