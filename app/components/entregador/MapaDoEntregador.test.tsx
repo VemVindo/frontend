@@ -5,6 +5,13 @@ import { useCompartilharLocalizacao } from '@/app/lib/useCompartilharLocalizacao
 import MapaDoEntregador from './MapaDoEntregador';
 
 vi.mock('@/app/lib/useCompartilharLocalizacao', () => ({ useCompartilharLocalizacao: vi.fn() }));
+vi.mock('@/app/components/mapa/MapaEntrega', () => ({
+  default: (props: { rotuloDestino: string; nomeOrigem: string; sobreposicao?: React.ReactNode }) => (
+    <div data-testid="mapa" data-rotulo={props.rotuloDestino} data-origem={props.nomeOrigem}>
+      {props.sobreposicao}
+    </div>
+  ),
+}));
 
 const PEDIDO: PedidoDoEntregador = {
   id: 7,
@@ -78,6 +85,14 @@ describe('MapaDoEntregador', () => {
     expect(parar).toHaveBeenCalledTimes(1);
   });
 
+  it('no mapa da entregadora, o destino leva o primeiro nome do recebedor', () => {
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    const mapa = screen.getByTestId('mapa');
+    expect(mapa.getAttribute('data-rotulo')).toBe('Pedro');
+    expect(mapa.getAttribute('data-origem')).toBe('Padaria Pao Quente');
+  });
+
   it('abre a navegação do Google Maps pela coordenada do destino', () => {
     render(<MapaDoEntregador pedido={PEDIDO} />);
 
@@ -101,6 +116,6 @@ describe('MapaDoEntregador', () => {
 
     expect(useCompartilharLocalizacao).toHaveBeenCalledWith(7, false);
     expect(screen.queryByRole('button')).toBeNull();
-    expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
+    expect(screen.queryByTestId('mapa')).toBeNull();
   });
 });

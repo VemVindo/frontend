@@ -5,6 +5,7 @@ import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
 import ResumoTrajeto from '@/app/components/mapa/ResumoTrajeto';
 import { linkDeNavegacao } from '@/app/lib/mapa';
+import { primeiroNome } from '@/app/lib/texto';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 import { useCompartilharLocalizacao } from '@/app/lib/useCompartilharLocalizacao';
 
@@ -41,6 +42,7 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
         origem={visao?.origem ?? null}
         nomeOrigem={pedido.empresa}
         destino={destino}
+        rotuloDestino={primeiroNome(pedido.recebedor)}
         entregador={entregador}
         rota={visao?.rota ?? null}
         sobreposicao={

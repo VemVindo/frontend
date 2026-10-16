@@ -10,6 +10,7 @@ export interface MapaEntregaProps {
   origem: Coordenada | null;
   nomeOrigem: string;
   destino: Coordenada | null;
+  rotuloDestino: string;
   entregador: Coordenada | null;
   rota: string | null;
   // Conteúdo sobre o mapa, no canto superior esquerdo (a pílula de ETA).
@@ -28,6 +29,7 @@ export default function MapaEntrega({
   origem,
   nomeOrigem,
   destino,
+  rotuloDestino,
   entregador,
   rota,
   sobreposicao,
@@ -64,7 +66,7 @@ export default function MapaEntrega({
           )}
           {destino && (
             <AdvancedMarker position={destino} title="Destino da entrega" {...CENTRALIZADO}>
-              <MarcadorDestino />
+              <MarcadorDestino rotulo={rotuloDestino} />
             </AdvancedMarker>
           )}
           {entregador && (

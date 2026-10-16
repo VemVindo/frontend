@@ -26,7 +26,7 @@ describe('componentes do mapa', () => {
     render(
       <>
         <MarcadorOrigem nome="Cantina Dona Marta" />
-        <MarcadorDestino />
+        <MarcadorDestino rotulo="Você" />
         <MarcadorEntregador />
       </>,
     );
@@ -44,5 +44,11 @@ describe('componentes do mapa', () => {
     ]);
     expect(screen.getByText('Cantina Dona Marta')).toBeTruthy();
     expect(screen.getByText('Você')).toBeTruthy();
+  });
+
+  it('o destino mostra o rótulo recebido', () => {
+    render(<MarcadorDestino rotulo="Pedro" />);
+    expect(screen.getByText('Pedro')).toBeTruthy();
+    expect(screen.queryByText('Você')).toBeNull();
   });
 });

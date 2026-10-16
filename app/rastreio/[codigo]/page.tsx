@@ -149,6 +149,7 @@ export default function PaginaRastreio() {
                 origem={visao?.origem ?? null}
                 nomeOrigem={pagina.estabelecimento}
                 destino={visao?.destino ?? null}
+                rotuloDestino="Você"
                 entregador={visao?.entregador ?? null}
                 rota={visao?.rota ?? null}
                 sobreposicao={

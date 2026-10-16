@@ -15,10 +15,11 @@ export function MarcadorOrigem({ nome }: { nome: string }) {
   );
 }
 
-export function MarcadorDestino() {
+// "Você" para o recebedor; para o entregador, o nome de quem recebe.
+export function MarcadorDestino({ rotulo }: { rotulo: string }) {
   return (
     <div className="relative">
-      <span className={`${ROTULO} bottom-full mb-[5px] text-mapa-destino`}>Você</span>
+      <span className={`${ROTULO} bottom-full mb-[5px] text-mapa-destino`}>{rotulo}</span>
       <Image src="/mapa/marcador-destino.svg" alt="" width={27.2816} height={30.5299} unoptimized />
     </div>
   );
