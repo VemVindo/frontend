@@ -31,6 +31,11 @@
 
   --color-sobreposicao: #29243a;
 
+  /* Mapa da entrega (Recebedor e Entregador no Figma). */
+  --color-mapa-fundo: #e4e2f1;
+  --color-mapa-destino: #e25b35;
+  --color-destaque-fundo: #f7f2fc;
+
   --font-sans: var(--font-inter);
   --font-titulo: var(--font-sora);
 }

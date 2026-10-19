@@ -65,3 +65,18 @@ export function formatarReais(centavos: number): string {
 export function formatarDistancia(metros: number): string {
   return `${(metros / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
 }
+
+export interface EnderecoDeEntrega {
+  logradouro: string;
+  numero: number;
+  complemento: string | null;
+  bairro: string;
+  cidade: string;
+  uf: string;
+}
+
+// Mesmo formato do endereço que o backend monta para o entregador.
+export function formatarEndereco(endereco: EnderecoDeEntrega): string {
+  const complemento = endereco.complemento ? `, ${endereco.complemento}` : '';
+  return `${endereco.logradouro}, ${endereco.numero}${complemento} - ${endereco.bairro}, ${endereco.cidade}/${endereco.uf}`;
+}

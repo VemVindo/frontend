@@ -29,6 +29,15 @@ export default function PainelDadosCompartilhados({ dados }: PainelDadosComparti
         <IconeInfo className="h-4 w-4 shrink-0 mt-px" />
         Se você sair da frota, a empresa deixa de ver esses dados e fica só com o histórico das entregas que você fez para ela.
       </p>
+      <p className="mt-2 flex gap-2 text-[12px] text-texto-suave">
+        <IconeInfo className="h-4 w-4 shrink-0 mt-px" />
+        <span>
+          Localização: só durante uma entrega em andamento e só depois que você tocar em &quot;Compartilhar
+          localização&quot;. O recebedor vê sua posição no mapa, se a empresa deixar o mapa ligado. Para calcular a rota
+          e o tempo de chegada, sua posição e o endereço de entrega são enviados ao Google Maps. A posição fica guardada
+          só até a entrega terminar e então é apagada.
+        </span>
+      </p>
     </section>
   );
 }

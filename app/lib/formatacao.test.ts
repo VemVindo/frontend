@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { formatarCpf, linhasDadosCompartilhados, rotuloDoVeiculo } from './dadosCompartilhados';
 import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, tomDoStatus } from './pedidos';
 import { TELA_INICIAL, telaPedidoDoEntregador, telaPedidoDoPainel } from './rotas';
-import { iniciais } from './texto';
+import { iniciais, primeiroNome } from './texto';
 import { ERRO_ACAO, EXECUTAR_ACAO } from './vinculos';
 
 describe('dadosCompartilhados', () => {
@@ -77,5 +77,10 @@ describe('texto', () => {
 describe('vinculos', () => {
   it('tem uma ação e uma mensagem de erro para cada resposta ao convite', () => {
     expect(Object.keys(EXECUTAR_ACAO).sort()).toEqual(Object.keys(ERRO_ACAO).sort());
+  });
+
+  it('pega o primeiro nome, ignorando espaços', () => {
+    expect(primeiroNome('  Pedro Alves ')).toBe('Pedro');
+    expect(primeiroNome('Ana')).toBe('Ana');
   });
 });

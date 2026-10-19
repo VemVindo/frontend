@@ -73,3 +73,63 @@ export interface StatusDisponiveis {
   statusAtual: StatusPedido;
   statusDisponiveis: StatusPedido[];
 }
+
+export interface Coordenada {
+  lat: number;
+  lng: number;
+}
+
+// PUT /pedidos/:id/localizacao, GET /pedidos/:id/rota, GET /rastreio/:token/localizacao
+// e o evento "localizacao" do socket. Distância em metros e duração em segundos;
+// "estimado" quer dizer linha reta, sem o cálculo de rota do Google. Com o mapa
+// desligado pela empresa, o recebedor recebe destino, entregador e rota nulos.
+export interface VisaoDaEntrega {
+  status: StatusPedido;
+  exibirMapa: boolean;
+  // Endereço da empresa: ponto de saída da entrega.
+  origem: Coordenada | null;
+  destino: Coordenada | null;
+  entregador: (Coordenada & { precisaoM: number | null }) | null;
+  rota: string | null;
+  distanciaRestanteM: number | null;
+  duracaoRestanteS: number | null;
+  estimado: boolean;
+  atualizadaEm: string | null;
+}
+
+// GET /rastreio/:token
+export interface PaginaDoRecebedor {
+  estabelecimento: string;
+  exibirMapa: boolean;
+  pedido: {
+    numero: number;
+    descricao: string;
+    recebedor: string;
+    status: StatusPedido;
+    criadoEm: string;
+    endereco: {
+      logradouro: string;
+      numero: number;
+      complemento: string | null;
+      bairro: string;
+      cidade: string;
+      uf: string;
+      cep: string;
+    };
+  };
+  // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
+  entregador: string | null;
+  codigoRecebedor: string;
+}
+
+// POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o
+// link aparece uma vez, e gerar outro invalida o anterior.
+export interface LinkDeRastreio {
+  link: string;
+  codigoRecebedor: string;
+}
+
+// GET e PATCH /empresa/configuracoes
+export interface ConfiguracoesDaEmpresa {
+  exibirMapa: boolean;
+}

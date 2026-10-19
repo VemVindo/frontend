@@ -29,4 +29,5 @@ export const MENU_PAINEL = [
   { rotulo: 'Remuneração', href: '/painel/remuneracao' },
   { rotulo: 'Avaliações', href: '/painel/avaliacoes' },
   { rotulo: 'Empresa', href: '/painel/empresa' },
+  { rotulo: 'Configurações', href: '/painel/configuracoes' },
 ] as const;
