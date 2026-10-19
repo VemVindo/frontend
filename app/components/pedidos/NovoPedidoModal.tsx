@@ -4,11 +4,17 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import IconeFechar from '@/app/components/icones/IconeFechar';
 import Botao from '@/app/components/ui/Botao';
 import CampoTexto from '@/app/components/ui/CampoTexto';
-import { validarNovoPedido, type ErrosNovoPedido, type FormularioNovoPedido } from '@/app/lib/novoPedido';
+import { ApiError, criarPedido } from '@/app/lib/api';
+import { useSessao } from '@/app/lib/useSessao';
+import type { CriarPedidoResposta } from '@/app/lib/tipos';
+import { criarFluxoEnvioPedido, type ObterEntregaNovoPedido, validarNovoPedido, type ErrosNovoPedido, type FormularioNovoPedido } from '@/app/lib/novoPedido';
 
 export interface NovoPedidoModalProps {
   aberto: boolean;
   onFechar: () => void;
+  onCriado?: (pedido: CriarPedidoResposta) => void;
+  /** Ausente até existir integração real de cotação automática; mantém o cadastro bloqueado. */
+  obterEntrega?: ObterEntregaNovoPedido;
 }
 
 const AVISO_INTEGRACAO = 'O cadastro está desabilitado: o cálculo do valor da entrega e a distância ainda dependem da integração. Nenhum pedido será enviado; seus dados serão mantidos neste formulário.';
@@ -18,12 +24,17 @@ const FORMULARIO_INICIAL: FormularioNovoPedido = {
   complemento: '', bairro: '', cidade: '', uf: '', itens: '', observacoes: '',
 };
 
-export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalProps) {
+export default function NovoPedidoModal({ aberto, onFechar, onCriado, obterEntrega }: NovoPedidoModalProps) {
+  const empresa = useSessao('ESTABELECIMENTO');
+  const fluxo = useRef(criarFluxoEnvioPedido(criarPedido));
+  const [enviando, setEnviando] = useState(false);
+  const envioEmCurso = useRef(false);
   const dialogo = useRef<HTMLDialogElement>(null);
   const id = useId();
   const [dados, setDados] = useState<FormularioNovoPedido>(FORMULARIO_INICIAL);
   const [erros, setErros] = useState<ErrosNovoPedido>({});
-  const [aviso, setAviso] = useState(AVISO_INTEGRACAO);
+  const [aviso, setAviso] = useState('');
+  const [erroEnvio, setErroEnvio] = useState('');
 
   useEffect(() => {
     if (!aberto || !dialogo.current) return;
@@ -43,22 +54,56 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
   function atualizar(campo: keyof FormularioNovoPedido, valor: string) {
     setDados((atuais) => ({ ...atuais, [campo]: valor }));
     setErros((atuais) => ({ ...atuais, [campo]: undefined }));
-    setAviso(AVISO_INTEGRACAO);
+    setAviso('');
+    setErroEnvio('');
   }
 
-  function validar(evento: FormEvent<HTMLFormElement>) {
+  async function validar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
+    if (envioEmCurso.current) return;
     const novosErros = validarNovoPedido(dados);
     setErros(novosErros);
-    setAviso(AVISO_INTEGRACAO);
+    setAviso('');
+    setErroEnvio('');
     const primeiroCampo = Object.keys(novosErros)[0];
     if (primeiroCampo) {
       const campo = evento.currentTarget.elements.namedItem(primeiroCampo);
       if (campo instanceof HTMLElement) campo.focus();
       return;
     }
-    // Não chamar criarPedido até haver dados reais de entrega e empresa autenticada.
-    setAviso(AVISO_INTEGRACAO);
+    if (!empresa || !obterEntrega) return;
+    envioEmCurso.current = true;
+    setEnviando(true);
+    let pedido: CriarPedidoResposta;
+    try {
+      const resultado = await fluxo.current(dados, empresa, obterEntrega);
+      if (resultado.estado !== 'criado') return;
+      pedido = resultado.pedido;
+    } catch (erro) {
+      setErroEnvio(
+        erro instanceof ApiError
+          ? erro.status === 401
+            ? 'Sua sessão expirou. Entre novamente para cadastrar o pedido.'
+            : erro.status === 403
+              ? 'Sua conta não tem permissão para cadastrar este pedido.'
+              : `Não foi possível criar o pedido: ${erro.message}`
+          : 'Não foi possível concluir o cadastro. Verifique sua conexão e tente novamente.',
+      );
+      return;
+    } finally {
+      envioEmCurso.current = false;
+      setEnviando(false);
+    }
+    // Callbacks ficam fora do catch da API: falha na página não significa falha no cadastro.
+    setDados(FORMULARIO_INICIAL);
+    setErros({});
+    setAviso(`Pedido #${pedido.id_pedido} criado com sucesso.`);
+    onFechar();
+    onCriado?.(pedido);
+  }
+
+  function fechar() {
+    if (!envioEmCurso.current) onFechar();
   }
 
   return (
@@ -67,21 +112,22 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
       role="dialog"
       aria-modal="true"
       aria-labelledby={`${id}-titulo`}
-      onCancel={(evento) => { evento.preventDefault(); onFechar(); }}
+      onCancel={(evento) => { evento.preventDefault(); fechar(); }}
       onClick={(evento) => {
         if (evento.target !== evento.currentTarget) return;
         const limites = evento.currentTarget.getBoundingClientRect();
-        if (evento.clientX < limites.left || evento.clientX > limites.right || evento.clientY < limites.top || evento.clientY > limites.bottom) onFechar();
+        if (evento.clientX < limites.left || evento.clientX > limites.right || evento.clientY < limites.top || evento.clientY > limites.bottom) fechar();
       }}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[520px] overflow-y-auto overscroll-contain rounded-[20px] border-0 bg-superficie p-5 text-texto backdrop:bg-sobreposicao/55 sm:p-6"
     >
       <div className="mb-6 flex items-center justify-between gap-3">
         <h2 id={`${id}-titulo`} className="font-titulo text-lg font-bold">Novo pedido</h2>
-        <button type="button" aria-label="Fechar novo pedido" onClick={onFechar} className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-primaria">
+        <button type="button" aria-label="Fechar novo pedido" onClick={fechar} disabled={enviando} className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-primaria">
           <IconeFechar className="size-5" />
         </button>
       </div>
-      <form noValidate onSubmit={validar} className="flex flex-col gap-3">
+      <form noValidate onSubmit={validar} aria-busy={enviando}>
+        <fieldset disabled={enviando} className="flex min-w-0 flex-col gap-3">
         <CampoTexto aparencia="modal" rotulo="Nome do recebedor" name="nome_recebedor" placeholder="Ex.: Carla Menezes" autoComplete="name" required value={dados.nome_recebedor} erro={erros.nome_recebedor} onChange={(evento) => atualizar('nome_recebedor', evento.target.value)} />
         <CampoTexto aparencia="modal" rotulo="Telefone" name="telefone" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(61) 99999-0000" required value={dados.telefone} erro={erros.telefone} onChange={(evento) => atualizar('telefone', evento.target.value)} />
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
@@ -127,8 +173,10 @@ export default function NovoPedidoModal({ aberto, onFechar }: NovoPedidoModalPro
             {erros[campo] && <p id={`${id}-${campo}-erro`} className="text-[11px] text-erro">{erros[campo]}</p>}
           </div>
         ))}
-        <p id={`${id}-aviso`} role="status" aria-live="polite" className="text-xs text-texto-apoio">{aviso}</p>
-        <Botao type="submit" disabled aria-describedby={`${id}-aviso`} larguraTotal className="mt-2 h-11 rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaria">Criar pedido</Botao>
+        <p id={`${id}-aviso`} role="status" aria-live="polite" className="text-xs text-texto-apoio">{enviando ? 'Calculando entrega e cadastrando pedido...' : !obterEntrega ? AVISO_INTEGRACAO : !empresa ? 'Aguardando a sessão do estabelecimento...' : aviso}</p>
+        {erroEnvio && <p role="alert" className="text-xs text-erro">{erroEnvio}</p>}
+        <Botao type="submit" disabled={enviando || !empresa || !obterEntrega} aria-describedby={`${id}-aviso`} larguraTotal className="mt-2 h-11 rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaria">{enviando ? 'Criando pedido...' : 'Criar pedido'}</Botao>
+        </fieldset>
       </form>
     </dialog>
   );

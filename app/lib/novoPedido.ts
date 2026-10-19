@@ -1,4 +1,4 @@
-import type { CriarPedidoRequisicao, Empresa } from './tipos';
+import type { CriarPedidoRequisicao, CriarPedidoResposta, Empresa } from './tipos';
 
 export interface FormularioNovoPedido {
   nome_recebedor: string;
@@ -97,5 +97,40 @@ export function prepararCriacaoPedido(
     valor_entrega: entrega.valor_entrega,
     distancia: entrega.distancia,
     idEmpresa: empresa.id,
+  };
+}
+
+/** Ponto de integração futuro com a cotação automática. Não implementa cálculo financeiro. */
+export type ObterEntregaNovoPedido = (
+  dados: Readonly<FormularioNovoPedido>,
+  empresa: Empresa,
+) => Promise<DadosEntregaNovoPedido>;
+
+type ResultadoEnvioPedido =
+  | { estado: 'bloqueado' | 'ocupado' }
+  | { estado: 'criado'; pedido: CriarPedidoResposta };
+
+/** Trava síncrona por instância: cobre cálculo e POST, inclusive antes do próximo render. */
+export function criarFluxoEnvioPedido(
+  enviar: (payload: CriarPedidoRequisicao) => Promise<CriarPedidoResposta>,
+) {
+  let enviando = false;
+  return async (
+    dados: FormularioNovoPedido,
+    empresa: Empresa | null,
+    obterEntrega?: ObterEntregaNovoPedido,
+  ): Promise<ResultadoEnvioPedido> => {
+    if (enviando) return { estado: 'ocupado' };
+    if (!empresa || !obterEntrega) return { estado: 'bloqueado' };
+    if (Object.keys(validarNovoPedido(dados)).length) throw new Error('Formulário inválido.');
+    enviando = true;
+    try {
+      const rascunho = Object.freeze({ ...dados });
+      const entrega = await obterEntrega(rascunho, empresa);
+      const pedido = await enviar(prepararCriacaoPedido(rascunho, empresa, entrega));
+      return { estado: 'criado', pedido };
+    } finally {
+      enviando = false;
+    }
   };
 }

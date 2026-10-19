@@ -7,7 +7,7 @@ const fonte = await readFile(new URL('./novoPedido.ts', import.meta.url), 'utf8'
 const { outputText } = ts.transpileModule(fonte, {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
 });
-const { validarNovoPedido, gerarDescricaoPedido, prepararCriacaoPedido } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
+const { validarNovoPedido, gerarDescricaoPedido, prepararCriacaoPedido, criarFluxoEnvioPedido } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 
 const valido = {
   nome_recebedor: 'Carla Menezes',
@@ -149,5 +149,109 @@ for (const usuario of [{ ...empresa, id: 0 }, { ...empresa, id: -1 }, { ...empre
 for (const campo of ['nome_recebedor', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'cidade', 'uf']) {
   test(`não monta payload com formulário inválido em ${campo}`, () => {
     assert.throws(() => prepararCriacaoPedido({ ...valido, [campo]: '' }, empresa, entrega));
+  });
+}
+
+const resposta = { id_pedido: 91, status: 'Pendente' };
+for (const cenario of ['sucesso', 'falha no cálculo', 'falha HTTP', 'falha de rede']) {
+  test(`fluxo com mocks: ${cenario}`, async () => {
+    const chamadas = [];
+    const falha = new Error(cenario);
+    const fluxo = criarFluxoEnvioPedido(async (payload) => {
+      chamadas.push(payload);
+      if (cenario === 'falha HTTP' || cenario === 'falha de rede') throw falha;
+      return resposta;
+    });
+    const obter = async () => {
+      if (cenario === 'falha no cálculo') throw falha;
+      return entrega;
+    };
+    const dados = Object.freeze({ ...valido });
+    if (cenario === 'sucesso') {
+      assert.deepEqual(await fluxo(dados, empresa, obter), { estado: 'criado', pedido: resposta });
+      assert.deepEqual(chamadas, [prepararCriacaoPedido(valido, empresa, entrega)]);
+    } else {
+      await assert.rejects(fluxo(dados, empresa, obter), (erro) => erro === falha);
+      // Uma falha libera a trava para tentativa posterior explícita.
+      await assert.rejects(fluxo(dados, empresa, obter), (erro) => erro === falha);
+      assert.equal(chamadas.length, cenario === 'falha no cálculo' ? 0 : 2);
+    }
+    assert.deepEqual(dados, valido);
+  });
+}
+for (const cenario of ['sem sessão', 'sem cálculo', 'cálculo incompleto', 'formulário inválido']) {
+  test(`bloqueia requisição: ${cenario}`, async () => {
+    let chamadas = 0;
+    const fluxo = criarFluxoEnvioPedido(async () => { chamadas++; return resposta; });
+    const executar = () => fluxo(
+      cenario === 'formulário inválido' ? { ...valido, cep: '' } : valido,
+      cenario === 'sem sessão' ? null : empresa,
+      cenario === 'sem cálculo' ? undefined : async () => cenario === 'cálculo incompleto' ? {} : entrega,
+    );
+    if (cenario === 'sem sessão' || cenario === 'sem cálculo') {
+      assert.deepEqual(await executar(), { estado: 'bloqueado' });
+    } else {
+      await assert.rejects(executar());
+    }
+    assert.equal(chamadas, 0);
+  });
+}
+for (const etapa of ['cálculo', 'POST']) {
+  test(`impede envio repetido durante ${etapa}`, async () => {
+    let liberar;
+    const pendente = new Promise((resolve) => { liberar = resolve; });
+    let chamadas = 0;
+    const fluxo = criarFluxoEnvioPedido(async () => {
+      chamadas++;
+      if (etapa === 'POST') await pendente;
+      return resposta;
+    });
+    const obter = async () => {
+      if (etapa === 'cálculo') await pendente;
+      return entrega;
+    };
+    const primeiro = fluxo(valido, empresa, obter);
+    await Promise.resolve();
+    assert.deepEqual(await fluxo(valido, empresa, obter), { estado: 'ocupado' });
+    liberar();
+    assert.deepEqual(await primeiro, { estado: 'criado', pedido: resposta });
+    assert.equal(chamadas, 1);
+    assert.equal((await fluxo(valido, empresa, obter)).estado, 'criado');
+    assert.equal(chamadas, 2);
+  });
+}
+
+const fonteApi = await readFile(new URL('./api.ts', import.meta.url), 'utf8');
+const apiCompilada = ts.transpileModule(fonteApi, {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+}).outputText;
+const { criarPedido, ApiError, API_URL } = await import(`data:text/javascript;base64,${Buffer.from(apiCompilada).toString('base64')}`);
+for (const status of [201, 400, 401, 403, 500, 'rede']) {
+  test(`API com fetch mockado: ${status}`, async () => {
+    const fetchOriginal = globalThis.fetch;
+    const payload = prepararCriacaoPedido(valido, empresa, entrega);
+    let chamadas = 0;
+    globalThis.fetch = async (url, init) => {
+      chamadas++;
+      assert.equal(url, `${API_URL}/pedido/criar`);
+      assert.equal(init.method, 'POST');
+      assert.equal(init.credentials, 'include');
+      assert.equal(init.headers['Content-Type'], 'application/json');
+      assert.deepEqual(JSON.parse(init.body), payload);
+      if (status === 'rede') throw new TypeError('Failed to fetch');
+      return new Response(JSON.stringify(status === 201 ? resposta : { message: ['Erro de teste'] }), { status });
+    };
+    try {
+      if (status === 201) {
+        assert.deepEqual(await criarPedido(payload), resposta);
+      } else {
+        await assert.rejects(criarPedido(payload), (erro) => status === 'rede'
+          ? erro instanceof TypeError
+          : erro instanceof ApiError && erro.status === status && erro.message === 'Erro de teste');
+      }
+      assert.equal(chamadas, 1);
+    } finally {
+      globalThis.fetch = fetchOriginal;
+    }
   });
 }
