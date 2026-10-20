@@ -98,6 +98,14 @@ export interface VisaoDaEntrega {
 }
 
 // GET /rastreio/:token
+// R-US02: etapas que o pedido já passou, com o horário de cada uma.
+export type EtapaDoPedido = 'CRIADO' | StatusPedido;
+
+export interface MarcoDoPedido {
+  etapa: EtapaDoPedido;
+  em: string;
+}
+
 export interface PaginaDoRecebedor {
   estabelecimento: string;
   exibirMapa: boolean;
@@ -120,6 +128,7 @@ export interface PaginaDoRecebedor {
   // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
   entregador: string | null;
   codigoRecebedor: string;
+  linhaDoTempo: MarcoDoPedido[];
 }
 
 // POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o
