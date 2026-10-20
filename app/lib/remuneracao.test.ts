@@ -40,6 +40,10 @@ describe('conversao entre formulario e parametros', () => {
     });
   });
 
+  it('deixa o formulario vazio quando a empresa ainda nao salvou parametros', () => {
+    expect(paraValores({ taxaFixa: null, coeficienteKm: null })).toEqual({ taxaFixa: '', coeficienteKm: '' });
+  });
+
   it('envia o que foi digitado em centavos', () => {
     expect(paraParametros({ taxaFixa: '9,5', coeficienteKm: '2.1' })).toEqual({
       taxaFixa: 950,
