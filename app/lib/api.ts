@@ -1,8 +1,11 @@
 import type {
+  CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
   Coordenada,
+  DadosCadastraisDaEmpresa,
   DadosCompartilhados,
   LinkDeRastreio,
+  NovaEmpresa,
   Empresa,
   Entregador,
   PedidoAtivo,
@@ -60,6 +63,25 @@ export async function loginEmpresa(
   return requisitar('/auth/login/empresa', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
+  });
+}
+
+// E-US01: o backend já devolve a sessão (cookie), como no login.
+export async function cadastrarEmpresa(dados: NovaEmpresa): Promise<RespostaLogin<Empresa>> {
+  return requisitar('/auth/cadastrar/empresa', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
+export async function buscarCadastroDaEmpresa(): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', { method: 'GET' });
+}
+
+export async function atualizarCadastroDaEmpresa(dados: DadosCadastraisDaEmpresa): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', {
+    method: 'PUT',
+    body: JSON.stringify(dados),
   });
 }
 
