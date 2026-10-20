@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { formatarCpf, linhasDadosCompartilhados, rotuloDoVeiculo } from './dadosCompartilhados';
 import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, tomDoStatus } from './pedidos';
 import { TELA_INICIAL, telaPedidoDoEntregador, telaPedidoDoPainel } from './rotas';
-import { iniciais, primeiroNome } from './texto';
+import { formatarTelefone, iniciais, primeiroNome } from './texto';
 import { ERRO_ACAO, EXECUTAR_ACAO } from './vinculos';
 
 describe('dadosCompartilhados', () => {
@@ -64,6 +64,17 @@ describe('rotas', () => {
   it('monta as telas de detalhe do pedido', () => {
     expect(telaPedidoDoPainel(7)).toBe('/painel/pedidos/7');
     expect(telaPedidoDoEntregador(7)).toBe(`${TELA_INICIAL.ENTREGADOR}/pedidos/7`);
+  });
+});
+
+describe('formatarTelefone', () => {
+  it('formata celular e fixo com DDD', () => {
+    expect(formatarTelefone('61930000000')).toBe('(61) 93000-0000');
+    expect(formatarTelefone('6133334444')).toBe('(61) 3333-4444');
+  });
+
+  it('deixa como está o que não tem o formato esperado', () => {
+    expect(formatarTelefone('123')).toBe('123');
   });
 });
 

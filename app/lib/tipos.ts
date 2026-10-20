@@ -142,3 +142,25 @@ export interface LinkDeRastreio {
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
 }
+
+// E-US13: detalhe de um pedido da empresa.
+export interface DetalheDoPedido {
+  id: number;
+  status: StatusPedido;
+  descricao: string;
+  recebedor: { nome: string; telefone: string };
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: number;
+    complemento: string | null;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  };
+  entregador: string | null;
+  valorEntrega: number;
+  distancia: number;
+  criadoEm: string;
+  linhaDoTempo: MarcoDoPedido[];
+}
