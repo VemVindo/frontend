@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PARAMETROS_REMUNERACAO_EXEMPLO } from './exemplos';
-import { buscarParametrosRemuneracao, salvarParametrosRemuneracao } from './parametrosRemuneracao';
+import {
+  buscarParametrosRemuneracao,
+  PARAMETROS_REMUNERACAO_EXEMPLO,
+  salvarParametrosRemuneracao,
+} from './parametrosRemuneracao';
 
 async function concluir<T>(promessa: Promise<T>): Promise<T> {
   await vi.runAllTimersAsync();

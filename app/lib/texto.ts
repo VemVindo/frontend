@@ -1,3 +1,7 @@
+export function primeiroNome(nome: string): string {
+  return nome.trim().split(/\s+/)[0] ?? '';
+}
+
 export function iniciais(nome: string): string {
   const partes = nome.trim().split(/\s+/);
   const primeira = partes[0]?.[0] ?? '';

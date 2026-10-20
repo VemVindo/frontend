@@ -3,7 +3,13 @@ import {
   API_URL,
   ApiError,
   aceitarVinculo,
+  atualizarConfiguracoes,
+  buscarConfiguracoes,
   buscarDadosCompartilhados,
+  buscarLocalizacaoDoRastreio,
+  buscarRastreio,
+  consultarRotaDoPedido,
+  gerarLinkDeRastreio,
   buscarUsuarioAtual,
   checkHealth,
   encerrarVinculo,
@@ -12,6 +18,7 @@ import {
   loginEmpresa,
   loginEntregador,
   recusarVinculo,
+  registrarPosicao,
   sair,
   trocarSenhaEntregador,
 } from './api';
@@ -87,6 +94,13 @@ describe('api', () => {
     ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
     ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
+    ['registrarPosicao', () => registrarPosicao(7, { lat: -15.79, lng: -47.88 }), 'PUT', '/pedidos/7/localizacao'],
+    ['consultarRotaDoPedido', () => consultarRotaDoPedido(7), 'GET', '/pedidos/7/rota'],
+    ['buscarRastreio', () => buscarRastreio('abc_123'), 'GET', '/rastreio/abc_123'],
+    ['buscarLocalizacaoDoRastreio', () => buscarLocalizacaoDoRastreio('abc_123'), 'GET', '/rastreio/abc_123/localizacao'],
+    ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
+    ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
+    ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
     const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
     vi.stubGlobal('fetch', fetchMock);
@@ -96,5 +110,23 @@ describe('api', () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe(`${API_URL}${caminho}`);
     expect(init.method).toBe(metodo);
+  });
+
+  it('manda a posição e a precisão no corpo', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await registrarPosicao(7, { lat: -15.79, lng: -47.88, precisao: 12 });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ lat: -15.79, lng: -47.88, precisao: 12 });
+  });
+
+  it('codifica o token do link na URL', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await buscarRastreio('a/b?c');
+
+    expect(fetchMock.mock.calls[0][0]).toBe(`${API_URL}/rastreio/a%2Fb%3Fc`);
   });
 });

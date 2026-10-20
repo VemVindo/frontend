@@ -1,5 +1,7 @@
-import { PARAMETROS_REMUNERACAO_EXEMPLO } from '@/app/lib/exemplos';
 import type { ParametrosRemuneracao } from '@/app/lib/tipos';
+
+// Simulado até o backend da E-US15 expor os parâmetros.
+export const PARAMETROS_REMUNERACAO_EXEMPLO: ParametrosRemuneracao = { taxaFixa: 800, coeficienteKm: 150 };
 
 const ATRASO_SIMULADO_MS = 400;
 
