@@ -123,7 +123,16 @@ export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
 }
 
 // Atribui (pedido PENDENTE) ou reatribui (EM_ANDAMENTO): o backend decide pelo status.
+// E-US08: primeiro entregador de um pedido pendente.
 export async function atribuirEntregadorAoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/atribuir`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cpfEntregador }),
+  });
+}
+
+// E-US11: troca o entregador e registra o anterior no histórico.
+export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
   return requisitar(`/pedidos/${id}/entregador`, {
     method: 'PATCH',
     body: JSON.stringify({ cpfEntregador }),
