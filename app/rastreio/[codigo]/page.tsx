@@ -6,6 +6,7 @@ import CabecalhoRecebedor from '@/app/components/layout/CabecalhoRecebedor';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import EtaSemMapa from '@/app/components/mapa/EtaSemMapa';
 import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
+import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import Card from '@/app/components/ui/Card';
 import { ApiError, buscarRastreio } from '@/app/lib/api';
@@ -117,6 +118,7 @@ export default function PaginaRastreio() {
       <Card titulo="Seu pedido" acao={<EtiquetaStatus status={statusAtual} />}>
         <p className="text-sm text-texto">{pagina.pedido.descricao}</p>
         <p className="mt-2 text-xs text-texto-apoio">{formatarEndereco(pagina.pedido.endereco)}</p>
+        <BotaoWhatsapp modo="visual" destinatario="estabelecimento" />
       </Card>
 
       {encerrada && (

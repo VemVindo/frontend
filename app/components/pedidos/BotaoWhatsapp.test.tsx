@@ -47,4 +47,14 @@ describe('BotaoWhatsapp', () => {
 
     expect((await screen.findByRole('status')).textContent).toBe('Não foi possível preparar a conversa agora.');
   });
+
+  it('mostra o botão visual para falar com o estabelecimento sem chamar o backend', () => {
+    render(<BotaoWhatsapp modo="visual" destinatario="estabelecimento" />);
+
+    expect(screen.getByRole('button', { name: 'Falar com o estabelecimento Em breve' })).toHaveProperty(
+      'disabled',
+      true,
+    );
+    expect(buscarConversaWhatsapp).not.toHaveBeenCalled();
+  });
 });

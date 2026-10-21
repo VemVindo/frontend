@@ -79,6 +79,10 @@ describe('PaginaRastreio', () => {
     expect(screen.getByText('13 min · 4,2 km restantes')).toBeTruthy();
     expect(screen.queryByText(/linha reta/)).toBeNull();
     expect(screen.getByText('012345')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Falar com o estabelecimento Em breve' })).toHaveProperty(
+      'disabled',
+      true,
+    );
     expect(screen.getByText('Atualizando em tempo real.')).toBeTruthy();
     expect(screen.getByText(/processado pelo Google Maps/)).toBeTruthy();
   });

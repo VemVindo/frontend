@@ -5,9 +5,12 @@ import type { PedidoAtivo, VisaoDaEntrega } from '@/app/lib/tipos';
 import DetalhePedidoPainel from './DetalhePedidoPainel';
 
 vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
-  default: ({ idPedido, com }: { idPedido: number; com: string }) => (
-    <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>
-  ),
+  default: (props: { idPedido?: number; com?: string; modo?: string; destinatario?: string }) =>
+    props.modo === 'visual' ? (
+      <button disabled>{props.destinatario === 'recebedor' ? 'Conversar com recebedor Em breve' : ''}</button>
+    ) : (
+      <a href="#">{`WhatsApp ${props.com} ${props.idPedido}`}</a>
+    ),
 }));
 vi.mock('@/app/lib/api', () => ({
   consultarRotaDoPedido: vi.fn(),
