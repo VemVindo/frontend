@@ -8,6 +8,7 @@ import {
   buscarConfiguracoes,
   buscarDadosCompartilhados,
   buscarLocalizacaoDoRastreio,
+  buscarParametrosRemuneracao,
   buscarRastreio,
   consultarRotaDoPedido,
   gerarLinkDeRastreio,
@@ -21,6 +22,7 @@ import {
   reatribuirEntregadorDoPedido,
   recusarVinculo,
   registrarPosicao,
+  salvarParametrosRemuneracao,
   sair,
   trocarSenhaEntregador,
 } from './api';
@@ -110,6 +112,13 @@ describe('api', () => {
     ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
     ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
+    ['buscarParametrosRemuneracao', () => buscarParametrosRemuneracao(), 'GET', '/empresa/remuneracao'],
+    [
+      'salvarParametrosRemuneracao',
+      () => salvarParametrosRemuneracao({ taxaFixa: 800, coeficienteKm: 150 }),
+      'PUT',
+      '/empresa/remuneracao',
+    ],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
     const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
     vi.stubGlobal('fetch', fetchMock);

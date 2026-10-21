@@ -7,7 +7,9 @@ import type {
   Entregador,
   PedidoAtivo,
   PaginaDoRecebedor,
+  ParametrosRemuneracao,
   PedidoDoEntregador,
+  RemuneracaoDaEmpresa,
   RespostaLogin,
   StatusDisponiveis,
   StatusPedido,
@@ -185,6 +187,18 @@ export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {
   return requisitar('/empresa/configuracoes', { method: 'GET' });
+}
+
+export async function buscarParametrosRemuneracao(): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', { method: 'GET' });
+}
+
+// E-US15: os novos valores valem para as próximas entregas.
+export async function salvarParametrosRemuneracao(parametros: ParametrosRemuneracao): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', {
+    method: 'PUT',
+    body: JSON.stringify(parametros),
+  });
 }
 
 export async function atualizarConfiguracoes(

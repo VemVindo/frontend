@@ -4,7 +4,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-import { buscarParametrosRemuneracao, salvarParametrosRemuneracao } from '@/app/lib/parametrosRemuneracao';
+import { ApiError, buscarParametrosRemuneracao, salvarParametrosRemuneracao } from '@/app/lib/api';
+import { formatarDataHora } from '@/app/lib/pedidos';
 import {
   CAMPOS_REMUNERACAO,
   paraParametros,
@@ -24,6 +25,7 @@ export default function FormularioRemuneracao() {
   const [erros, setErros] = useState<ErrosRemuneracao>({});
   const [estado, setEstado] = useState<Estado>('carregando');
   const [mensagem, setMensagem] = useState<Mensagem | null>(null);
+  const [vigenteDesde, setVigenteDesde] = useState<string | null>(null);
 
   const [tentativa, setTentativa] = useState(0);
 
@@ -33,6 +35,7 @@ export default function FormularioRemuneracao() {
       .then((parametros) => {
         if (cancelado) return;
         setValores(paraValores(parametros));
+        setVigenteDesde(parametros.vigenteDesde);
         setEstado('pronto');
       })
       .catch(() => {
@@ -71,12 +74,16 @@ export default function FormularioRemuneracao() {
     try {
       const salvos = await salvarParametrosRemuneracao(paraParametros(valores));
       setValores(paraValores(salvos));
+      setVigenteDesde(salvos.vigenteDesde);
       setMensagem({
         tipo: 'sucesso',
         texto: 'Parâmetros salvos. Os novos valores valem para as próximas entregas.',
       });
-    } catch {
-      setMensagem({ tipo: 'erro', texto: 'Não foi possível salvar. Tente de novo.' });
+    } catch (erro) {
+      setMensagem({
+        tipo: 'erro',
+        texto: erro instanceof ApiError ? erro.message : 'Não foi possível salvar. Tente de novo.',
+      });
     } finally {
       setEstado('pronto');
     }
@@ -127,6 +134,12 @@ export default function FormularioRemuneracao() {
                 onChange={(valor) => alterarCampo(campo.nome, valor)}
               />
             ))}
+
+            <p className="text-[11px] text-texto-apoio">
+              {vigenteDesde
+                ? `Valores em vigor desde ${formatarDataHora(vigenteDesde)}.`
+                : 'Nenhum parâmetro salvo ainda. Defina os valores para calcular as entregas.'}
+            </p>
 
             <div className="mt-2 rounded-[8px] border border-borda bg-superficie-suave px-[11px] py-3 md:mt-[10px] md:border-0 md:px-4 md:py-[14px]">
               <p className="text-[11px] font-semibold text-texto-corpo md:text-xs md:font-normal">

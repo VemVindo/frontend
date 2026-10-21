@@ -1,5 +1,5 @@
 import { centavosParaReais, reaisParaCentavos } from '@/app/lib/moeda';
-import type { ParametrosRemuneracao } from '@/app/lib/tipos';
+import type { ParametrosRemuneracao, RemuneracaoDaEmpresa } from '@/app/lib/tipos';
 
 export type CampoRemuneracao = keyof ParametrosRemuneracao;
 export type ValoresRemuneracao = Record<CampoRemuneracao, string>;
@@ -24,10 +24,11 @@ export const CAMPOS_REMUNERACAO: DescricaoCampoRemuneracao[] = [
   },
 ];
 
-export function paraValores(parametros: ParametrosRemuneracao): ValoresRemuneracao {
+// Sem parâmetros salvos, o formulário começa vazio.
+export function paraValores(parametros: Pick<RemuneracaoDaEmpresa, CampoRemuneracao>): ValoresRemuneracao {
   return {
-    taxaFixa: centavosParaReais(parametros.taxaFixa),
-    coeficienteKm: centavosParaReais(parametros.coeficienteKm),
+    taxaFixa: parametros.taxaFixa === null ? '' : centavosParaReais(parametros.taxaFixa),
+    coeficienteKm: parametros.coeficienteKm === null ? '' : centavosParaReais(parametros.coeficienteKm),
   };
 }
 
