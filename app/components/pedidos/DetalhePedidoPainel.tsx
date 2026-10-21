@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import IconeConversa from '@/app/components/icones/IconeConversa';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
@@ -124,8 +125,18 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
         </dl>
 
         {pedido.status === 'EM_ANDAMENTO' && (
-          <div className="mt-auto pt-6">
+          <div className="mt-auto flex flex-col gap-3 pt-6">
             <BotaoWhatsapp idPedido={pedido.id} com="entregador" />
+            <button
+              type="button"
+              disabled
+              title="O chat com o recebedor estará disponível em breve."
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-[16px] bg-primaria px-4 py-3 text-[15px] font-bold text-white opacity-70 shadow-sm"
+            >
+              <IconeConversa className="size-5" />
+              Conversar com recebedor
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] uppercase">Em breve</span>
+            </button>
           </div>
         )}
       </section>

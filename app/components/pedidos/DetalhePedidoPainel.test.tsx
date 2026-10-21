@@ -4,17 +4,17 @@ import { consultarRotaDoPedido, listarPedidosDaEmpresa } from '@/app/lib/api';
 import type { PedidoAtivo, VisaoDaEntrega } from '@/app/lib/tipos';
 import DetalhePedidoPainel from './DetalhePedidoPainel';
 
+vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
+  default: ({ idPedido, com }: { idPedido: number; com: string }) => (
+    <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>
+  ),
+}));
 vi.mock('@/app/lib/api', () => ({
   consultarRotaDoPedido: vi.fn(),
   listarPedidosDaEmpresa: vi.fn(),
 }));
 vi.mock('@/app/components/mapa/MapaEntrega', () => ({
   default: () => <div role="region" aria-label="Mapa da entrega" />,
-}));
-vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
-  default: ({ idPedido, com }: { idPedido: number; com: string }) => (
-    <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>
-  ),
 }));
 
 const PEDIDO: PedidoAtivo = {
@@ -49,13 +49,14 @@ describe('DetalhePedidoPainel', () => {
     vi.clearAllMocks();
   });
 
-  it('exibe o mapa, os dados do pedido e a conversa com o entregador no WhatsApp', async () => {
+  it('exibe o mapa, os dados do pedido e os botões de conversa com o entregador e com o recebedor', async () => {
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByRole('region', { name: 'Mapa da entrega' })).toBeTruthy();
     expect(screen.getByText('Pedro Alves')).toBeTruthy();
     expect(screen.getByText('Carla Reis')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'WhatsApp entregador 7' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Conversar com recebedor Em breve' })).toHaveProperty('disabled', true);
     expect(consultarRotaDoPedido).toHaveBeenCalledWith(7);
   });
 
