@@ -1,5 +1,6 @@
 import type {
   ConfiguracoesDaEmpresa,
+  ConversaWhatsapp,
   Coordenada,
   DadosCompartilhados,
   LinkDeRastreio,
@@ -172,6 +173,12 @@ export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoD
 
 export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
   return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
+}
+
+export type LadoDaConversa = 'entregador' | 'estabelecimento';
+
+export async function buscarConversaWhatsapp(id: number, com: LadoDaConversa): Promise<ConversaWhatsapp> {
+  return requisitar(`/pedidos/${id}/whatsapp/${com}`, { method: 'GET' });
 }
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {

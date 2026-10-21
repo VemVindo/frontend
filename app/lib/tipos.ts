@@ -22,6 +22,7 @@ export interface RespostaLogin<Usuario> {
 export interface DadosCompartilhados {
   nome: string;
   cpf: string;
+  telefone: string;
   tipoVeiculo: string;
   placa: string | null;
   disponivel: boolean;
@@ -127,6 +128,11 @@ export interface PaginaDoRecebedor {
 export interface LinkDeRastreio {
   link: string;
   codigoRecebedor: string;
+}
+
+export interface ConversaWhatsapp {
+  link: string;
+  contato: string;
 }
 
 // GET e PATCH /empresa/configuracoes

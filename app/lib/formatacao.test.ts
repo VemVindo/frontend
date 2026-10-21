@@ -19,6 +19,7 @@ describe('dadosCompartilhados', () => {
     const linhas = linhasDadosCompartilhados({
       nome: 'Carla Reis',
       cpf: '24681357928',
+      telefone: '6132345678',
       tipoVeiculo: 'BICICLETA',
       placa: null,
       disponivel: false,
@@ -27,6 +28,7 @@ describe('dadosCompartilhados', () => {
     expect(linhas).toEqual([
       { rotulo: 'Nome', valor: 'Carla Reis' },
       { rotulo: 'CPF', valor: '246.813.579-28' },
+      { rotulo: 'Telefone', valor: '(61) 3234-5678' },
       { rotulo: 'Veículo', valor: 'Bicicleta' },
       { rotulo: 'Placa', valor: 'Sem placa' },
       { rotulo: 'Disponibilidade', valor: 'Indisponível' },

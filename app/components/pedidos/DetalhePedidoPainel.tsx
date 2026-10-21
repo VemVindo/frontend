@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
+import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import { consultarRotaDoPedido, listarPedidosDaEmpresa } from '@/app/lib/api';
 import { formatarDataHora } from '@/app/lib/pedidos';
@@ -21,12 +22,6 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
 
   useEffect(() => {
     let cancelado = false;
-    setPedido(null);
-    setVisao(null);
-    setErroPedido(null);
-    setErroMapa(null);
-    setCarregandoPedido(true);
-    setCarregandoMapa(false);
 
     async function carregar() {
       try {
@@ -128,17 +123,11 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
           </dd>
         </dl>
 
-        <div className="mt-auto pt-6">
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-[16px] bg-primaria px-4 py-3 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-primaria-escura"
-          >
-            <span aria-hidden className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">
-              💬
-            </span>
-            Abrir chat
-          </button>
-        </div>
+        {pedido.status === 'EM_ANDAMENTO' && (
+          <div className="mt-auto pt-6">
+            <BotaoWhatsapp idPedido={pedido.id} com="entregador" />
+          </div>
+        )}
       </section>
     </div>
   );

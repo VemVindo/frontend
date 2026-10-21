@@ -19,10 +19,15 @@ export function formatarCpf(cpf: string): string {
   return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
 }
 
+export function formatarTelefone(telefone: string): string {
+  return telefone.replace(/^(\d{2})(\d{4,5})(\d{4})$/, '($1) $2-$3');
+}
+
 export function linhasDadosCompartilhados(dados: DadosCompartilhados): LinhaDadoCompartilhado[] {
   return [
     { rotulo: 'Nome', valor: dados.nome },
     { rotulo: 'CPF', valor: formatarCpf(dados.cpf) },
+    { rotulo: 'Telefone', valor: formatarTelefone(dados.telefone) },
     { rotulo: 'Veículo', valor: rotuloDoVeiculo(dados.tipoVeiculo) },
     { rotulo: 'Placa', valor: dados.placa ?? 'Sem placa' },
     { rotulo: 'Disponibilidade', valor: dados.disponivel ? 'Disponível para entregas' : 'Indisponível' },

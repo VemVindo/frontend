@@ -32,6 +32,13 @@ export default function PainelDadosCompartilhados({ dados }: PainelDadosComparti
       <p className="mt-2 flex gap-2 text-[12px] text-texto-suave">
         <IconeInfo className="h-4 w-4 shrink-0 mt-px" />
         <span>
+          WhatsApp: durante uma entrega em andamento, a empresa pode abrir uma conversa com você no WhatsApp pelo seu
+          telefone, e você com ela. As mensagens ficam só no WhatsApp; a plataforma não envia nem guarda nenhuma.
+        </span>
+      </p>
+      <p className="mt-2 flex gap-2 text-[12px] text-texto-suave">
+        <IconeInfo className="h-4 w-4 shrink-0 mt-px" />
+        <span>
           Localização: só durante uma entrega em andamento e só depois que você tocar em &quot;Compartilhar
           localização&quot;. O recebedor vê sua posição no mapa, se a empresa deixar o mapa ligado. Para calcular a rota
           e o tempo de chegada, sua posição e o endereço de entrega são enviados ao Google Maps. A posição fica guardada

@@ -11,6 +11,11 @@ vi.mock('@/app/lib/api', () => ({
 vi.mock('@/app/components/mapa/MapaEntrega', () => ({
   default: () => <div role="region" aria-label="Mapa da entrega" />,
 }));
+vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
+  default: ({ idPedido, com }: { idPedido: number; com: string }) => (
+    <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>
+  ),
+}));
 
 const PEDIDO: PedidoAtivo = {
   id: 7,
@@ -44,24 +49,24 @@ describe('DetalhePedidoPainel', () => {
     vi.clearAllMocks();
   });
 
-  it('exibe o mapa, os dados do pedido e o botão para abrir o chat', async () => {
+  it('exibe o mapa, os dados do pedido e a conversa com o entregador no WhatsApp', async () => {
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByRole('region', { name: 'Mapa da entrega' })).toBeTruthy();
     expect(screen.getByText('Pedro Alves')).toBeTruthy();
     expect(screen.getByText('Carla Reis')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Abrir chat' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'WhatsApp entregador 7' })).toBeTruthy();
     expect(consultarRotaDoPedido).toHaveBeenCalledWith(7);
   });
 
-  it('não busca nem exibe o mapa antes de a entrega começar', async () => {
+  it('não busca o mapa nem oferece a conversa antes de a entrega começar', async () => {
     vi.mocked(listarPedidosDaEmpresa).mockResolvedValue([{ ...PEDIDO, status: 'PENDENTE' }]);
 
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByText('O mapa fica disponível com a entrega em andamento.')).toBeTruthy();
     expect(consultarRotaDoPedido).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Abrir chat' })).toBeTruthy();
+    expect(screen.queryByRole('link')).toBeNull();
   });
 
   it('informa quando o carregamento dos detalhes falha', async () => {
