@@ -63,6 +63,19 @@ export interface PedidoAtivo {
   criadoEm: string;
 }
 
+// Centavos: valor base por entrega e adicional por quilômetro.
+export interface ParametrosRemuneracao {
+  taxaFixa: number;
+  coeficienteKm: number;
+}
+
+// Sem nada salvo ainda, os valores e a vigência vêm nulos.
+export interface RemuneracaoDaEmpresa {
+  taxaFixa: number | null;
+  coeficienteKm: number | null;
+  vigenteDesde: string | null;
+}
+
 export interface TrocaDeEntregador {
   anterior: string | null;
   novo: string;

@@ -8,7 +8,9 @@ import type {
   Entregador,
   PedidoAtivo,
   PaginaDoRecebedor,
+  ParametrosRemuneracao,
   PedidoDoEntregador,
+  RemuneracaoDaEmpresa,
   RespostaLogin,
   StatusDisponiveis,
   StatusPedido,
@@ -122,7 +124,16 @@ export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
 }
 
 // Atribui (pedido PENDENTE) ou reatribui (EM_ANDAMENTO): o backend decide pelo status.
+// E-US08: primeiro entregador de um pedido pendente.
 export async function atribuirEntregadorAoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/atribuir`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cpfEntregador }),
+  });
+}
+
+// E-US11: troca o entregador e registra o anterior no histórico.
+export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
   return requisitar(`/pedidos/${id}/entregador`, {
     method: 'PATCH',
     body: JSON.stringify({ cpfEntregador }),
@@ -181,6 +192,18 @@ export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {
   return requisitar('/empresa/configuracoes', { method: 'GET' });
+}
+
+export async function buscarParametrosRemuneracao(): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', { method: 'GET' });
+}
+
+// E-US15: os novos valores valem para as próximas entregas.
+export async function salvarParametrosRemuneracao(parametros: ParametrosRemuneracao): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', {
+    method: 'PUT',
+    body: JSON.stringify(parametros),
+  });
 }
 
 export async function atualizarConfiguracoes(

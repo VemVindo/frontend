@@ -3,11 +3,13 @@ import {
   API_URL,
   ApiError,
   aceitarVinculo,
+  atribuirEntregadorAoPedido,
   atualizarConfiguracoes,
   buscarConfiguracoes,
   buscarDetalheDoPedido,
   buscarDadosCompartilhados,
   buscarLocalizacaoDoRastreio,
+  buscarParametrosRemuneracao,
   buscarRastreio,
   consultarRotaDoPedido,
   gerarLinkDeRastreio,
@@ -18,8 +20,10 @@ import {
   listarVinculos,
   loginEmpresa,
   loginEntregador,
+  reatribuirEntregadorDoPedido,
   recusarVinculo,
   registrarPosicao,
+  salvarParametrosRemuneracao,
   sair,
   trocarSenhaEntregador,
 } from './api';
@@ -95,6 +99,13 @@ describe('api', () => {
     ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
     ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
+    ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
+    [
+      'reatribuirEntregadorDoPedido',
+      () => reatribuirEntregadorDoPedido(7, '11144477735'),
+      'PATCH',
+      '/pedidos/7/entregador',
+    ],
     ['registrarPosicao', () => registrarPosicao(7, { lat: -15.79, lng: -47.88 }), 'PUT', '/pedidos/7/localizacao'],
     ['consultarRotaDoPedido', () => consultarRotaDoPedido(7), 'GET', '/pedidos/7/rota'],
     ['buscarDetalheDoPedido', () => buscarDetalheDoPedido(7), 'GET', '/pedidos/7'],
@@ -103,6 +114,13 @@ describe('api', () => {
     ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
     ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
+    ['buscarParametrosRemuneracao', () => buscarParametrosRemuneracao(), 'GET', '/empresa/remuneracao'],
+    [
+      'salvarParametrosRemuneracao',
+      () => salvarParametrosRemuneracao({ taxaFixa: 800, coeficienteKm: 150 }),
+      'PUT',
+      '/empresa/remuneracao',
+    ],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
     const fetchMock = vi.fn().mockResolvedValue(resposta(200, {}));
     vi.stubGlobal('fetch', fetchMock);

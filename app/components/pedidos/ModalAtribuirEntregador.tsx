@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import IconeFechar from '@/app/components/icones/IconeFechar';
 import Avatar from '@/app/components/ui/Avatar';
 import Botao from '@/app/components/ui/Botao';
-import { ApiError, atribuirEntregadorAoPedido, listarFrota } from '@/app/lib/api';
+import { ApiError, atribuirEntregadorAoPedido, listarFrota, reatribuirEntregadorDoPedido } from '@/app/lib/api';
 import { rotuloDoVeiculo } from '@/app/lib/dadosCompartilhados';
 import { iniciais } from '@/app/lib/texto';
 import type { DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
@@ -52,7 +52,8 @@ export default function ModalAtribuirEntregador({
     setAtribuindo(true);
     setErro(null);
     try {
-      onAtribuido(await atribuirEntregadorAoPedido(pedido.id, entregador.cpf));
+      const enviar = modo === 'reatribuir' ? reatribuirEntregadorDoPedido : atribuirEntregadorAoPedido;
+      onAtribuido(await enviar(pedido.id, entregador.cpf));
     } catch (err) {
       setErro(err instanceof ApiError ? err.message : `Não foi possível ${modo} o entregador agora.`);
       setAtribuindo(false);
