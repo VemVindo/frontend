@@ -8,8 +8,10 @@ import EtaSemMapa from '@/app/components/mapa/EtaSemMapa';
 import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
 import { LinkWhatsapp } from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
+import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
 import Card from '@/app/components/ui/Card';
 import { ApiError, buscarRastreio } from '@/app/lib/api';
+import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
 import { formatarEndereco, pedidoEmAberto } from '@/app/lib/pedidos';
 import { iniciais } from '@/app/lib/texto';
 import type { PaginaDoRecebedor } from '@/app/lib/tipos';
@@ -63,7 +65,7 @@ export default function PaginaRastreio() {
   }, [codigo]);
 
   const abertaAoCarregar = pagina !== null && pedidoEmAberto(pagina.pedido.status);
-  const { visao, status, conexao, acessoNegado } = useRastreioTempoReal(codigo, abertaAoCarregar);
+  const { visao, status, marcos, conexao, acessoNegado } = useRastreioTempoReal(codigo, abertaAoCarregar);
 
   const statusAtual = status ?? visao?.status ?? pagina?.pedido.status;
   const encerrada = acessoNegado !== null || (statusAtual !== undefined && !pedidoEmAberto(statusAtual));
@@ -123,6 +125,9 @@ export default function PaginaRastreio() {
             <LinkWhatsapp link={pagina.whatsappEstabelecimento} rotulo="Falar com o estabelecimento no WhatsApp" />
           </div>
         )}
+        <div className="mt-4 border-t border-borda pt-4">
+          <LinhaDoTempoDoPedido passos={montarLinhaDoTempo(pagina.linhaDoTempo, marcos, statusAtual)} />
+        </div>
       </Card>
 
       {encerrada && (
