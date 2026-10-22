@@ -80,7 +80,11 @@ export default function BotaoWhatsapp({ idPedido, com, variante }: BotaoWhatsapp
   }
 
   if (!conversa) {
-    return <p className="text-xs text-texto-apoio">Preparando a conversa...</p>;
+    return (
+      <p role="status" className="text-xs text-texto-apoio">
+        Preparando a conversa...
+      </p>
+    );
   }
 
   return (

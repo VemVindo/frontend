@@ -56,6 +56,14 @@ describe('BotaoWhatsapp', () => {
     expect(buscarConversaWhatsapp).toHaveBeenCalledWith(12, 'recebedor');
   });
 
+  it('anuncia que a conversa está sendo preparada', () => {
+    vi.mocked(buscarConversaWhatsapp).mockReturnValue(new Promise(() => {}));
+    render(<BotaoWhatsapp idPedido={12} com="entregador" />);
+
+    expect(screen.getByRole('status').textContent).toBe('Preparando a conversa...');
+    expect(screen.queryByRole('link')).toBeNull();
+  });
+
   it('o link pronto abre o WhatsApp sem chamar o backend', () => {
     render(<LinkWhatsapp link={CONVERSA.link} rotulo="Falar com o estabelecimento no WhatsApp" />);
 
