@@ -43,6 +43,20 @@
 
   ENV NODE_ENV=production
 
+  # URL publica da API. Variaveis NEXT_PUBLIC_ sao embutidas no JavaScript no
+  # momento do build (nao em runtime), por isso entram como build-arg. Nao e
+  # segredo: o navegador recebe esse valor de qualquer forma.
+  ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+  ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+  # Chave do Maps JavaScript API e Map ID. Tambem vao para o navegador; a chave
+  # e protegida pela restricao de dominio no Google Cloud. Vazias, o mapa nao
+  # aparece e a tela mostra so distancia e tempo.
+  ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+  ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+  ARG NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=
+  ENV NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=${NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID}
+
   # Next.js collects completely anonymous telemetry data about general usage.
   # Learn more here: https://nextjs.org/telemetry
   # Uncomment the following line in case you want to disable telemetry during the build.
@@ -69,6 +83,12 @@
   # ============================================
 
   FROM node:${NODE_VERSION} AS runner
+
+  # Aplica as correcoes de seguranca do Debian publicadas depois da imagem base
+  # do Node. Sem isso, o Trivy do CI barra a imagem (ex.: perl-base).
+  RUN apt-get update \
+   && apt-get upgrade -y --no-install-recommends \
+   && rm -rf /var/lib/apt/lists/*
 
   # Set working directory
   WORKDIR /app

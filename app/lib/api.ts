@@ -1,12 +1,23 @@
 import type {
   CriarPedidoRequisicao,
   CriarPedidoResposta,
+  ConfiguracoesDaEmpresa,
+  Coordenada,
   DadosCompartilhados,
+  LinkDeRastreio,
   Empresa,
   Entregador,
+  PedidoAtivo,
+  PaginaDoRecebedor,
+  ParametrosRemuneracao,
   PedidoDoEntregador,
+  RemuneracaoDaEmpresa,
   RespostaLogin,
+  StatusDisponiveis,
+  StatusPedido,
+  TrocaDeEntregador,
   Vinculo,
+  VisaoDaEntrega,
 } from '@/app/lib/tipos';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -105,10 +116,6 @@ export async function encerrarVinculo(id: number): Promise<void> {
   return requisitar(`/entregador/vinculos/${id}/encerrar`, { method: 'POST' });
 }
 
-export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]> {
-  return requisitar('/entregador/pedidos', { method: 'GET' });
-}
-
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
 }
@@ -118,6 +125,98 @@ export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPe
   return requisitar('/pedido/criar', {
     method: 'POST',
     body: JSON.stringify(dados),
+  });
+}
+
+export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
+  return requisitar('/pedidos', { method: 'GET' });
+}
+
+// Atribui (pedido PENDENTE) ou reatribui (EM_ANDAMENTO): o backend decide pelo status.
+// E-US08: primeiro entregador de um pedido pendente.
+export async function atribuirEntregadorAoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/atribuir`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cpfEntregador }),
+  });
+}
+
+// E-US11: troca o entregador e registra o anterior no histórico.
+export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/entregador`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cpfEntregador }),
+  });
+}
+
+export async function listarHistoricoDeEntregadores(id: number): Promise<TrocaDeEntregador[]> {
+  return requisitar(`/pedidos/${id}/historico-entregadores`, { method: 'GET' });
+}
+
+export async function listarPedidosDoEntregador(): Promise<PedidoDoEntregador[]> {
+  return requisitar('/pedidos/minhas-entregas', { method: 'GET' });
+}
+
+export async function obterStatusDisponiveis(id: number): Promise<StatusDisponiveis> {
+  return requisitar(`/pedidos/${id}/status-disponiveis`, { method: 'GET' });
+}
+
+export async function atualizarStatusDoPedido(id: number, status: StatusPedido): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function registrarPosicao(
+  id: number,
+  posicao: Coordenada & { precisao?: number },
+): Promise<VisaoDaEntrega> {
+  return requisitar(`/pedidos/${id}/localizacao`, {
+    method: 'PUT',
+    body: JSON.stringify(posicao),
+  });
+}
+
+export async function consultarRotaDoPedido(id: number): Promise<VisaoDaEntrega> {
+  return requisitar(`/pedidos/${id}/rota`, { method: 'GET' });
+}
+
+// O token vem do link do recebedor e vai na URL como recebido.
+export async function buscarRastreio(token: string): Promise<PaginaDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}`, { method: 'GET' });
+}
+
+export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoDaEntrega> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/localizacao`, { method: 'GET' });
+}
+
+export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
+  return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
+}
+
+export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {
+  return requisitar('/empresa/configuracoes', { method: 'GET' });
+}
+
+export async function buscarParametrosRemuneracao(): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', { method: 'GET' });
+}
+
+// E-US15: os novos valores valem para as próximas entregas.
+export async function salvarParametrosRemuneracao(parametros: ParametrosRemuneracao): Promise<RemuneracaoDaEmpresa> {
+  return requisitar('/empresa/remuneracao', {
+    method: 'PUT',
+    body: JSON.stringify(parametros),
+  });
+}
+
+export async function atualizarConfiguracoes(
+  configuracoes: ConfiguracoesDaEmpresa,
+): Promise<ConfiguracoesDaEmpresa> {
+  return requisitar('/empresa/configuracoes', {
+    method: 'PATCH',
+    body: JSON.stringify(configuracoes),
   });
 }
 
