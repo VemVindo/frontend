@@ -2,6 +2,7 @@ import type {
   ConfiguracoesDaEmpresa,
   Coordenada,
   DadosCompartilhados,
+  DetalheDoPedido,
   LinkDeRastreio,
   Empresa,
   Entregador,
@@ -137,6 +138,10 @@ export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: st
     method: 'PATCH',
     body: JSON.stringify({ cpfEntregador }),
   });
+}
+
+export async function buscarDetalheDoPedido(id: number): Promise<DetalheDoPedido> {
+  return requisitar(`/pedidos/${id}`, { method: 'GET' });
 }
 
 export async function listarHistoricoDeEntregadores(id: number): Promise<TrocaDeEntregador[]> {
