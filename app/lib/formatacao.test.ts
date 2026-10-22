@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatarCpf, linhasDadosCompartilhados, rotuloDoVeiculo } from './dadosCompartilhados';
+import { formatarCpf, formatarTelefone, linhasDadosCompartilhados, rotuloDoVeiculo } from './dadosCompartilhados';
 import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, tomDoStatus } from './pedidos';
 import { TELA_INICIAL, telaPedidoDoEntregador, telaPedidoDoPainel } from './rotas';
 import { iniciais, primeiroNome } from './texto';
@@ -8,6 +8,13 @@ import { ERRO_ACAO, EXECUTAR_ACAO } from './vinculos';
 describe('dadosCompartilhados', () => {
   it('formata o CPF com pontos e traço', () => {
     expect(formatarCpf('12345678909')).toBe('123.456.789-09');
+  });
+
+  it('formata o telefone com máscara ou DDI e mantém um valor fora do padrão', () => {
+    expect(formatarTelefone('5561987654321')).toBe('(61) 98765-4321');
+    expect(formatarTelefone('(61) 98765-4321')).toBe('(61) 98765-4321');
+    expect(formatarTelefone('556132345678')).toBe('(61) 3234-5678');
+    expect(formatarTelefone('123')).toBe('123');
   });
 
   it('traduz o veículo e mantém um tipo desconhecido', () => {
