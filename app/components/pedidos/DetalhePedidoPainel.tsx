@@ -5,7 +5,7 @@ import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import { consultarRotaDoPedido, listarPedidosDaEmpresa } from '@/app/lib/api';
-import { formatarDataHora } from '@/app/lib/pedidos';
+import { formatarDataHora, pedidoEmAberto } from '@/app/lib/pedidos';
 import type { PedidoAtivo, VisaoDaEntrega } from '@/app/lib/tipos';
 
 export interface DetalhePedidoPainelProps {
@@ -123,10 +123,10 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
           </dd>
         </dl>
 
-        {pedido.status === 'EM_ANDAMENTO' && (
+        {pedidoEmAberto(pedido.status) && (
           <div className="mt-auto flex flex-col gap-3 pt-6">
-            <BotaoWhatsapp idPedido={pedido.id} com="entregador" />
-            <BotaoWhatsapp modo="visual" destinatario="recebedor" />
+            {pedido.status === 'EM_ANDAMENTO' && <BotaoWhatsapp idPedido={pedido.id} com="entregador" />}
+            <BotaoWhatsapp idPedido={pedido.id} com="recebedor" variante="claro" />
           </div>
         )}
       </section>

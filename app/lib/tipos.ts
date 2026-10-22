@@ -121,6 +121,8 @@ export interface PaginaDoRecebedor {
   // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
   entregador: string | null;
   codigoRecebedor: string;
+  // Link wa.me para o estabelecimento; nulo com a entrega encerrada.
+  whatsappEstabelecimento: string | null;
 }
 
 // POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o

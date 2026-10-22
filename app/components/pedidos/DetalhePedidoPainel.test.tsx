@@ -5,12 +5,7 @@ import type { PedidoAtivo, VisaoDaEntrega } from '@/app/lib/tipos';
 import DetalhePedidoPainel from './DetalhePedidoPainel';
 
 vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
-  default: (props: { idPedido?: number; com?: string; modo?: string; destinatario?: string }) =>
-    props.modo === 'visual' ? (
-      <button disabled>{props.destinatario === 'recebedor' ? 'Conversar com recebedor Em breve' : ''}</button>
-    ) : (
-      <a href="#">{`WhatsApp ${props.com} ${props.idPedido}`}</a>
-    ),
+  default: ({ idPedido, com }: { idPedido: number; com: string }) => <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>,
 }));
 vi.mock('@/app/lib/api', () => ({
   consultarRotaDoPedido: vi.fn(),
@@ -59,17 +54,27 @@ describe('DetalhePedidoPainel', () => {
     expect(screen.getByText('Pedro Alves')).toBeTruthy();
     expect(screen.getByText('Carla Reis')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'WhatsApp entregador 7' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Conversar com recebedor Em breve' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('link', { name: 'WhatsApp recebedor 7' })).toBeTruthy();
     expect(consultarRotaDoPedido).toHaveBeenCalledWith(7);
   });
 
-  it('não busca o mapa nem oferece a conversa antes de a entrega começar', async () => {
+  it('antes de a entrega começar, não busca o mapa e só oferece a conversa com o recebedor', async () => {
     vi.mocked(listarPedidosDaEmpresa).mockResolvedValue([{ ...PEDIDO, status: 'PENDENTE' }]);
 
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByText('O mapa fica disponível com a entrega em andamento.')).toBeTruthy();
     expect(consultarRotaDoPedido).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: 'WhatsApp recebedor 7' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'WhatsApp entregador 7' })).toBeNull();
+  });
+
+  it('com o pedido encerrado, não oferece conversa', async () => {
+    vi.mocked(listarPedidosDaEmpresa).mockResolvedValue([{ ...PEDIDO, status: 'FINALIZADO' }]);
+
+    render(<DetalhePedidoPainel idPedido={7} />);
+
+    expect(await screen.findByText('Pedro Alves')).toBeTruthy();
     expect(screen.queryByRole('link')).toBeNull();
   });
 

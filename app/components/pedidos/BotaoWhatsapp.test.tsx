@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, buscarConversaWhatsapp } from '@/app/lib/api';
-import BotaoWhatsapp from './BotaoWhatsapp';
+import BotaoWhatsapp, { LinkWhatsapp } from './BotaoWhatsapp';
 
 vi.mock('@/app/lib/api', async (original) => ({
   ...(await original<typeof import('@/app/lib/api')>()),
@@ -48,13 +48,20 @@ describe('BotaoWhatsapp', () => {
     expect((await screen.findByRole('status')).textContent).toBe('Não foi possível preparar a conversa agora.');
   });
 
-  it('mostra o botão visual para falar com o estabelecimento sem chamar o backend', () => {
-    render(<BotaoWhatsapp modo="visual" destinatario="estabelecimento" />);
+  it('busca a conversa com o recebedor pela rota da empresa', async () => {
+    vi.mocked(buscarConversaWhatsapp).mockResolvedValue({ ...CONVERSA, contato: 'Carla Menezes' });
+    render(<BotaoWhatsapp idPedido={12} com="recebedor" variante="claro" />);
 
-    expect(screen.getByRole('button', { name: 'Falar com o estabelecimento Em breve' })).toHaveProperty(
-      'disabled',
-      true,
-    );
+    expect(await screen.findByRole('link', { name: 'Conversar com Carla Menezes no WhatsApp' })).toBeTruthy();
+    expect(buscarConversaWhatsapp).toHaveBeenCalledWith(12, 'recebedor');
+  });
+
+  it('o link pronto abre o WhatsApp sem chamar o backend', () => {
+    render(<LinkWhatsapp link={CONVERSA.link} rotulo="Falar com o estabelecimento no WhatsApp" />);
+
+    const link = screen.getByRole('link', { name: 'Falar com o estabelecimento no WhatsApp' });
+    expect(link.getAttribute('href')).toBe(CONVERSA.link);
+    expect(link.getAttribute('target')).toBe('_blank');
     expect(buscarConversaWhatsapp).not.toHaveBeenCalled();
   });
 });

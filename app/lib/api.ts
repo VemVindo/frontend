@@ -175,7 +175,7 @@ export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
   return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
 }
 
-export type LadoDaConversa = 'entregador' | 'estabelecimento';
+export type LadoDaConversa = 'entregador' | 'estabelecimento' | 'recebedor';
 
 export async function buscarConversaWhatsapp(id: number, com: LadoDaConversa): Promise<ConversaWhatsapp> {
   return requisitar(`/pedidos/${id}/whatsapp/${com}`, { method: 'GET' });
