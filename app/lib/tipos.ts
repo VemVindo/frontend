@@ -155,3 +155,16 @@ export interface LinkDeRastreio {
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
 }
+
+export type SituacaoDaAvaliacao = 'aguardando' | 'disponivel' | 'avaliado' | 'expirada' | 'indisponivel';
+
+export interface AvaliacaoEnviada {
+  nota: number;
+  comentario: string | null;
+  data: string;
+}
+
+export interface AvaliacaoDoRecebedor {
+  situacao: SituacaoDaAvaliacao;
+  avaliacao: AvaliacaoEnviada | null;
+}

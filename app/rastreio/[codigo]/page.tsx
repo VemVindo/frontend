@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import AvaliacaoDaEntrega from '@/app/components/avaliacao/AvaliacaoDaEntrega';
 import CabecalhoRecebedor from '@/app/components/layout/CabecalhoRecebedor';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import EtaSemMapa from '@/app/components/mapa/EtaSemMapa';
@@ -70,6 +71,14 @@ export default function PaginaRastreio() {
   const encerrada = acessoNegado !== null || (statusAtual !== undefined && !pedidoEmAberto(statusAtual));
   const falhaVisivel: Falha | null = falha ?? (acessoNegado === 'invalido' ? 'invalido' : null);
 
+  if (falhaVisivel === 'encerrado') {
+    return (
+      <main className="mx-auto w-full max-w-[640px] px-[18px] py-12">
+        <AvaliacaoDaEntrega token={codigo} />
+      </main>
+    );
+  }
+
   if (falhaVisivel) {
     const { titulo, texto } = MENSAGEM_DA_FALHA[falhaVisivel];
     return (
@@ -124,7 +133,8 @@ export default function PaginaRastreio() {
         </div>
       </Card>
 
-      {encerrada && (
+      {encerrada && statusAtual === 'FINALIZADO' && <AvaliacaoDaEntrega token={codigo} />}
+      {encerrada && statusAtual !== 'FINALIZADO' && (
         <Card
           titulo="Entrega encerrada"
           descricao="O rastreio em tempo real termina quando o pedido é finalizado ou cancelado."
