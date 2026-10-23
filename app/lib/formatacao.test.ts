@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatarCpf, linhasDadosCompartilhados, rotuloDoVeiculo } from './dadosCompartilhados';
+import {
+  formatarCpf,
+  formatarTelefone as formatarTelefoneCompartilhado,
+  linhasDadosCompartilhados,
+  rotuloDoVeiculo,
+} from './dadosCompartilhados';
 import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, textoDaNota, tomDoStatus } from './pedidos';
 import { TELA_INICIAL, telaPedidoDoEntregador, telaPedidoDoPainel } from './rotas';
 import { formatarTelefone, iniciais, primeiroNome } from './texto';
@@ -8,6 +13,13 @@ import { ERRO_ACAO, EXECUTAR_ACAO } from './vinculos';
 describe('dadosCompartilhados', () => {
   it('formata o CPF com pontos e traço', () => {
     expect(formatarCpf('12345678909')).toBe('123.456.789-09');
+  });
+
+  it('formata o telefone com máscara ou DDI e mantém um valor fora do padrão', () => {
+    expect(formatarTelefoneCompartilhado('5561987654321')).toBe('(61) 98765-4321');
+    expect(formatarTelefoneCompartilhado('(61) 98765-4321')).toBe('(61) 98765-4321');
+    expect(formatarTelefoneCompartilhado('556132345678')).toBe('(61) 3234-5678');
+    expect(formatarTelefoneCompartilhado('123')).toBe('123');
   });
 
   it('traduz o veículo e mantém um tipo desconhecido', () => {
@@ -19,6 +31,7 @@ describe('dadosCompartilhados', () => {
     const linhas = linhasDadosCompartilhados({
       nome: 'Carla Reis',
       cpf: '24681357928',
+      telefone: '6132345678',
       tipoVeiculo: 'BICICLETA',
       placa: null,
       disponivel: false,
@@ -27,6 +40,7 @@ describe('dadosCompartilhados', () => {
     expect(linhas).toEqual([
       { rotulo: 'Nome', valor: 'Carla Reis' },
       { rotulo: 'CPF', valor: '246.813.579-28' },
+      { rotulo: 'Telefone', valor: '(61) 3234-5678' },
       { rotulo: 'Veículo', valor: 'Bicicleta' },
       { rotulo: 'Placa', valor: 'Sem placa' },
       { rotulo: 'Disponibilidade', valor: 'Indisponível' },
