@@ -1,5 +1,6 @@
 import AcoesDeStatus from '@/app/components/entregador/AcoesDeStatus';
 import MapaDoEntregador from '@/app/components/entregador/MapaDoEntregador';
+import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import { formatarDataHora, formatarDistancia, formatarReais, rotuloDoStatus } from '@/app/lib/pedidos';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 
@@ -39,15 +40,11 @@ export default function DetalhePedidoEntregador({ pedido, onStatusAlterado }: De
             ))}
           </dl>
 
-          <div className="mt-auto pt-6">
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-[16px] bg-primaria px-4 py-3 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-primaria-escura"
-            >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">💬</span>
-              Abrir chat
-            </button>
-          </div>
+          {pedido.status === 'EM_ANDAMENTO' && (
+            <div className="mt-auto pt-6">
+              <BotaoWhatsapp idPedido={pedido.id} com="estabelecimento" />
+            </div>
+          )}
         </div>
       </div>
 

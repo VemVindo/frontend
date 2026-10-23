@@ -1,10 +1,15 @@
 import type {
   CriarPedidoRequisicao,
   CriarPedidoResposta,
+  CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
+  ConversaWhatsapp,
   Coordenada,
+  DadosCadastraisDaEmpresa,
   DadosCompartilhados,
+  DetalheDoPedido,
   LinkDeRastreio,
+  NovaEmpresa,
   Empresa,
   Entregador,
   PedidoAtivo,
@@ -26,6 +31,7 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    readonly detalhes: Record<string, unknown> = {},
   ) {
     super(message);
     this.name = 'ApiError';
@@ -41,11 +47,11 @@ async function requisitar<T>(caminho: string, init: RequestInit): Promise<T> {
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
       message?: string | string[];
-    };
+    } & Record<string, unknown>;
     const mensagem = Array.isArray(body.message)
       ? body.message.join('; ')
       : body.message;
-    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`);
+    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`, body);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -64,6 +70,25 @@ export async function loginEmpresa(
   return requisitar('/auth/login/empresa', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
+  });
+}
+
+// E-US01: o backend já devolve a sessão (cookie), como no login.
+export async function cadastrarEmpresa(dados: NovaEmpresa): Promise<RespostaLogin<Empresa>> {
+  return requisitar('/auth/cadastrar/empresa', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
+export async function buscarCadastroDaEmpresa(): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', { method: 'GET' });
+}
+
+export async function atualizarCadastroDaEmpresa(dados: DadosCadastraisDaEmpresa): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', {
+    method: 'PUT',
+    body: JSON.stringify(dados),
   });
 }
 
@@ -149,6 +174,10 @@ export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: st
   });
 }
 
+export async function buscarDetalheDoPedido(id: number): Promise<DetalheDoPedido> {
+  return requisitar(`/pedidos/${id}`, { method: 'GET' });
+}
+
 export async function listarHistoricoDeEntregadores(id: number): Promise<TrocaDeEntregador[]> {
   return requisitar(`/pedidos/${id}/historico-entregadores`, { method: 'GET' });
 }
@@ -165,6 +194,13 @@ export async function atualizarStatusDoPedido(id: number, status: StatusPedido):
   return requisitar(`/pedidos/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  });
+}
+
+export async function finalizarPedido(id: number, codigo: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/finalizar`, {
+    method: 'POST',
+    body: JSON.stringify({ codigo }),
   });
 }
 
@@ -193,6 +229,12 @@ export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoD
 
 export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
   return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
+}
+
+export type LadoDaConversa = 'entregador' | 'estabelecimento' | 'recebedor';
+
+export async function buscarConversaWhatsapp(id: number, com: LadoDaConversa): Promise<ConversaWhatsapp> {
+  return requisitar(`/pedidos/${id}/whatsapp/${com}`, { method: 'GET' });
 }
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {

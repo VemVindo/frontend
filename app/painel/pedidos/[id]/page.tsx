@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DetalhePedidoPainel from '@/app/components/pedidos/DetalhePedidoPainel';
 import HistoricoEntregadores from '@/app/components/pedidos/HistoricoEntregadores';
 import LinkDeRastreio from '@/app/components/pedidos/LinkDeRastreio';
 import TituloPagina from '@/app/components/ui/TituloPagina';
@@ -11,6 +12,7 @@ export default async function PaginaDetalheDoPedido({ params }: PageProps<'/pain
     <>
       <TituloPagina titulo={`Pedido #${id}`} subtitulo="Detalhe da entrega" />
       <div className="flex flex-col gap-4">
+        <DetalhePedidoPainel key={id} idPedido={Number(id)} />
         <LinkDeRastreio idPedido={Number(id)} />
         <HistoricoEntregadores idPedido={Number(id)} />
         <Link href={TELA_PEDIDOS} className="text-xs font-semibold text-destaque hover:underline">

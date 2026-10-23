@@ -7,6 +7,49 @@ export interface Empresa {
   cargo: 'ESTABELECIMENTO';
 }
 
+export type TipoDocumento = 'CNPJ' | 'CPF';
+
+// E-US03: o que a empresa pode editar. Documento e razão social não mudam.
+export interface DadosCadastraisDaEmpresa {
+  nomeFantasia: string;
+  email: string;
+  telefone: string;
+  cep: string;
+  logradouro: string;
+  numero: number;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+}
+
+// E-US01: CNPJ com razão social, ou CPF.
+export interface NovaEmpresa extends DadosCadastraisDaEmpresa {
+  cnpj?: string;
+  cpf?: string;
+  razaoSocial?: string;
+  senha: string;
+}
+
+export interface CadastroDaEmpresa {
+  nomeFantasia: string;
+  razaoSocial: string | null;
+  documento: { tipo: TipoDocumento; numero: string };
+  email: string;
+  telefone: string;
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: number;
+    complemento: string | null;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  };
+  criadaEm: string;
+  atualizadaEm: string;
+}
+
 export interface Entregador {
   cpf: string;
   nome: string;
@@ -22,6 +65,7 @@ export interface RespostaLogin<Usuario> {
 export interface DadosCompartilhados {
   nome: string;
   cpf: string;
+  telefone: string;
   tipoVeiculo: string;
   placa: string | null;
   disponivel: boolean;
@@ -113,6 +157,7 @@ export interface TrocaDeEntregador {
 export interface StatusDisponiveis {
   statusAtual: StatusPedido;
   statusDisponiveis: StatusPedido[];
+  podeFinalizarComCodigo: boolean;
 }
 
 export interface Coordenada {
@@ -139,6 +184,14 @@ export interface VisaoDaEntrega {
 }
 
 // GET /rastreio/:token
+// R-US02: etapas que o pedido já passou, com o horário de cada uma.
+export type EtapaDoPedido = 'CRIADO' | StatusPedido;
+
+export interface MarcoDoPedido {
+  etapa: EtapaDoPedido;
+  em: string;
+}
+
 export interface PaginaDoRecebedor {
   estabelecimento: string;
   exibirMapa: boolean;
@@ -161,6 +214,9 @@ export interface PaginaDoRecebedor {
   // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
   entregador: string | null;
   codigoRecebedor: string;
+  // Link wa.me para o estabelecimento; nulo com a entrega encerrada.
+  whatsappEstabelecimento: string | null;
+  linhaDoTempo: MarcoDoPedido[];
 }
 
 // POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o
@@ -170,7 +226,34 @@ export interface LinkDeRastreio {
   codigoRecebedor: string;
 }
 
+export interface ConversaWhatsapp {
+  link: string;
+  contato: string;
+}
+
 // GET e PATCH /empresa/configuracoes
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
+}
+
+// E-US13: detalhe de um pedido da empresa.
+export interface DetalheDoPedido {
+  id: number;
+  status: StatusPedido;
+  descricao: string;
+  recebedor: { nome: string; telefone: string };
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: number;
+    complemento: string | null;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  };
+  entregador: string | null;
+  valorEntrega: number;
+  distancia: number;
+  criadoEm: string;
+  linhaDoTempo: MarcoDoPedido[];
 }

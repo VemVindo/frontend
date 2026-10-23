@@ -81,6 +81,14 @@ describe('useRastreioTempoReal', () => {
     expect(result.current.status).toBe('FINALIZADO');
   });
 
+  it('guarda o horário de cada mudança de status para a linha do tempo', () => {
+    const { result } = renderHook(() => useRastreioTempoReal('token', true));
+
+    socket.disparar('status', { status: 'FINALIZADO', em: '2026-10-20T12:40:00Z' });
+
+    expect(result.current.marcos).toEqual([{ etapa: 'FINALIZADO', em: '2026-10-20T12:40:00Z' }]);
+  });
+
   it('mostra reconexão quando a rede cai e encerra quando o backend fecha', () => {
     const { result } = renderHook(() => useRastreioTempoReal('token', true));
 
