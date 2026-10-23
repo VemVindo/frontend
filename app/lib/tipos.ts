@@ -242,6 +242,8 @@ export interface FiltroDeAvaliacoes {
   notas: number[];
   de: string;
   ate: string;
+}
+
 export type SituacaoDaAvaliacao = 'aguardando' | 'disponivel' | 'avaliado' | 'expirada' | 'indisponivel';
 
 export interface AvaliacaoEnviada {

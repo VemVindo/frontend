@@ -258,6 +258,8 @@ export async function atualizarConfiguracoes(
 
 export async function listarAvaliacoes(filtro: FiltroDeAvaliacoes): Promise<AvaliacaoDaEmpresa[]> {
   return requisitar(`/avaliacoes${consultaDasAvaliacoes(filtro)}`, { method: 'GET' });
+}
+
 export async function consultarAvaliacao(token: string): Promise<AvaliacaoDoRecebedor> {
   return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, { method: 'GET' });
 }
