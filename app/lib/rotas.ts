@@ -12,6 +12,8 @@ export const TELA_INICIAL: Record<Cargo, string> = {
 
 export const TELA_TROCAR_SENHA = '/login/entregador/trocar-senha';
 
+export const TELA_CADASTRO = '/cadastro';
+
 export const TELA_PEDIDOS = '/painel/pedidos';
 
 export function telaPedidoDoPainel(id: number): string {
