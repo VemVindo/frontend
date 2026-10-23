@@ -4,6 +4,9 @@ import { buscarDetalheDoPedido, consultarRotaDoPedido } from '@/app/lib/api';
 import type { DetalheDoPedido, VisaoDaEntrega } from '@/app/lib/tipos';
 import DetalhePedidoPainel, { INTERVALO_ATUALIZACAO_MS } from './DetalhePedidoPainel';
 
+vi.mock('@/app/components/pedidos/BotaoWhatsapp', () => ({
+  default: ({ idPedido, com }: { idPedido: number; com: string }) => <a href="#">{`WhatsApp ${com} ${idPedido}`}</a>,
+}));
 vi.mock('@/app/lib/api', () => ({
   buscarDetalheDoPedido: vi.fn(),
   consultarRotaDoPedido: vi.fn(),
@@ -65,7 +68,7 @@ describe('DetalhePedidoPainel', () => {
     vi.useRealTimers();
   });
 
-  it('mostra recebedor, endereço, entregador, valor e andamento', async () => {
+  it('mostra recebedor, endereço, entregador, valor, andamento e conversas', async () => {
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByText('Pedro Alves')).toBeTruthy();
@@ -73,6 +76,8 @@ describe('DetalhePedidoPainel', () => {
     expect(screen.getByText(/SQS 308 Bloco C, 101/)).toBeTruthy();
     expect(screen.getByText('Carla Reis')).toBeTruthy();
     expect(screen.getByText(/4,2 km/)).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'WhatsApp entregador 7' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'WhatsApp recebedor 7' })).toBeTruthy();
     const andamento = screen.getByRole('list', { name: 'Andamento do pedido' });
     expect(andamento.querySelector('[aria-current="step"]')?.textContent).toContain('Saiu para entrega');
   });
@@ -84,13 +89,27 @@ describe('DetalhePedidoPainel', () => {
     expect(screen.getByText('Chegada prevista')).toBeTruthy();
   });
 
-  it('fora de andamento não busca o mapa', async () => {
-    vi.mocked(buscarDetalheDoPedido).mockResolvedValue({ ...PEDIDO, status: 'PENDENTE', entregador: null });
+  it('fora de andamento não busca o mapa e só oferece conversa com o recebedor', async () => {
+    vi.mocked(buscarDetalheDoPedido).mockResolvedValue({
+      ...PEDIDO,
+      status: 'PENDENTE',
+      entregador: null,
+    });
     render(<DetalhePedidoPainel idPedido={7} />);
 
     expect(await screen.findByText(/O mapa fica disponível/)).toBeTruthy();
     expect(screen.getByText('Não atribuído')).toBeTruthy();
     expect(consultarRotaDoPedido).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: 'WhatsApp recebedor 7' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'WhatsApp entregador 7' })).toBeNull();
+  });
+
+  it('com o pedido encerrado não oferece conversa', async () => {
+    vi.mocked(buscarDetalheDoPedido).mockResolvedValue({ ...PEDIDO, status: 'FINALIZADO' });
+    render(<DetalhePedidoPainel idPedido={7} />);
+
+    expect(await screen.findByText('Pedro Alves')).toBeTruthy();
+    expect(screen.queryByRole('link')).toBeNull();
   });
 
   it('atualiza o mapa e o detalhe periodicamente durante a entrega', async () => {

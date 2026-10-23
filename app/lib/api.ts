@@ -1,8 +1,10 @@
 import { consultaDasAvaliacoes } from '@/app/lib/comentarios';
 import type {
   AvaliacaoDaEmpresa,
+  AvaliacaoDoRecebedor,
   CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
+  ConversaWhatsapp,
   Coordenada,
   DadosCadastraisDaEmpresa,
   DadosCompartilhados,
@@ -31,6 +33,7 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    readonly detalhes: Record<string, unknown> = {},
   ) {
     super(message);
     this.name = 'ApiError';
@@ -46,11 +49,11 @@ async function requisitar<T>(caminho: string, init: RequestInit): Promise<T> {
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
       message?: string | string[];
-    };
+    } & Record<string, unknown>;
     const mensagem = Array.isArray(body.message)
       ? body.message.join('; ')
       : body.message;
-    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`);
+    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`, body);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -188,6 +191,13 @@ export async function atualizarStatusDoPedido(id: number, status: StatusPedido):
   });
 }
 
+export async function finalizarPedido(id: number, codigo: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/finalizar`, {
+    method: 'POST',
+    body: JSON.stringify({ codigo }),
+  });
+}
+
 export async function registrarPosicao(
   id: number,
   posicao: Coordenada & { precisao?: number },
@@ -213,6 +223,12 @@ export async function buscarLocalizacaoDoRastreio(token: string): Promise<VisaoD
 
 export async function gerarLinkDeRastreio(id: number): Promise<LinkDeRastreio> {
   return requisitar(`/pedidos/${id}/link-rastreio`, { method: 'POST' });
+}
+
+export type LadoDaConversa = 'entregador' | 'estabelecimento' | 'recebedor';
+
+export async function buscarConversaWhatsapp(id: number, com: LadoDaConversa): Promise<ConversaWhatsapp> {
+  return requisitar(`/pedidos/${id}/whatsapp/${com}`, { method: 'GET' });
 }
 
 export async function buscarConfiguracoes(): Promise<ConfiguracoesDaEmpresa> {
@@ -242,6 +258,22 @@ export async function atualizarConfiguracoes(
 
 export async function listarAvaliacoes(filtro: FiltroDeAvaliacoes): Promise<AvaliacaoDaEmpresa[]> {
   return requisitar(`/avaliacoes${consultaDasAvaliacoes(filtro)}`, { method: 'GET' });
+export async function consultarAvaliacao(token: string): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, { method: 'GET' });
+}
+
+export async function enviarNota(token: string, nota: number): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, {
+    method: 'POST',
+    body: JSON.stringify({ nota }),
+  });
+}
+
+export async function enviarComentario(token: string, comentario: string): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, {
+    method: 'PATCH',
+    body: JSON.stringify({ comentario }),
+  });
 }
 
 export { API_URL };

@@ -11,12 +11,16 @@ import {
   buscarLocalizacaoDoRastreio,
   buscarParametrosRemuneracao,
   buscarRastreio,
+  consultarAvaliacao,
   consultarRotaDoPedido,
+  enviarComentario,
+  enviarNota,
   gerarLinkDeRastreio,
   buscarUsuarioAtual,
   checkHealth,
   encerrarVinculo,
   listarAvaliacoes,
+  finalizarPedido,
   listarFrota,
   listarVinculos,
   loginEmpresa,
@@ -66,6 +70,26 @@ describe('api', () => {
     expect(erro).toMatchObject({ status: 401, message: 'Credenciais invalidas' });
   });
 
+  it('guarda o corpo do erro para quem precisa de mais que a mensagem', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(resposta(422, { message: 'Código incorreto', tentativasRestantes: 3 })),
+    );
+
+    const erro = await finalizarPedido(7, '000000').catch((falha: unknown) => falha);
+
+    expect(erro).toMatchObject({ status: 422, detalhes: { tentativasRestantes: 3 } });
+  });
+
+  it('manda o código do recebedor no corpo da finalização', async () => {
+    const fetchSimulado = vi.fn().mockResolvedValue(resposta(200, {}));
+    vi.stubGlobal('fetch', fetchSimulado);
+
+    await finalizarPedido(7, '482913');
+
+    expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual({ codigo: '482913' });
+  });
+
   it('junta as mensagens quando a validação devolve uma lista', async () => {
     vi.stubGlobal(
       'fetch',
@@ -107,6 +131,7 @@ describe('api', () => {
       'PATCH',
       '/pedidos/7/entregador',
     ],
+    ['finalizarPedido', () => finalizarPedido(7, '482913'), 'POST', '/pedidos/7/finalizar'],
     ['registrarPosicao', () => registrarPosicao(7, { lat: -15.79, lng: -47.88 }), 'PUT', '/pedidos/7/localizacao'],
     ['consultarRotaDoPedido', () => consultarRotaDoPedido(7), 'GET', '/pedidos/7/rota'],
     ['buscarDetalheDoPedido', () => buscarDetalheDoPedido(7), 'GET', '/pedidos/7'],
@@ -117,6 +142,9 @@ describe('api', () => {
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
     ['buscarParametrosRemuneracao', () => buscarParametrosRemuneracao(), 'GET', '/empresa/remuneracao'],
     ['listarAvaliacoes', () => listarAvaliacoes({ notas: [], de: '', ate: '' }), 'GET', '/avaliacoes'],
+    ['consultarAvaliacao', () => consultarAvaliacao('abc_123'), 'GET', '/rastreio/abc_123/avaliacao'],
+    ['enviarNota', () => enviarNota('abc_123', 4), 'POST', '/rastreio/abc_123/avaliacao'],
+    ['enviarComentario', () => enviarComentario('abc_123', 'Rapido'), 'PATCH', '/rastreio/abc_123/avaliacao'],
     [
       'salvarParametrosRemuneracao',
       () => salvarParametrosRemuneracao({ taxaFixa: 800, coeficienteKm: 150 }),

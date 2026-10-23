@@ -33,6 +33,7 @@ const PAGINA: PaginaDoRecebedor = {
   },
   entregador: 'Marcos',
   codigoRecebedor: '012345',
+  whatsappEstabelecimento: 'https://wa.me/556133334444?text=Ol%C3%A1',
   linhaDoTempo: [
     { etapa: 'CRIADO', em: '2026-10-15T11:30:00Z' },
     { etapa: 'EM_ANDAMENTO', em: '2026-10-15T11:45:00Z' },
@@ -84,6 +85,9 @@ describe('PaginaRastreio', () => {
     expect(screen.getByText('13 min · 4,2 km restantes')).toBeTruthy();
     expect(screen.queryByText(/linha reta/)).toBeNull();
     expect(screen.getByText('012345')).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: 'Falar com o estabelecimento no WhatsApp' }).getAttribute('href'),
+    ).toBe(PAGINA.whatsappEstabelecimento);
     expect(screen.getByText('Atualizando em tempo real.')).toBeTruthy();
     expect(screen.getByText(/processado pelo Google Maps/)).toBeTruthy();
   });
@@ -165,6 +169,7 @@ describe('PaginaRastreio', () => {
     expect(screen.queryByText('Atualizando em tempo real.')).toBeNull();
     expect(screen.queryByText('Código de recebimento')).toBeNull();
     expect(screen.queryByText('012345')).toBeNull();
+    expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull();
   });
 
   it('mostra a linha do tempo e completa com o horário da entrega vindo do tempo real', async () => {
