@@ -51,6 +51,7 @@ const VISAO: VisaoDaEntrega = {
   duracaoRestanteS: 420,
   estimado: false,
   atualizadaEm: '2026-10-15T12:00:00Z',
+  entregadorProximo: false,
 };
 
 describe('DetalhePedidoPainel', () => {

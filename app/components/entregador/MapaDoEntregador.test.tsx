@@ -37,6 +37,7 @@ const VISAO: VisaoDaEntrega = {
   duracaoRestanteS: 300,
   estimado: true,
   atualizadaEm: null,
+  entregadorProximo: false,
 };
 
 const iniciar = vi.fn();
