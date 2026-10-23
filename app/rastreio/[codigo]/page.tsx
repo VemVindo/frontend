@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
+import AvaliacaoDaEntrega from '@/app/components/avaliacao/AvaliacaoDaEntrega';
 import CabecalhoRecebedor from '@/app/components/layout/CabecalhoRecebedor';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import EtaSemMapa from '@/app/components/mapa/EtaSemMapa';
 import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
+import { LinkWhatsapp } from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
 import AvisoFlutuante from '@/app/components/ui/AvisoFlutuante';
@@ -85,6 +87,14 @@ export default function PaginaRastreio() {
     if (novoAviso) setAviso(novoAviso);
   }, [statusAtual, entregadorProximo]);
 
+  if (falhaVisivel === 'encerrado') {
+    return (
+      <main className="mx-auto w-full max-w-[640px] px-[18px] py-12">
+        <AvaliacaoDaEntrega token={codigo} />
+      </main>
+    );
+  }
+
   if (falhaVisivel) {
     const { titulo, texto } = MENSAGEM_DA_FALHA[falhaVisivel];
     return (
@@ -134,12 +144,18 @@ export default function PaginaRastreio() {
       <Card titulo="Seu pedido" acao={<EtiquetaStatus status={statusAtual} />}>
         <p className="text-sm text-texto">{pagina.pedido.descricao}</p>
         <p className="mt-2 text-xs text-texto-apoio">{formatarEndereco(pagina.pedido.endereco)}</p>
+        {pagina.whatsappEstabelecimento && !encerrada && (
+          <div className="mt-4">
+            <LinkWhatsapp link={pagina.whatsappEstabelecimento} rotulo="Falar com o estabelecimento no WhatsApp" />
+          </div>
+        )}
         <div className="mt-4 border-t border-borda pt-4">
           <LinhaDoTempoDoPedido passos={montarLinhaDoTempo(pagina.linhaDoTempo, marcos, statusAtual)} />
         </div>
       </Card>
 
-      {encerrada && (
+      {encerrada && statusAtual === 'FINALIZADO' && <AvaliacaoDaEntrega token={codigo} />}
+      {encerrada && statusAtual !== 'FINALIZADO' && (
         <Card
           titulo="Entrega encerrada"
           descricao="O rastreio em tempo real termina quando o pedido é finalizado ou cancelado."
