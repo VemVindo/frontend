@@ -129,6 +129,7 @@ export interface TrocaDeEntregador {
 export interface StatusDisponiveis {
   statusAtual: StatusPedido;
   statusDisponiveis: StatusPedido[];
+  podeFinalizarComCodigo: boolean;
 }
 
 export interface Coordenada {

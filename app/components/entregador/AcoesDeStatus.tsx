@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import FinalizarComCodigo from '@/app/components/entregador/FinalizarComCodigo';
 import Botao from '@/app/components/ui/Botao';
 import { ApiError, atualizarStatusDoPedido, obterStatusDisponiveis } from '@/app/lib/api';
 import { acaoDoStatus, rotuloDoStatus } from '@/app/lib/pedidos';
-import type { StatusPedido } from '@/app/lib/tipos';
+import type { StatusDisponiveis, StatusPedido } from '@/app/lib/tipos';
 
 export interface AcoesDeStatusProps {
   idPedido: number;
@@ -15,7 +16,7 @@ export interface AcoesDeStatusProps {
 // Os botões vêm de GET /pedidos/:id/status-disponiveis: o front não repete a
 // máquina de estados do backend.
 export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: AcoesDeStatusProps) {
-  const [disponiveis, setDisponiveis] = useState<StatusPedido[] | null>(null);
+  const [acoes, setAcoes] = useState<StatusDisponiveis | null>(null);
   const [confirmando, setConfirmando] = useState<StatusPedido | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: Aco
     let cancelado = false;
     obterStatusDisponiveis(idPedido)
       .then((resposta) => {
-        if (!cancelado) setDisponiveis(resposta.statusDisponiveis);
+        if (!cancelado) setAcoes(resposta);
       })
       .catch(() => {
         if (!cancelado) setErro('Não foi possível carregar as ações do pedido.');
@@ -53,7 +54,7 @@ export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: Aco
       {erro}
     </p>
   );
-  if (!disponiveis || disponiveis.length === 0) {
+  if (!acoes || (acoes.statusDisponiveis.length === 0 && !acoes.podeFinalizarComCodigo)) {
     return aviso || null;
   }
 
@@ -79,11 +80,12 @@ export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: Aco
   return (
     <div className="flex flex-col gap-3">
       {aviso}
-      {disponiveis.map((status) => (
+      {acoes.statusDisponiveis.map((status) => (
         <Botao key={status} larguraTotal className="h-14 text-base" onClick={() => setConfirmando(status)}>
           {acaoDoStatus(status)}
         </Botao>
       ))}
+      {acoes.podeFinalizarComCodigo && <FinalizarComCodigo idPedido={idPedido} onFinalizado={onAlterado} />}
     </div>
   );
 }

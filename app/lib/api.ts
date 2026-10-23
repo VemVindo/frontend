@@ -29,6 +29,7 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    readonly detalhes: Record<string, unknown> = {},
   ) {
     super(message);
     this.name = 'ApiError';
@@ -44,11 +45,11 @@ async function requisitar<T>(caminho: string, init: RequestInit): Promise<T> {
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
       message?: string | string[];
-    };
+    } & Record<string, unknown>;
     const mensagem = Array.isArray(body.message)
       ? body.message.join('; ')
       : body.message;
-    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`);
+    throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`, body);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -183,6 +184,13 @@ export async function atualizarStatusDoPedido(id: number, status: StatusPedido):
   return requisitar(`/pedidos/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  });
+}
+
+export async function finalizarPedido(id: number, codigo: string): Promise<PedidoAtivo> {
+  return requisitar(`/pedidos/${id}/finalizar`, {
+    method: 'POST',
+    body: JSON.stringify({ codigo }),
   });
 }
 
