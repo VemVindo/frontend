@@ -1,4 +1,6 @@
 import type {
+  CriarPedidoRequisicao,
+  CriarPedidoResposta,
   CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
   ConversaWhatsapp,
@@ -141,6 +143,14 @@ export async function encerrarVinculo(id: number): Promise<void> {
 
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
+}
+
+// O chamador deve fornecer valor/distância reais e idEmpresa da sessão autenticada.
+export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPedidoResposta> {
+  return requisitar('/pedido/criar', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
 }
 
 export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {

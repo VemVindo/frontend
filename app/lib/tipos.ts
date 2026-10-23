@@ -107,6 +107,34 @@ export interface PedidoAtivo {
   criadoEm: string;
 }
 
+// Contrato atual de POST /pedido/criar, separado dos tipos da listagem.
+export interface CriarPedidoRequisicao {
+  nome_recebedor: string;
+  telefone_recebedor: string;
+  cep: string;
+  logradouro: string;
+  numero: number;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  descricao: string;
+  valor_entrega: number;
+  distancia: number;
+  idEmpresa: number;
+  cpf_entregador?: string;
+}
+
+export interface CriarPedidoResposta extends Omit<CriarPedidoRequisicao, 'complemento' | 'cpf_entregador'> {
+  id_pedido: number;
+  complemento: string | null;
+  cpf_entregador: string | null;
+  status: 'Pendente' | 'Em andamento';
+  data_criacao: string;
+  data_inicio_entrega: null;
+  data_finalizacao: null;
+}
+
 // Centavos: valor base por entrega e adicional por quilômetro.
 export interface ParametrosRemuneracao {
   taxaFixa: number;

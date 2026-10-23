@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   API_URL,
+  criarPedido,
   ApiError,
   aceitarVinculo,
   atribuirEntregadorAoPedido,
@@ -170,5 +171,28 @@ describe('api', () => {
     await buscarRastreio('a/b?c');
 
     expect(fetchMock.mock.calls[0][0]).toBe(`${API_URL}/rastreio/a%2Fb%3Fc`);
+  });
+});
+
+// E-US07: os comportamentos genéricos de requisitar são cobertos no describe acima.
+describe('criarPedido', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it.each([{ nome: 'POST /pedido/criar' }])('$nome envia o DTO exato e devolve o pedido', async () => {
+    const payload = {
+      nome_recebedor: 'Carla', telefone_recebedor: '61999990000', cep: '70000000', logradouro: 'Rua A',
+      numero: 10, bairro: 'Centro', cidade: 'Brasília', uf: 'DF', descricao: '',
+      valor_entrega: 1500, distancia: 4200, idEmpresa: 42,
+    };
+    const pedido = {
+      ...payload, id_pedido: 91, complemento: null, cpf_entregador: null, status: 'Pendente',
+      data_criacao: '2026-10-22T12:00:00.000Z', data_inicio_entrega: null, data_finalizacao: null,
+    };
+    const fetchMock = vi.fn().mockResolvedValue(resposta(201, pedido));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await criarPedido(payload)).toEqual(pedido);
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`${API_URL}/pedido/criar`, {
+      method: 'POST', body: JSON.stringify(payload), credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
   });
 });
