@@ -1,4 +1,5 @@
 import type {
+  AvaliacaoDoRecebedor,
   CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
   ConversaWhatsapp,
@@ -249,6 +250,24 @@ export async function atualizarConfiguracoes(
   return requisitar('/empresa/configuracoes', {
     method: 'PATCH',
     body: JSON.stringify(configuracoes),
+  });
+}
+
+export async function consultarAvaliacao(token: string): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, { method: 'GET' });
+}
+
+export async function enviarNota(token: string, nota: number): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, {
+    method: 'POST',
+    body: JSON.stringify({ nota }),
+  });
+}
+
+export async function enviarComentario(token: string, comentario: string): Promise<AvaliacaoDoRecebedor> {
+  return requisitar(`/rastreio/${encodeURIComponent(token)}/avaliacao`, {
+    method: 'PATCH',
+    body: JSON.stringify({ comentario }),
   });
 }
 
