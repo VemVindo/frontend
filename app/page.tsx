@@ -7,7 +7,7 @@ import BotaoLogin from '@/app/components/auth/BotaoLogin';
 import CampoLogin from '@/app/components/auth/CampoLogin';
 import TelaLogin from '@/app/components/auth/TelaLogin';
 import { ApiError, loginEmpresa } from '@/app/lib/api';
-import { TELA_INICIAL } from '@/app/lib/rotas';
+import { TELA_CADASTRO, TELA_INICIAL } from '@/app/lib/rotas';
 
 export default function Home() {
   const router = useRouter();
@@ -58,6 +58,9 @@ export default function Home() {
         </BotaoLogin>
         <Link href="/login/entregador" className="text-center text-[13px] text-primaria font-medium">
           Sou entregador
+        </Link>
+        <Link href={TELA_CADASTRO} className="text-center text-[13px] text-primaria font-medium">
+          Cadastrar meu estabelecimento
         </Link>
       </form>
     </TelaLogin>

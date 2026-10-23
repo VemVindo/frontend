@@ -1,11 +1,15 @@
 import { consultaDasAvaliacoes } from '@/app/lib/comentarios';
 import type {
   AvaliacaoDaEmpresa,
+  CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
   Coordenada,
+  DadosCadastraisDaEmpresa,
   DadosCompartilhados,
+  DetalheDoPedido,
   FiltroDeAvaliacoes,
   LinkDeRastreio,
+  NovaEmpresa,
   Empresa,
   Entregador,
   PedidoAtivo,
@@ -65,6 +69,25 @@ export async function loginEmpresa(
   return requisitar('/auth/login/empresa', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
+  });
+}
+
+// E-US01: o backend já devolve a sessão (cookie), como no login.
+export async function cadastrarEmpresa(dados: NovaEmpresa): Promise<RespostaLogin<Empresa>> {
+  return requisitar('/auth/cadastrar/empresa', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
+export async function buscarCadastroDaEmpresa(): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', { method: 'GET' });
+}
+
+export async function atualizarCadastroDaEmpresa(dados: DadosCadastraisDaEmpresa): Promise<CadastroDaEmpresa> {
+  return requisitar('/empresa/cadastro', {
+    method: 'PUT',
+    body: JSON.stringify(dados),
   });
 }
 
@@ -140,6 +163,10 @@ export async function reatribuirEntregadorDoPedido(id: number, cpfEntregador: st
     method: 'PATCH',
     body: JSON.stringify({ cpfEntregador }),
   });
+}
+
+export async function buscarDetalheDoPedido(id: number): Promise<DetalheDoPedido> {
+  return requisitar(`/pedidos/${id}`, { method: 'GET' });
 }
 
 export async function listarHistoricoDeEntregadores(id: number): Promise<TrocaDeEntregador[]> {

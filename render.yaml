@@ -1,0 +1,14 @@
+# Blueprint do Render: front do VemVindo (Next.js standalone).
+# Doc: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: frontend
+    runtime: image
+    image:
+      url: ghcr.io/vemvindo/frontend:main
+    region: oregon
+    plan: free
+    autoDeploy: false
+
+    healthCheckPath: /
