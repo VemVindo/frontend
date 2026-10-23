@@ -65,6 +65,7 @@ export interface RespostaLogin<Usuario> {
 export interface DadosCompartilhados {
   nome: string;
   cpf: string;
+  telefone: string;
   tipoVeiculo: string;
   placa: string | null;
   disponivel: boolean;
@@ -184,6 +185,8 @@ export interface PaginaDoRecebedor {
   // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
   entregador: string | null;
   codigoRecebedor: string;
+  // Link wa.me para o estabelecimento; nulo com a entrega encerrada.
+  whatsappEstabelecimento: string | null;
   linhaDoTempo: MarcoDoPedido[];
 }
 
@@ -192,6 +195,11 @@ export interface PaginaDoRecebedor {
 export interface LinkDeRastreio {
   link: string;
   codigoRecebedor: string;
+}
+
+export interface ConversaWhatsapp {
+  link: string;
+  contato: string;
 }
 
 // GET e PATCH /empresa/configuracoes

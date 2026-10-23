@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import ResumoTrajeto from '@/app/components/mapa/ResumoTrajeto';
+import BotaoWhatsapp from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
 import { buscarDetalheDoPedido, consultarRotaDoPedido } from '@/app/lib/api';
 import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
-import { formatarDistancia, formatarEndereco, formatarReais } from '@/app/lib/pedidos';
+import { formatarDataHora, formatarDistancia, formatarEndereco, formatarReais, pedidoEmAberto } from '@/app/lib/pedidos';
 import { formatarTelefone, primeiroNome } from '@/app/lib/texto';
 import type { DetalheDoPedido, VisaoDaEntrega } from '@/app/lib/tipos';
 
@@ -142,11 +143,22 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
             <dd className="text-texto">{formatarEndereco(pedido.endereco)}</dd>
             <dt className="text-texto-suave">Entregador</dt>
             <dd className="text-texto">{pedido.entregador ?? 'Não atribuído'}</dd>
+            <dt className="text-texto-suave">Criado em</dt>
+            <dd className="text-texto">
+              <time dateTime={pedido.criadoEm}>{formatarDataHora(pedido.criadoEm)}</time>
+            </dd>
             <dt className="text-texto-suave">Valor</dt>
             <dd className="text-texto">
               {formatarReais(pedido.valorEntrega)} ({formatarDistancia(pedido.distancia)})
             </dd>
           </dl>
+
+          {pedidoEmAberto(pedido.status) && (
+            <div className="mt-auto flex flex-col gap-3 border-t border-borda pt-4">
+              {emAndamento && <BotaoWhatsapp idPedido={pedido.id} com="entregador" />}
+              <BotaoWhatsapp idPedido={pedido.id} com="recebedor" variante="claro" />
+            </div>
+          )}
         </section>
 
         <section className={CAIXA}>
