@@ -62,6 +62,11 @@ export function formatarReais(centavos: number): string {
   return (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+export function textoDaNota(nota: number | null): string {
+  if (nota === null) return 'Sem avaliação';
+  return `${nota} de 5`;
+}
+
 export function formatarDistancia(metros: number): string {
   return `${(metros / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
 }
