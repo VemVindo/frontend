@@ -6,12 +6,14 @@ export interface CampoTextoProps extends InputHTMLAttributes<HTMLInputElement> {
   rotulo: string;
   descricao?: string;
   erro?: string;
+  reservarEspacoDescricao?: boolean;
 }
 
 export default function CampoTexto({
   rotulo,
   descricao,
   erro,
+  reservarEspacoDescricao = false,
   id,
   className = '',
   ...props
@@ -31,6 +33,7 @@ export default function CampoTexto({
           {descricao}
         </p>
       )}
+      {!descricao && reservarEspacoDescricao && <span aria-hidden="true" className="min-h-[17px]" />}
       <input
         id={idCampo}
         aria-invalid={erro ? true : undefined}
