@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, buscarRastreio } from '@/app/lib/api';
+import { AVISO_ENTREGADOR_PROXIMO, AVISO_SAIU_PARA_ENTREGA } from '@/app/lib/avisos';
 import type { PaginaDoRecebedor, VisaoDaEntrega } from '@/app/lib/tipos';
 import { useRastreioTempoReal } from '@/app/lib/useRastreioTempoReal';
 import PaginaRastreio from './page';
@@ -51,6 +52,7 @@ const VISAO: VisaoDaEntrega = {
   duracaoRestanteS: 780,
   estimado: false,
   atualizadaEm: '2026-10-15T12:00:00Z',
+  entregadorProximo: false,
 };
 
 function tempoReal(parcial: Partial<ReturnType<typeof useRastreioTempoReal>> = {}) {
@@ -149,6 +151,30 @@ describe('PaginaRastreio', () => {
 
     expect(await screen.findByText('Link de rastreio inválido')).toBeTruthy();
     expect(screen.queryByText('012345')).toBeNull();
+  });
+
+  it('não mostra aviso ao abrir a página com a entrega já em andamento', async () => {
+    render(<PaginaRastreio />);
+
+    expect(await screen.findByText('Padaria Pao Quente')).toBeTruthy();
+    expect(screen.queryByText(AVISO_SAIU_PARA_ENTREGA)).toBeNull();
+    expect(screen.queryByText(AVISO_ENTREGADOR_PROXIMO)).toBeNull();
+  });
+
+  it.each([
+    ['o pedido sai para entrega', { visao: null, status: 'EM_ANDAMENTO' as const }, AVISO_SAIU_PARA_ENTREGA],
+    ['o entregador chega perto', { visao: { ...VISAO, entregadorProximo: true } }, AVISO_ENTREGADOR_PROXIMO],
+  ])('mostra o aviso quando %s', async (_caso, mudanca, aviso) => {
+    vi.mocked(buscarRastreio).mockResolvedValue({ ...PAGINA, pedido: { ...PAGINA.pedido, status: 'PENDENTE' } });
+    tempoReal({ visao: null });
+    const { rerender } = render(<PaginaRastreio />);
+    expect(await screen.findByText('Padaria Pao Quente')).toBeTruthy();
+    expect(screen.queryByText(aviso)).toBeNull();
+
+    tempoReal(mudanca);
+    rerender(<PaginaRastreio />);
+
+    expect(await screen.findByText(aviso)).toBeTruthy();
   });
 
   it('avisa a conexão instável', async () => {
