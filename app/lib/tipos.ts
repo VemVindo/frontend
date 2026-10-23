@@ -155,3 +155,17 @@ export interface LinkDeRastreio {
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
 }
+
+export interface AvaliacaoDaEmpresa {
+  idPedido: number;
+  nota: number;
+  comentario: string | null;
+  data: string;
+  entregador: string | null;
+}
+
+export interface FiltroDeAvaliacoes {
+  notas: number[];
+  de: string;
+  ate: string;
+}

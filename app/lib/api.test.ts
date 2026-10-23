@@ -15,6 +15,7 @@ import {
   buscarUsuarioAtual,
   checkHealth,
   encerrarVinculo,
+  listarAvaliacoes,
   listarFrota,
   listarVinculos,
   loginEmpresa,
@@ -113,6 +114,7 @@ describe('api', () => {
     ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
     ['buscarParametrosRemuneracao', () => buscarParametrosRemuneracao(), 'GET', '/empresa/remuneracao'],
+    ['listarAvaliacoes', () => listarAvaliacoes({ notas: [], de: '', ate: '' }), 'GET', '/avaliacoes'],
     [
       'salvarParametrosRemuneracao',
       () => salvarParametrosRemuneracao({ taxaFixa: 800, coeficienteKm: 150 }),
