@@ -127,6 +127,7 @@ export default function PaginaCadastro() {
               <CampoTexto
                 id="empresa-razaoSocial"
                 rotulo="Razão social"
+                reservarEspacoDescricao
                 value={valores.razaoSocial}
                 erro={erros.razaoSocial}
                 disabled={enviando}
@@ -138,7 +139,13 @@ export default function PaginaCadastro() {
 
         <fieldset>
           <legend className="mb-3 text-xs font-semibold text-texto">Dados do estabelecimento</legend>
-          <CamposDaEmpresa valores={valores} erros={erros} desabilitado={enviando} onChange={alterar} />
+          <CamposDaEmpresa
+            valores={valores}
+            erros={erros}
+            desabilitado={enviando}
+            reservarEspacoDescricao
+            onChange={alterar}
+          />
         </fieldset>
 
         <fieldset className="grid gap-4 md:grid-cols-2">
@@ -157,6 +164,7 @@ export default function PaginaCadastro() {
           <CampoTexto
             id="empresa-confirmacaoSenha"
             rotulo="Confirme a senha"
+            reservarEspacoDescricao
             type="password"
             autoComplete="new-password"
             value={valores.confirmacaoSenha}
