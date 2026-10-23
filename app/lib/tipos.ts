@@ -104,6 +104,14 @@ export interface PedidoAtivo {
   entregador: string | null;
   status: StatusPedido;
   criadoEm: string;
+  valorEntrega: number;
+  finalizadoEm: string | null;
+  nota: number | null;
+}
+
+export interface PeriodoDeConclusao {
+  de: string;
+  ate: string;
 }
 
 // Centavos: valor base por entrega e adicional por quilômetro.
