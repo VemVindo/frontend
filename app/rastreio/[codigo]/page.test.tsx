@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, buscarRastreio } from '@/app/lib/api';
+import { ApiError, buscarRastreio, consultarAvaliacao } from '@/app/lib/api';
 import type { PaginaDoRecebedor, VisaoDaEntrega } from '@/app/lib/tipos';
 import { useRastreioTempoReal } from '@/app/lib/useRastreioTempoReal';
 import PaginaRastreio from './page';
@@ -9,6 +9,7 @@ vi.mock('next/navigation', () => ({ useParams: () => ({ codigo: 'token-do-link' 
 vi.mock('@/app/lib/api', async (original) => ({
   ...(await original<typeof import('@/app/lib/api')>()),
   buscarRastreio: vi.fn(),
+  consultarAvaliacao: vi.fn(),
 }));
 vi.mock('@/app/lib/useRastreioTempoReal', () => ({ useRastreioTempoReal: vi.fn() }));
 
@@ -67,6 +68,7 @@ function tempoReal(parcial: Partial<ReturnType<typeof useRastreioTempoReal>> = {
 describe('PaginaRastreio', () => {
   beforeEach(() => {
     vi.mocked(buscarRastreio).mockResolvedValue(PAGINA);
+    vi.mocked(consultarAvaliacao).mockResolvedValue({ situacao: 'disponivel', avaliacao: null });
     tempoReal();
   });
 
@@ -140,6 +142,7 @@ describe('PaginaRastreio', () => {
 
     expect(await screen.findByText('Entrega encerrada')).toBeTruthy();
     expect(screen.queryByText('012345')).toBeNull();
+    expect(consultarAvaliacao).not.toHaveBeenCalled();
   });
 
   it('link revogado pela empresa vira link inválido', async () => {
@@ -159,17 +162,29 @@ describe('PaginaRastreio', () => {
     expect(await screen.findByText(/Conexão instável/)).toBeTruthy();
   });
 
-  it('troca o mapa pelo aviso de entrega encerrada quando o status muda', async () => {
+  it('troca o mapa pela avaliação quando a entrega é finalizada', async () => {
     tempoReal({ status: 'FINALIZADO' });
 
     render(<PaginaRastreio />);
 
-    expect(await screen.findByText('Entrega encerrada')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Enviar avaliação' })).toBeTruthy();
+    expect(consultarAvaliacao).toHaveBeenCalledWith('token-do-link');
+    expect(screen.queryByText('Entrega encerrada')).toBeNull();
     expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
     expect(screen.queryByText('Atualizando em tempo real.')).toBeNull();
     expect(screen.queryByText('Código de recebimento')).toBeNull();
     expect(screen.queryByText('012345')).toBeNull();
     expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull();
+  });
+
+  it('entrega cancelada mostra o aviso de encerrada sem abrir a avaliação', async () => {
+    tempoReal({ status: 'CANCELADO' });
+
+    render(<PaginaRastreio />);
+
+    expect(await screen.findByText('Entrega encerrada')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Enviar avaliação' })).toBeNull();
+    expect(consultarAvaliacao).not.toHaveBeenCalled();
   });
 
   it('mostra a linha do tempo e completa com o horário da entrega vindo do tempo real', async () => {
@@ -186,7 +201,6 @@ describe('PaginaRastreio', () => {
 
   it.each([
     [404, 'Link de rastreio inválido'],
-    [410, 'Entrega encerrada'],
     [500, 'Não foi possível carregar o rastreio'],
   ])('trata a resposta %s do backend', async (status, titulo) => {
     vi.mocked(buscarRastreio).mockRejectedValue(new ApiError(status, 'erro'));
@@ -194,6 +208,17 @@ describe('PaginaRastreio', () => {
     render(<PaginaRastreio />);
 
     expect(await screen.findByText(titulo)).toBeTruthy();
+    expect(useRastreioTempoReal).toHaveBeenLastCalledWith('token-do-link', false);
+    expect(consultarAvaliacao).not.toHaveBeenCalled();
+  });
+
+  it('com o link encerrado pelo backend (410) abre só a avaliação', async () => {
+    vi.mocked(buscarRastreio).mockRejectedValue(new ApiError(410, 'erro'));
+
+    render(<PaginaRastreio />);
+
+    expect(await screen.findByRole('button', { name: 'Enviar avaliação' })).toBeTruthy();
+    expect(consultarAvaliacao).toHaveBeenCalledWith('token-do-link');
     expect(useRastreioTempoReal).toHaveBeenLastCalledWith('token-do-link', false);
   });
 });
