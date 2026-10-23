@@ -106,6 +106,19 @@ export interface PedidoAtivo {
   criadoEm: string;
 }
 
+// Centavos: valor base por entrega e adicional por quilômetro.
+export interface ParametrosRemuneracao {
+  taxaFixa: number;
+  coeficienteKm: number;
+}
+
+// Sem nada salvo ainda, os valores e a vigência vêm nulos.
+export interface RemuneracaoDaEmpresa {
+  taxaFixa: number | null;
+  coeficienteKm: number | null;
+  vigenteDesde: string | null;
+}
+
 export interface TrocaDeEntregador {
   anterior: string | null;
   novo: string;
@@ -141,6 +154,14 @@ export interface VisaoDaEntrega {
 }
 
 // GET /rastreio/:token
+// R-US02: etapas que o pedido já passou, com o horário de cada uma.
+export type EtapaDoPedido = 'CRIADO' | StatusPedido;
+
+export interface MarcoDoPedido {
+  etapa: EtapaDoPedido;
+  em: string;
+}
+
 export interface PaginaDoRecebedor {
   estabelecimento: string;
   exibirMapa: boolean;
@@ -163,6 +184,7 @@ export interface PaginaDoRecebedor {
   // Só o primeiro nome; nulo enquanto o pedido não tem entregador.
   entregador: string | null;
   codigoRecebedor: string;
+  linhaDoTempo: MarcoDoPedido[];
 }
 
 // POST /pedidos/:id/link-rastreio. O backend só guarda o hash do token: o
@@ -175,4 +197,26 @@ export interface LinkDeRastreio {
 // GET e PATCH /empresa/configuracoes
 export interface ConfiguracoesDaEmpresa {
   exibirMapa: boolean;
+}
+
+// E-US13: detalhe de um pedido da empresa.
+export interface DetalheDoPedido {
+  id: number;
+  status: StatusPedido;
+  descricao: string;
+  recebedor: { nome: string; telefone: string };
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: number;
+    complemento: string | null;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  };
+  entregador: string | null;
+  valorEntrega: number;
+  distancia: number;
+  criadoEm: string;
+  linhaDoTempo: MarcoDoPedido[];
 }
