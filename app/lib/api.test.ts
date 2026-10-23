@@ -17,7 +17,9 @@ import {
   enviarNota,
   gerarLinkDeRastreio,
   buscarUsuarioAtual,
+  cadastrarEntregador,
   checkHealth,
+  convidarEntregador,
   encerrarVinculo,
   finalizarPedido,
   listarFrota,
@@ -123,6 +125,13 @@ describe('api', () => {
     ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
     ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
+    [
+      'cadastrarEntregador',
+      () => cadastrarEntregador({ nome: 'Joana', cpf: '52998224725', telefone: '61988887777', tipoVeiculo: 'BICICLETA' }),
+      'POST',
+      '/entregadores',
+    ],
+    ['convidarEntregador', () => convidarEntregador('52998224725'), 'POST', '/entregadores/vinculo'],
     ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
     [
       'reatribuirEntregadorDoPedido',

@@ -71,6 +71,27 @@ export interface DadosCompartilhados {
   disponivel: boolean;
 }
 
+export type TipoVeiculo = 'MOTO' | 'CARRO' | 'BICICLETA';
+
+export interface NovoEntregador {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  tipoVeiculo: TipoVeiculo;
+  placa?: string;
+}
+
+export interface EntregadorCadastrado {
+  entregador: { cpf: string; nome: string; tipoVeiculo: TipoVeiculo; placa: string | null };
+  status: 'PENDENTE';
+  senhaTemporaria: string;
+  senhaTemporariaExpiraEm: string;
+}
+
+export interface ConviteEnviado {
+  mensagem: string;
+}
+
 export type StatusVinculo = 'PENDENTE' | 'ATIVO';
 
 export interface Vinculo {
