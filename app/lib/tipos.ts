@@ -105,6 +105,14 @@ export interface PedidoAtivo {
   entregador: string | null;
   status: StatusPedido;
   criadoEm: string;
+  valorEntrega: number;
+  finalizadoEm: string | null;
+  nota: number | null;
+}
+
+export interface PeriodoDeConclusao {
+  de: string;
+  ate: string;
 }
 
 // Centavos: valor base por entrega e adicional por quilômetro.
@@ -153,6 +161,12 @@ export interface VisaoDaEntrega {
   duracaoRestanteS: number | null;
   estimado: boolean;
   atualizadaEm: string | null;
+  entregadorProximo: boolean;
+}
+
+export interface SituacaoDoAviso {
+  status: StatusPedido;
+  entregadorProximo: boolean;
 }
 
 // GET /rastreio/:token

@@ -25,6 +25,9 @@ describe('FinalizarComCodigo', () => {
       entregador: 'Bruno Lima',
       status: 'FINALIZADO',
       criadoEm: '2026-10-22T12:00:00-03:00',
+      valorEntrega: 1430,
+      finalizadoEm: '2026-10-22T12:30:00-03:00',
+      nota: null,
     });
   });
 

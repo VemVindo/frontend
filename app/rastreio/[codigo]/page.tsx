@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import AvaliacaoDaEntrega from '@/app/components/avaliacao/AvaliacaoDaEntrega';
 import CabecalhoRecebedor from '@/app/components/layout/CabecalhoRecebedor';
@@ -10,12 +10,14 @@ import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
 import { LinkWhatsapp } from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
+import AvisoFlutuante from '@/app/components/ui/AvisoFlutuante';
 import Card from '@/app/components/ui/Card';
 import { ApiError, buscarRastreio } from '@/app/lib/api';
+import { avisoDaMudanca } from '@/app/lib/avisos';
 import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
 import { formatarEndereco, pedidoEmAberto } from '@/app/lib/pedidos';
 import { iniciais } from '@/app/lib/texto';
-import type { PaginaDoRecebedor } from '@/app/lib/tipos';
+import type { PaginaDoRecebedor, SituacaoDoAviso } from '@/app/lib/tipos';
 import { type EstadoConexao, useRastreioTempoReal } from '@/app/lib/useRastreioTempoReal';
 
 type Falha = 'invalido' | 'encerrado' | 'erro';
@@ -71,6 +73,19 @@ export default function PaginaRastreio() {
   const statusAtual = status ?? visao?.status ?? pagina?.pedido.status;
   const encerrada = acessoNegado !== null || (statusAtual !== undefined && !pedidoEmAberto(statusAtual));
   const falhaVisivel: Falha | null = falha ?? (acessoNegado === 'invalido' ? 'invalido' : null);
+
+  const [aviso, setAviso] = useState<string | null>(null);
+  const situacaoAnterior = useRef<SituacaoDoAviso | null>(null);
+  const entregadorProximo = visao?.entregadorProximo ?? false;
+  const fecharAviso = useCallback(() => setAviso(null), []);
+
+  useEffect(() => {
+    if (!statusAtual) return;
+    const situacaoAtual = { status: statusAtual, entregadorProximo };
+    const novoAviso = avisoDaMudanca(situacaoAnterior.current, situacaoAtual);
+    situacaoAnterior.current = situacaoAtual;
+    if (novoAviso) setAviso(novoAviso);
+  }, [statusAtual, entregadorProximo]);
 
   if (falhaVisivel === 'encerrado') {
     return (
@@ -218,6 +233,7 @@ export default function PaginaRastreio() {
 
         {!emAndamento && <div className="flex max-w-[640px] flex-col gap-5">{cartoesDoPedido}</div>}
       </main>
+      <AvisoFlutuante texto={aviso} onFechar={fecharAviso} />
     </>
   );
 }
