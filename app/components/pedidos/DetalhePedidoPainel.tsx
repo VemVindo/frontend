@@ -8,7 +8,13 @@ import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
 import { buscarDetalheDoPedido, consultarRotaDoPedido } from '@/app/lib/api';
 import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
-import { formatarDataHora, formatarDistancia, formatarEndereco, formatarReais, pedidoEmAberto } from '@/app/lib/pedidos';
+import {
+  formatarDataHora,
+  formatarDistancia,
+  formatarEndereco,
+  formatarReais,
+  pedidoEmAberto,
+} from '@/app/lib/pedidos';
 import { formatarTelefone, primeiroNome } from '@/app/lib/texto';
 import type { DetalheDoPedido, VisaoDaEntrega } from '@/app/lib/tipos';
 

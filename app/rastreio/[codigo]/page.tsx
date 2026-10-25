@@ -167,7 +167,10 @@ export default function PaginaRastreio() {
 
       {/* Depois da entrega o código não serve mais para nada. */}
       {!encerrada && (
-        <Card titulo="Código de recebimento" descricao="Informe este código ao entregador para confirmar o recebimento.">
+        <Card
+          titulo="Código de recebimento"
+          descricao="Informe este código ao entregador para confirmar o recebimento."
+        >
           <p className="font-titulo text-2xl font-bold tracking-[0.3em] text-texto">{pagina.codigoRecebedor}</p>
         </Card>
       )}

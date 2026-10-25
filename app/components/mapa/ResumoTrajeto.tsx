@@ -34,9 +34,7 @@ export default function ResumoTrajeto({
           <dd className="font-titulo text-xl font-bold text-texto">{distancia}</dd>
         </div>
       </dl>
-      {estimado && (
-        <p className="text-[11px] text-texto-suave">Estimativa aproximada, calculada em linha reta.</p>
-      )}
+      {estimado && <p className="text-[11px] text-texto-suave">Estimativa aproximada, calculada em linha reta.</p>}
     </div>
   );
 }

@@ -98,9 +98,7 @@ describe('MapaDoEntregador', () => {
     render(<MapaDoEntregador pedido={PEDIDO} />);
 
     const link = screen.getByRole('link', { name: 'Abrir no Google Maps' });
-    expect(link.getAttribute('href')).toBe(
-      'https://www.google.com/maps/dir/?api=1&destination=-15.8135%2C-47.9046',
-    );
+    expect(link.getAttribute('href')).toBe('https://www.google.com/maps/dir/?api=1&destination=-15.8135%2C-47.9046');
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
   });
 

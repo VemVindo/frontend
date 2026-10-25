@@ -8,9 +8,9 @@ services:
     pull_policy: build
     container_name: vemvindo-frontend-prod
     # Opt-in: so sobe com --profile prod. Fora do "up" padrao (evita colisao na 3000).
-    profiles: ["prod"]
+    profiles: ['prod']
     ports:
-      - "3000:3000"
+      - '3000:3000'
 
   nextjs-dev:
     build:
@@ -21,7 +21,7 @@ services:
     pull_policy: build
     container_name: vemvindo-frontend-dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     # URL do backend usada pelo browser (NEXT_PUBLIC_ e inlined pelo Next).
     # O browser roda no host, entao aponta pra porta publicada do backend.
     environment:

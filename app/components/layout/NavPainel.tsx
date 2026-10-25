@@ -63,11 +63,7 @@ export default function NavPainel() {
 
       {menuAberto && (
         <div className="md:hidden fixed inset-0 z-50">
-          <div
-            aria-hidden
-            onClick={() => setMenuAberto(false)}
-            className="absolute inset-0 bg-sobreposicao/35"
-          />
+          <div aria-hidden onClick={() => setMenuAberto(false)} className="absolute inset-0 bg-sobreposicao/35" />
           <nav
             id="menu-lateral"
             aria-label="Menu principal"

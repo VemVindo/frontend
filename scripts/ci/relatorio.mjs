@@ -88,7 +88,9 @@ function secaoCobertura(atual, base) {
 function secaoApi(newman) {
   if (!newman) return '';
   const { requests, assertions } = newman.run.stats;
-  const falhas = newman.run.failures.map((f) => `- ${f.source?.name ?? 'requisição'}: ${f.error?.message ?? f.error?.test}`);
+  const falhas = newman.run.failures.map(
+    (f) => `- ${f.source?.name ?? 'requisição'}: ${f.error?.message ?? f.error?.test}`,
+  );
   let md = `### API (Postman): ${requests.total} requisições, ${assertions.total - assertions.failed}/${assertions.total} asserções passando\n`;
   if (falhas.length) {
     md += `\n<details><summary>${falhas.length} falha(s)</summary>\n\n${falhas.slice(0, 20).join('\n')}\n</details>\n`;

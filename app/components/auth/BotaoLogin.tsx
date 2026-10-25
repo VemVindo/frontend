@@ -8,7 +8,7 @@ interface BotaoLoginProps {
 
 export default function BotaoLogin({ carregando, erro, children }: BotaoLoginProps) {
   return (
-    <div className='w-full flex flex-col justify-center items-center'>
+    <div className="w-full flex flex-col justify-center items-center">
       {carregando ? (
         <div
           role="status"
@@ -23,7 +23,11 @@ export default function BotaoLogin({ carregando, erro, children }: BotaoLoginPro
           {children}
         </button>
       )}
-      {erro && <p role="alert" className='text-[14px] text-erro mt-5'>{erro}</p>}
+      {erro && (
+        <p role="alert" className="text-[14px] text-erro mt-5">
+          {erro}
+        </p>
+      )}
     </div>
   );
 }
