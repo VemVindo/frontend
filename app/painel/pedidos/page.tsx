@@ -97,7 +97,9 @@ export default function PaginaPedidosAtivos() {
           </div>
         }
       >
-        <p role="status" className="text-xs text-sucesso-texto">{aviso}</p>
+        <p role="status" className="text-xs text-sucesso-texto">
+          {aviso}
+        </p>
         {abaAtiva === 'finalizados' && <FiltroDePeriodo periodo={periodo} onAlterar={setPeriodo} />}
         {erro && (
           <p role="alert" className="text-xs text-erro">

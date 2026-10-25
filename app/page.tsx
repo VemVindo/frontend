@@ -41,8 +41,11 @@ export default function Home() {
           autoComplete="email"
           required
           value={email}
-          placeholder='example@mail.com'
-          onChange={(e) => { setEmail(e.target.value); setErro(null); }}
+          placeholder="example@mail.com"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErro(null);
+          }}
         />
         <CampoLogin
           rotulo="SENHA"
@@ -50,8 +53,11 @@ export default function Home() {
           autoComplete="current-password"
           required
           value={senha}
-          placeholder='*********'
-          onChange={(e) => { setSenha(e.target.value); setErro(null); }}
+          placeholder="*********"
+          onChange={(e) => {
+            setSenha(e.target.value);
+            setErro(null);
+          }}
         />
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar

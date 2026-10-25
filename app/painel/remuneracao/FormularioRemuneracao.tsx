@@ -96,10 +96,7 @@ export default function FormularioRemuneracao() {
       className="grid md:grid-cols-[minmax(0,900px)_minmax(0,300px)] md:justify-between md:gap-x-6"
     >
       <div className="md:col-start-1 md:row-start-1">
-        <TituloPagina
-          titulo="Remuneração"
-          subtitulo="Parâmetros usados para calcular o pagamento dos motoboys"
-        />
+        <TituloPagina titulo="Remuneração" subtitulo="Parâmetros usados para calcular o pagamento dos motoboys" />
       </div>
 
       <Card
@@ -107,9 +104,7 @@ export default function FormularioRemuneracao() {
         descricao="Defina os valores usados no cálculo automático de cada entrega."
         className="md:col-start-1 md:row-start-2"
       >
-        {estado === 'carregando' && (
-          <p className="text-xs text-texto-apoio">Carregando parâmetros...</p>
-        )}
+        {estado === 'carregando' && <p className="text-xs text-texto-apoio">Carregando parâmetros...</p>}
 
         {estado === 'erro-carregar' && (
           <div className="flex flex-col items-start gap-3">
@@ -157,10 +152,7 @@ export default function FormularioRemuneracao() {
         <Botao type="submit" disabled={estado !== 'pronto'} className="w-full">
           {estado === 'salvando' ? 'Salvando...' : 'Salvar parâmetros'}
         </Botao>
-        <p
-          role="status"
-          className={`text-xs ${mensagem?.tipo === 'erro' ? 'text-erro' : 'text-sucesso-texto'}`}
-        >
+        <p role="status" className={`text-xs ${mensagem?.tipo === 'erro' ? 'text-erro' : 'text-sucesso-texto'}`}>
           {mensagem?.texto}
         </p>
       </div>

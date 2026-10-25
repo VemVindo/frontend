@@ -29,7 +29,12 @@ export default function CamposDaEmpresa({
 
   return (
     <div className="grid gap-4 md:grid-cols-6">
-      <CampoTexto rotulo="Nome fantasia" autoComplete="organization" className="md:col-span-6" {...texto('nomeFantasia')} />
+      <CampoTexto
+        rotulo="Nome fantasia"
+        autoComplete="organization"
+        className="md:col-span-6"
+        {...texto('nomeFantasia')}
+      />
       <CampoTexto
         rotulo="E-mail"
         type="email"
@@ -63,7 +68,12 @@ export default function CamposDaEmpresa({
         {...texto('numero')}
         onChange={(evento) => onChange('numero', somenteDigitos(evento.target.value, 6))}
       />
-      <CampoTexto rotulo="Complemento (opcional)" autoComplete="address-line2" className="md:col-span-4" {...texto('complemento')} />
+      <CampoTexto
+        rotulo="Complemento (opcional)"
+        autoComplete="address-line2"
+        className="md:col-span-4"
+        {...texto('complemento')}
+      />
       <CampoTexto rotulo="Bairro" className="md:col-span-2" {...texto('bairro')} />
       <CampoTexto rotulo="Cidade" autoComplete="address-level2" className="md:col-span-3" {...texto('cidade')} />
       <div className="flex flex-col gap-1 md:col-span-1">

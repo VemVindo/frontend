@@ -148,7 +148,14 @@ export default function PaginaEmpresa() {
             </form>
           </Card>
         ) : (
-          <Card titulo="Dados do estabelecimento" acao={<Botao variante="claro" onClick={editar}>Editar</Botao>}>
+          <Card
+            titulo="Dados do estabelecimento"
+            acao={
+              <Botao variante="claro" onClick={editar}>
+                Editar
+              </Botao>
+            }
+          >
             <dl className="grid gap-4 md:grid-cols-2">
               <Informacao rotulo="Nome fantasia" valor={cadastro.nomeFantasia} />
               <Informacao rotulo="E-mail" valor={cadastro.email} />
@@ -164,7 +171,8 @@ export default function PaginaEmpresa() {
         )}
 
         <p className="text-[11px] text-texto-apoio">
-          Cadastro criado em {formatarData(cadastro.criadaEm)}. Última atualização em {formatarData(cadastro.atualizadaEm)}.
+          Cadastro criado em {formatarData(cadastro.criadaEm)}. Última atualização em{' '}
+          {formatarData(cadastro.atualizadaEm)}.
         </p>
       </div>
     </>

@@ -22,10 +22,7 @@ export default function PaginaComponentes() {
         <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {CORES_DO_TEMA.map((cor) => (
             <li key={cor} className="flex items-center gap-2 text-xs">
-              <span
-                className="size-8 rounded-lg border border-borda"
-                style={{ background: `var(--color-${cor})` }}
-              />
+              <span className="size-8 rounded-lg border border-borda" style={{ background: `var(--color-${cor})` }} />
               {cor}
             </li>
           ))}
@@ -48,7 +45,11 @@ export default function PaginaComponentes() {
 
       <Card titulo="Campos" descricao="Com descrição e com erro">
         <div className="grid gap-4 sm:grid-cols-2">
-          <CampoTexto rotulo="Valor base por entrega" descricao="Valor fixo pago a cada entrega concluída" placeholder="R$ 8,00" />
+          <CampoTexto
+            rotulo="Valor base por entrega"
+            descricao="Valor fixo pago a cada entrega concluída"
+            placeholder="R$ 8,00"
+          />
           <CampoTexto rotulo="Adicional por quilômetro" erro="Informe um valor positivo" defaultValue="-1" />
         </div>
       </Card>
@@ -58,7 +59,10 @@ export default function PaginaComponentes() {
           <Avatar iniciais="MV" variante="escuro" />
           <Avatar iniciais="MV" variante="claro" />
           <Avatar iniciais="CM" variante="marca" tamanho={38} />
-          <Etiqueta tom="sucesso"><IconeCheck className="size-3" />Concluída</Etiqueta>
+          <Etiqueta tom="sucesso">
+            <IconeCheck className="size-3" />
+            Concluída
+          </Etiqueta>
           <Etiqueta tom="alerta">Pendente</Etiqueta>
           <Etiqueta tom="erro">Cancelada</Etiqueta>
           <Etiqueta>Em rota</Etiqueta>

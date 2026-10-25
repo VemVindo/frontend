@@ -48,8 +48,11 @@ export default function LoginEntregador() {
           required
           maxLength={11}
           value={cpf}
-          placeholder='Somente números'
-          onChange={(e) => { setCpf(somenteDigitosCpf(e.target.value)); setErro(null); }}
+          placeholder="Somente números"
+          onChange={(e) => {
+            setCpf(somenteDigitosCpf(e.target.value));
+            setErro(null);
+          }}
         />
         <CampoLogin
           rotulo="SENHA"
@@ -57,8 +60,11 @@ export default function LoginEntregador() {
           autoComplete="current-password"
           required
           value={senha}
-          placeholder='*********'
-          onChange={(e) => { setSenha(e.target.value); setErro(null); }}
+          placeholder="*********"
+          onChange={(e) => {
+            setSenha(e.target.value);
+            setErro(null);
+          }}
         />
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar

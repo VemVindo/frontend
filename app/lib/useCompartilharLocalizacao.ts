@@ -27,8 +27,7 @@ function gravarEscolha(idPedido: number, ligado: boolean) {
   try {
     if (ligado) window.localStorage.setItem(chaveDoPedido(idPedido), '1');
     else window.localStorage.removeItem(chaveDoPedido(idPedido));
-  } catch {
-  }
+  } catch {}
 }
 
 export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolean) {
@@ -46,8 +45,7 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
       .then((resposta) => {
         if (!cancelado) setVisao(resposta);
       })
-      .catch(() => {
-      });
+      .catch(() => {});
     return () => {
       cancelado = true;
     };
@@ -134,8 +132,7 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
           if (cancelado) void nova.release();
           else trava = nova;
         })
-        .catch(() => {
-        });
+        .catch(() => {});
     }
     function aoVoltarParaAba() {
       if (document.visibilityState === 'visible') travarTela();
