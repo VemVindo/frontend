@@ -12,7 +12,6 @@ const TAMANHO_MAXIMO_SENHA = 72;
 const SENHA_SO_TECLADO = /^[\x21-\x7E]*$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Tudo como texto, do jeito que está nos campos.
 export interface ValoresDaEmpresa {
   nomeFantasia: string;
   email: string;
@@ -57,7 +56,6 @@ export function normalizarDocumento(tipo: TipoDocumento, texto: string): string 
   return tipo === 'CNPJ' ? normalizarCnpj(texto) : somenteDigitosCpf(texto);
 }
 
-// E-US01 e E-US03: as mesmas regras do backend, para avisar antes de enviar.
 export function validarEmpresa(valores: ValoresDaEmpresa): ErrosDoFormulario<ValoresDaEmpresa> {
   const erros: ErrosDoFormulario<ValoresDaEmpresa> = {};
   const obrigatorios = ['nomeFantasia', 'logradouro', 'bairro', 'cidade'] as const;

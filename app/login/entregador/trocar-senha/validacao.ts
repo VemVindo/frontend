@@ -1,4 +1,3 @@
-// Mesmas regras do TrocarSenhaDto do backend.
 export const TAMANHO_MINIMO = 8;
 export const TAMANHO_MAXIMO = 72;
 export const CARACTERES_PERMITIDOS = /^[\x21-\x7E]*$/;

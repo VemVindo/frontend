@@ -15,7 +15,6 @@ const TOM_STATUS: Record<StatusPedido, TomEtiqueta> = {
   CANCELADO: 'erro',
 };
 
-// Rótulo do botão que leva o pedido a cada status (PATCH /pedidos/:id/status).
 const ACAO_DO_STATUS: Record<StatusPedido, string> = {
   PENDENTE: 'Voltar para pendente',
   EM_ANDAMENTO: 'Iniciar entrega',
@@ -39,7 +38,6 @@ export function acaoDoStatus(status: StatusPedido): string {
   return ACAO_DO_STATUS[status];
 }
 
-// Em aberto = ainda aceita atribuição ou reatribuição de entregador.
 export function pedidoEmAberto(status: string): boolean {
   return !STATUS_ENCERRADOS.includes(status);
 }
@@ -80,7 +78,6 @@ export interface EnderecoDeEntrega {
   uf: string;
 }
 
-// Mesmo formato do endereço que o backend monta para o entregador.
 export function formatarEndereco(endereco: EnderecoDeEntrega): string {
   const complemento = endereco.complemento ? `, ${endereco.complemento}` : '';
   return `${endereco.logradouro}, ${endereco.numero}${complemento} - ${endereco.bairro}, ${endereco.cidade}/${endereco.uf}`;

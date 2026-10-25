@@ -44,7 +44,6 @@ const TEXTO_DA_CONEXAO: Record<EstadoConexao, string | null> = {
   encerrado: null,
 };
 
-// O [codigo] da URL é o token do link do recebedor, não o número do pedido.
 export default function PaginaRastreio() {
   const { codigo } = useParams<{ codigo: string }>();
   const [pagina, setPagina] = useState<PaginaDoRecebedor | null>(null);
@@ -112,8 +111,6 @@ export default function PaginaRastreio() {
     );
   }
 
-  // O mapa só é carregado (e cobrado pelo Google) com a entrega em andamento:
-  // antes disso não há entregador para mostrar.
   const emAndamento = statusAtual === 'EM_ANDAMENTO' && !encerrada;
   const mapaLigado = visao?.exibirMapa ?? pagina.exibirMapa;
   const mostrarMapa = emAndamento && mapaLigado;
@@ -165,7 +162,6 @@ export default function PaginaRastreio() {
         <Card titulo="Tempo estimado de chegada" descricao="O pedido ainda não saiu para entrega." />
       )}
 
-      {/* Depois da entrega o código não serve mais para nada. */}
       {!encerrada && (
         <Card titulo="Código de recebimento" descricao="Informe este código ao entregador para confirmar o recebimento.">
           <p className="font-titulo text-2xl font-bold tracking-[0.3em] text-texto">{pagina.codigoRecebedor}</p>
@@ -183,9 +179,6 @@ export default function PaginaRastreio() {
       />
       <main className="mx-auto w-full max-w-[1280px] px-[18px] pb-6 md:px-10 md:py-12">
         {mostrarMapa && (
-          // Figma "Recebedor — Desktop · Em andamento": cartões à esquerda (560)
-          // e mapa à direita (627 × 375). No mobile, o mapa vem primeiro e
-          // ocupa a largura toda (390 × 435).
           <div className="grid gap-5 lg:grid-cols-[560fr_627fr] lg:gap-[13px]">
             <div className="-mx-[18px] flex flex-col gap-3 md:mx-0 lg:order-2">
               <MapaEntrega
@@ -211,7 +204,6 @@ export default function PaginaRastreio() {
         )}
 
         {mostrarEtaSemMapa && (
-          // Figma "03B — Rastreio sem mapa" (mobile) e "— Web" (700 + 420).
           <>
             <div className="mb-[29px] hidden md:block">
               <h1 className="text-[28px] font-semibold text-texto-corpo">Rastreio ao vivo</h1>

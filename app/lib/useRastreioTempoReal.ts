@@ -9,14 +9,10 @@ export type EstadoConexao = 'conectando' | 'conectado' | 'reconectando' | 'encer
 
 export type MotivoAcessoNegado = 'invalido' | 'encerrado';
 
-// Eventos do namespace /rastreio do backend (src/mapa/rastreio.gateway.ts).
 const EVENTO_LOCALIZACAO = 'localizacao';
 const EVENTO_STATUS = 'status';
 const EVENTO_ACESSO_NEGADO = 'acesso-negado';
 
-// R-US03: o recebedor recebe a posição do entregador assim que ela chega ao
-// backend. A cada (re)conexão a posição atual é buscada por HTTP, porque o
-// socket não guarda o que passou enquanto a conexão estava caída.
 export function useRastreioTempoReal(token: string, ativo: boolean) {
   const [visao, setVisao] = useState<VisaoDaEntrega | null>(null);
   const [status, setStatus] = useState<StatusPedido | null>(null);
@@ -34,7 +30,6 @@ export function useRastreioTempoReal(token: string, ativo: boolean) {
           if (!cancelado) setVisao(resposta);
         })
         .catch(() => {
-          // A próxima posição pelo socket corrige a tela.
         });
     }
 
@@ -45,8 +40,6 @@ export function useRastreioTempoReal(token: string, ativo: boolean) {
       atualizar();
     });
     socket.on('disconnect', (motivo) => {
-      // "io server disconnect" = o backend fechou a sala (entrega encerrada ou
-      // link inválido); nesse caso o socket.io não tenta reconectar.
       setConexao(motivo === 'io server disconnect' ? 'encerrado' : 'reconectando');
     });
     socket.on('connect_error', () => setConexao('reconectando'));

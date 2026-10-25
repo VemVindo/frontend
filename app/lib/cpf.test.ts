@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cpfValido, somenteDigitosCpf } from './cpf';
 
-// CPFs gerados pelo algoritmo, sem relação com pessoas reais.
 const CPF_FICTICIO = '52998224725';
 
 describe('cpfValido', () => {
