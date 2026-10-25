@@ -1,4 +1,6 @@
+import { consultaDasAvaliacoes } from '@/app/lib/comentarios';
 import type {
+  AvaliacaoDaEmpresa,
   AvaliacaoDoRecebedor,
   CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
@@ -7,6 +9,7 @@ import type {
   DadosCadastraisDaEmpresa,
   DadosCompartilhados,
   DetalheDoPedido,
+  FiltroDeAvaliacoes,
   LinkDeRastreio,
   NovaEmpresa,
   Empresa,
@@ -251,6 +254,10 @@ export async function atualizarConfiguracoes(
     method: 'PATCH',
     body: JSON.stringify(configuracoes),
   });
+}
+
+export async function listarAvaliacoes(filtro: FiltroDeAvaliacoes): Promise<AvaliacaoDaEmpresa[]> {
+  return requisitar(`/avaliacoes${consultaDasAvaliacoes(filtro)}`, { method: 'GET' });
 }
 
 export async function consultarAvaliacao(token: string): Promise<AvaliacaoDoRecebedor> {

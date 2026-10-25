@@ -244,6 +244,20 @@ export interface DetalheDoPedido {
   linhaDoTempo: MarcoDoPedido[];
 }
 
+export interface AvaliacaoDaEmpresa {
+  idPedido: number;
+  nota: number;
+  comentario: string | null;
+  data: string;
+  entregador: string | null;
+}
+
+export interface FiltroDeAvaliacoes {
+  notas: number[];
+  de: string;
+  ate: string;
+}
+
 export type SituacaoDaAvaliacao = 'aguardando' | 'disponivel' | 'avaliado' | 'expirada' | 'indisponivel';
 
 export interface AvaliacaoEnviada {
