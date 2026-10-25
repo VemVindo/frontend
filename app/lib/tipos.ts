@@ -153,6 +153,12 @@ export interface VisaoDaEntrega {
   duracaoRestanteS: number | null;
   estimado: boolean;
   atualizadaEm: string | null;
+  entregadorProximo: boolean;
+}
+
+export interface SituacaoDoAviso {
+  status: StatusPedido;
+  entregadorProximo: boolean;
 }
 
 // GET /rastreio/:token
