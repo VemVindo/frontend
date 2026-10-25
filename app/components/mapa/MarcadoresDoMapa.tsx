@@ -1,6 +1,5 @@
 import Image from 'next/image';
 
-
 const ROTULO = 'absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9.66px] font-bold leading-none';
 
 export function MarcadorOrigem({ nome }: { nome: string }) {

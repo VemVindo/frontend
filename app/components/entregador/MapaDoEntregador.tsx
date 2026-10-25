@@ -94,8 +94,8 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
           </a>
         </div>
         <p className="text-[11px] text-texto-suave">
-          O navegador só envia a localização com esta tela aberta e o celular desbloqueado. Enquanto você navega
-          pelo app do Google Maps, o recebedor vê a última posição enviada.
+          O navegador só envia a localização com esta tela aberta e o celular desbloqueado. Enquanto você navega pelo
+          app do Google Maps, o recebedor vê a última posição enviada.
         </p>
       </div>
     </div>

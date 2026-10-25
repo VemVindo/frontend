@@ -29,8 +29,7 @@ export function useRastreioTempoReal(token: string, ativo: boolean) {
         .then((resposta) => {
           if (!cancelado) setVisao(resposta);
         })
-        .catch(() => {
-        });
+        .catch(() => {});
     }
 
     const socket = io(`${API_URL}/rastreio`, { auth: { token } });
