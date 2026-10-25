@@ -5,6 +5,7 @@ import type {
   CadastroDaEmpresa,
   ConfiguracoesDaEmpresa,
   ConversaWhatsapp,
+  ConviteEnviado,
   Coordenada,
   DadosCadastraisDaEmpresa,
   DadosCompartilhados,
@@ -12,8 +13,10 @@ import type {
   FiltroDeAvaliacoes,
   LinkDeRastreio,
   NovaEmpresa,
+  NovoEntregador,
   Empresa,
   Entregador,
+  EntregadorCadastrado,
   PedidoAtivo,
   PaginaDoRecebedor,
   ParametrosRemuneracao,
@@ -145,6 +148,20 @@ export async function encerrarVinculo(id: number): Promise<void> {
 
 export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
+}
+
+export async function cadastrarEntregador(dados: NovoEntregador): Promise<EntregadorCadastrado> {
+  return requisitar('/entregadores', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
+export async function convidarEntregador(cpf: string): Promise<ConviteEnviado> {
+  return requisitar('/entregadores/vinculo', {
+    method: 'POST',
+    body: JSON.stringify({ cpf }),
+  });
 }
 
 export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
