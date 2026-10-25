@@ -2,15 +2,10 @@ import type { Coordenada } from '@/app/lib/tipos';
 
 export const CHAVE_GOOGLE_MAPS = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
-// Os marcadores avançados exigem um Map ID; o DEMO_MAP_ID do Google serve
-// para desenvolvimento.
 export const MAP_ID_GOOGLE_MAPS = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
 
-// Centro de Brasília, usado só até a primeira coordenada chegar.
 export const CENTRO_PADRAO: Coordenada = { lat: -15.7939, lng: -47.8828 };
 
-// O navegador entrega posições a cada poucos segundos; o backend só precisa
-// de uma a cada INTERVALO_ENVIO_MS.
 export const INTERVALO_ENVIO_MS = 5_000;
 
 export function formatarDistanciaRestante(metros: number | null): string | null {
@@ -37,7 +32,6 @@ export function horarioDeChegada(segundos: number | null, agora: Date = new Date
   return chegada.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Maps URLs: abre a navegação do app do Google Maps, sem chave e sem custo.
 export function linkDeNavegacao(destino: Coordenada | null, endereco: string): string {
   const alvo = destino ? `${destino.lat},${destino.lng}` : endereco;
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(alvo)}`;
@@ -47,8 +41,6 @@ export function deveEnviarPosicao(ultimoEnvio: number | null, agora: number): bo
   return ultimoEnvio === null || agora - ultimoEnvio >= INTERVALO_ENVIO_MS;
 }
 
-// Códigos do GeolocationPositionError: 1 permissão negada, 2 posição
-// indisponível, 3 tempo esgotado.
 export function mensagemDeErroDeLocalizacao(codigo: number): string {
   switch (codigo) {
     case 1:

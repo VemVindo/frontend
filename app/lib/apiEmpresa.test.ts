@@ -13,7 +13,6 @@ const DADOS = {
   uf: 'DF',
 };
 
-// Contrato das rotas da E-US01 a E-US03 com o backend.
 describe('api da empresa', () => {
   afterEach(() => {
     vi.unstubAllGlobals();

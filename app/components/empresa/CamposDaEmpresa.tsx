@@ -11,7 +11,6 @@ export interface CamposDaEmpresaProps {
   onChange: (campo: keyof ValoresDaEmpresa, valor: string) => void;
 }
 
-// Campos comuns ao cadastro (E-US01) e à edição (E-US03).
 export default function CamposDaEmpresa({
   valores,
   erros,

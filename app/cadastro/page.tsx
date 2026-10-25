@@ -28,7 +28,6 @@ const CADASTRO_VAZIO: ValoresDoCadastro = {
   confirmacaoSenha: '',
 };
 
-// E-US01: cadastro do estabelecimento por CNPJ ou por CPF.
 export default function PaginaCadastro() {
   const router = useRouter();
   const [valores, setValores] = useState(CADASTRO_VAZIO);

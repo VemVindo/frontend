@@ -36,8 +36,6 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Figma "Entregador — Mobile · detail" (325 × 279, pílula de ETA) e
-          "— Desktop · detail" (627 × 375, sem pílula). */}
       <MapaEntrega
         origem={visao?.origem ?? null}
         nomeOrigem={pedido.empresa}

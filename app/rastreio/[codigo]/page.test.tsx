@@ -101,7 +101,6 @@ describe('PaginaRastreio', () => {
 
     expect(await screen.findByText('Acompanhe seu pedido mesmo sem o mapa.')).toBeTruthy();
     expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
-    // Variantes mobile e desktop do Figma ficam no DOM; o CSS mostra uma.
     expect(screen.getAllByText('13 min')).toHaveLength(2);
     expect(screen.getByText('Marcos está a caminho do seu endereço · 4,2 km restantes')).toBeTruthy();
     expect(screen.getByText('Marcos está a caminho · 4,2 km restantes')).toBeTruthy();

@@ -24,7 +24,6 @@ export const CAMPOS_REMUNERACAO: DescricaoCampoRemuneracao[] = [
   },
 ];
 
-// Sem parâmetros salvos, o formulário começa vazio.
 export function paraValores(parametros: Pick<RemuneracaoDaEmpresa, CampoRemuneracao>): ValoresRemuneracao {
   return {
     taxaFixa: parametros.taxaFixa === null ? '' : centavosParaReais(parametros.taxaFixa),

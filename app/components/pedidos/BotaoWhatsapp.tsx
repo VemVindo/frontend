@@ -18,7 +18,6 @@ const estilosPorVariante: Record<VarianteLinkWhatsapp, string> = {
   claro: 'bg-primaria-clara text-primaria-escura hover:bg-lilas',
 };
 
-// Abre o WhatsApp de quem clica, já na conversa com o outro lado (wa.me).
 export function LinkWhatsapp({ link, rotulo, variante = 'primario' }: LinkWhatsappProps) {
   return (
     <a
@@ -35,19 +34,12 @@ export function LinkWhatsapp({ link, rotulo, variante = 'primario' }: LinkWhatsa
 
 export interface BotaoWhatsappProps {
   idPedido: number;
-  // Com quem a conversa abre: entregador, recebedor ou estabelecimento.
   com: LadoDaConversa;
   variante?: VarianteLinkWhatsapp;
 }
 
-// Recusas que o backend explica (pedido não é seu, pedido fora do status,
-// telefone inválido): a mensagem dele vai direto para a tela.
 const RECUSAS_EXPLICADAS = [404, 409, 422];
 
-// E-US19 e E-US20 + EN-US07: a plataforma só monta o link wa.me; a conversa
-// acontece no WhatsApp de cada um e nada passa pelo sistema. O link é buscado
-// ao montar para o clique abrir direto: abrir uma aba depois de um await é
-// bloqueado como pop-up em alguns navegadores.
 export default function BotaoWhatsapp({ idPedido, com, variante }: BotaoWhatsappProps) {
   const [conversa, setConversa] = useState<ConversaWhatsapp | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);

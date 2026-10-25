@@ -1,4 +1,3 @@
-// Nomes dos tokens --color-* de globals.css mostrados na vitrine.
 export const CORES_DO_TEMA = [
   'fundo', 'superficie', 'superficie-suave', 'borda',
   'primaria', 'primaria-escura', 'primaria-media', 'primaria-clara', 'lilas', 'destaque',

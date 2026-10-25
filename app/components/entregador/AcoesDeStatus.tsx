@@ -13,8 +13,6 @@ export interface AcoesDeStatusProps {
   onAlterado: () => void;
 }
 
-// Os botões vêm de GET /pedidos/:id/status-disponiveis: o front não repete a
-// máquina de estados do backend.
 export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: AcoesDeStatusProps) {
   const [acoes, setAcoes] = useState<StatusDisponiveis | null>(null);
   const [confirmando, setConfirmando] = useState<StatusPedido | null>(null);

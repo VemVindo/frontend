@@ -31,7 +31,6 @@ function Informacao({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-// E-US02 (visualizar) e E-US03 (editar) os dados da empresa.
 export default function PaginaEmpresa() {
   const [cadastro, setCadastro] = useState<CadastroDaEmpresa | null>(null);
   const [erroCarregar, setErroCarregar] = useState(false);
