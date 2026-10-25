@@ -1,14 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import FiltroDePeriodo from '@/app/components/pedidos/FiltroDePeriodo';
 import ListaPedidosAtivos from '@/app/components/pedidos/ListaPedidosAtivos';
+import ListaPedidosFinalizados from '@/app/components/pedidos/ListaPedidosFinalizados';
 import ModalAtribuirEntregador from '@/app/components/pedidos/ModalAtribuirEntregador';
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import TituloPagina from '@/app/components/ui/TituloPagina';
 import { listarPedidosDaEmpresa } from '@/app/lib/api';
+import { PERIODO_INICIAL, filtrarPorConclusao } from '@/app/lib/finalizados';
 import { pedidoEmAberto } from '@/app/lib/pedidos';
-import type { PedidoAtivo } from '@/app/lib/tipos';
+import type { PedidoAtivo, PeriodoDeConclusao } from '@/app/lib/tipos';
 
 export default function PaginaPedidosAtivos() {
   const [pedidos, setPedidos] = useState<PedidoAtivo[] | null>(null);
@@ -16,6 +19,7 @@ export default function PaginaPedidosAtivos() {
   const [pedidoParaAtribuir, setPedidoParaAtribuir] = useState<PedidoAtivo | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<'ativos' | 'finalizados'>('ativos');
+  const [periodo, setPeriodo] = useState<PeriodoDeConclusao>(PERIODO_INICIAL);
 
   useEffect(() => {
     let cancelado = false;
@@ -31,9 +35,12 @@ export default function PaginaPedidosAtivos() {
     };
   }, []);
 
-  const pedidosFiltrados = pedidos?.filter((pedido) =>
+  const pedidosDaAba = pedidos?.filter((pedido) =>
     abaAtiva === 'ativos' ? pedidoEmAberto(pedido.status) : !pedidoEmAberto(pedido.status),
   );
+  const pedidosFiltrados =
+    pedidosDaAba && abaAtiva === 'finalizados' ? filtrarPorConclusao(pedidosDaAba, periodo) : pedidosDaAba;
+  const comPeriodo = periodo.de !== '' || periodo.ate !== '';
 
   const fecharModal = useCallback(() => setPedidoParaAtribuir(null), []);
 
@@ -91,6 +98,7 @@ export default function PaginaPedidosAtivos() {
         }
       >
         <p role="status" className="text-xs text-sucesso-texto">{aviso}</p>
+        {abaAtiva === 'finalizados' && <FiltroDePeriodo periodo={periodo} onAlterar={setPeriodo} />}
         {erro && (
           <p role="alert" className="text-xs text-erro">
             Não foi possível carregar os pedidos agora.
@@ -99,12 +107,18 @@ export default function PaginaPedidosAtivos() {
         {!pedidosFiltrados && !erro && <p className="text-xs text-texto-apoio">Carregando pedidos...</p>}
         {pedidosFiltrados?.length === 0 && (
           <p className="text-xs text-texto-apoio">
-            {abaAtiva === 'ativos' ? 'Nenhum pedido ativo no momento.' : 'Nenhum pedido finalizado no momento.'}
+            {abaAtiva === 'ativos' && 'Nenhum pedido ativo no momento.'}
+            {abaAtiva === 'finalizados' && comPeriodo && 'Nenhum pedido finalizado nesse período.'}
+            {abaAtiva === 'finalizados' && !comPeriodo && 'Nenhum pedido finalizado no momento.'}
           </p>
         )}
         {pedidosFiltrados && pedidosFiltrados.length > 0 && (
           <>
-            <ListaPedidosAtivos pedidos={pedidosFiltrados} onAtribuir={setPedidoParaAtribuir} />
+            {abaAtiva === 'ativos' ? (
+              <ListaPedidosAtivos pedidos={pedidosFiltrados} onAtribuir={setPedidoParaAtribuir} />
+            ) : (
+              <ListaPedidosFinalizados pedidos={pedidosFiltrados} />
+            )}
 
             {abaAtiva === 'ativos' && (
               <div className="mt-4 md:hidden">

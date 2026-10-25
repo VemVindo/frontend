@@ -17,6 +17,9 @@ const PENDENTE: PedidoAtivo = {
   entregador: null,
   status: 'PENDENTE',
   criadoEm: '2026-10-19T12:00:00-03:00',
+  valorEntrega: 1430,
+  finalizadoEm: null,
+  nota: null,
 };
 const EM_ANDAMENTO: PedidoAtivo = { ...PENDENTE, entregador: 'Bruno Lima', status: 'EM_ANDAMENTO' };
 
