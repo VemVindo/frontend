@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar
       - run: npm run lint
+      - run: npm run format:check
 
   typecheck:
     name: Typecheck

@@ -1,0 +1,12 @@
+# Gerados pelo build, pelos testes ou pelo npm.
+.next
+out
+build
+coverage
+reports
+node_modules
+next-env.d.ts
+package-lock.json
+.claude
+AGENTS.md
+CLAUDE.md
