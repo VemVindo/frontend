@@ -126,6 +126,14 @@ export interface PedidoAtivo {
   entregador: string | null;
   status: StatusPedido;
   criadoEm: string;
+  valorEntrega: number;
+  finalizadoEm: string | null;
+  nota: number | null;
+}
+
+export interface PeriodoDeConclusao {
+  de: string;
+  ate: string;
 }
 
 // Centavos: valor base por entrega e adicional por quilômetro.
@@ -174,6 +182,12 @@ export interface VisaoDaEntrega {
   duracaoRestanteS: number | null;
   estimado: boolean;
   atualizadaEm: string | null;
+  entregadorProximo: boolean;
+}
+
+export interface SituacaoDoAviso {
+  status: StatusPedido;
+  entregadorProximo: boolean;
 }
 
 // GET /rastreio/:token
@@ -249,6 +263,20 @@ export interface DetalheDoPedido {
   distancia: number;
   criadoEm: string;
   linhaDoTempo: MarcoDoPedido[];
+}
+
+export interface AvaliacaoDaEmpresa {
+  idPedido: number;
+  nota: number;
+  comentario: string | null;
+  data: string;
+  entregador: string | null;
+}
+
+export interface FiltroDeAvaliacoes {
+  notas: number[];
+  de: string;
+  ate: string;
 }
 
 export type SituacaoDaAvaliacao = 'aguardando' | 'disponivel' | 'avaliado' | 'expirada' | 'indisponivel';
