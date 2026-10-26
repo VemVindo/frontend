@@ -92,6 +92,14 @@ export interface ConviteEnviado {
   mensagem: string;
 }
 
+export interface EdicaoDoEntregador {
+  cpf: string;
+  nome: string;
+  telefone: string;
+  veiculo: TipoVeiculo;
+  placa?: string;
+}
+
 export type StatusVinculo = 'PENDENTE' | 'ATIVO';
 
 export interface Vinculo {

@@ -20,6 +20,7 @@ import {
   cadastrarEntregador,
   checkHealth,
   convidarEntregador,
+  editarEntregador,
   encerrarVinculo,
   listarAvaliacoes,
   finalizarPedido,
@@ -92,6 +93,16 @@ describe('api', () => {
     expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual({ codigo: '482913' });
   });
 
+  it('manda o cpf e os dados novos no corpo da edição do entregador', async () => {
+    const fetchSimulado = vi.fn().mockResolvedValue(resposta(200, true));
+    vi.stubGlobal('fetch', fetchSimulado);
+    const dados = { cpf: '52998224725', nome: 'Joana', telefone: '61988887777', veiculo: 'MOTO' as const, placa: 'ABC1D23' };
+
+    await expect(editarEntregador(dados)).resolves.toBe(true);
+
+    expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual(dados);
+  });
+
   it('junta as mensagens quando a validação devolve uma lista', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(resposta(400, { message: ['cpf invalido', 'senha vazia'] })));
 
@@ -131,6 +142,12 @@ describe('api', () => {
       '/entregadores',
     ],
     ['convidarEntregador', () => convidarEntregador('52998224725'), 'POST', '/entregadores/vinculo'],
+    [
+      'editarEntregador',
+      () => editarEntregador({ cpf: '52998224725', nome: 'Joana', telefone: '61988887777', veiculo: 'BICICLETA' }),
+      'PATCH',
+      '/entregadores',
+    ],
     ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
     [
       'reatribuirEntregadorDoPedido',
