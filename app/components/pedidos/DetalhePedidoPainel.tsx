@@ -8,13 +8,16 @@ import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
 import { buscarDetalheDoPedido, consultarRotaDoPedido } from '@/app/lib/api';
 import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
-import { formatarDataHora, formatarDistancia, formatarEndereco, formatarReais, pedidoEmAberto } from '@/app/lib/pedidos';
+import {
+  formatarDataHora,
+  formatarDistancia,
+  formatarEndereco,
+  formatarReais,
+  pedidoEmAberto,
+} from '@/app/lib/pedidos';
 import { formatarTelefone, primeiroNome } from '@/app/lib/texto';
 import type { DetalheDoPedido, VisaoDaEntrega } from '@/app/lib/tipos';
 
-// Sem socket no painel: enquanto a entrega anda, o detalhe e o mapa são
-// buscados de novo. A consulta não chama a Routes API (só lê o que o
-// entregador já calculou), então não gera custo no Google.
 export const INTERVALO_ATUALIZACAO_MS = 15_000;
 
 export interface DetalhePedidoPainelProps {
@@ -23,7 +26,6 @@ export interface DetalhePedidoPainelProps {
 
 const CAIXA = 'rounded-[18px] bg-superficie p-4 text-xs ring-1 ring-borda';
 
-// E-US13: dados do pedido, andamento com horários e, em andamento, o mapa.
 export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelProps) {
   const [pedido, setPedido] = useState<DetalheDoPedido | null>(null);
   const [visao, setVisao] = useState<VisaoDaEntrega | null>(null);
@@ -64,9 +66,7 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
         .then((resposta) => {
           if (!cancelado) setPedido(resposta);
         })
-        .catch(() => {
-          // Mantém o que já está na tela; a próxima rodada tenta de novo.
-        });
+        .catch(() => {});
     }
 
     atualizar();

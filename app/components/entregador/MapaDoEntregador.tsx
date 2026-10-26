@@ -36,8 +36,6 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Figma "Entregador — Mobile · detail" (325 × 279, pílula de ETA) e
-          "— Desktop · detail" (627 × 375, sem pílula). */}
       <MapaEntrega
         origem={visao?.origem ?? null}
         nomeOrigem={pedido.empresa}
@@ -96,8 +94,8 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
           </a>
         </div>
         <p className="text-[11px] text-texto-suave">
-          O navegador só envia a localização com esta tela aberta e o celular desbloqueado. Enquanto você navega
-          pelo app do Google Maps, o recebedor vê a última posição enviada.
+          O navegador só envia a localização com esta tela aberta e o celular desbloqueado. Enquanto você navega pelo
+          app do Google Maps, o recebedor vê a última posição enviada.
         </p>
       </div>
     </div>

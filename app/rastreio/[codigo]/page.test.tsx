@@ -87,9 +87,9 @@ describe('PaginaRastreio', () => {
     expect(screen.getByText('13 min · 4,2 km restantes')).toBeTruthy();
     expect(screen.queryByText(/linha reta/)).toBeNull();
     expect(screen.getByText('012345')).toBeTruthy();
-    expect(
-      screen.getByRole('link', { name: 'Falar com o estabelecimento no WhatsApp' }).getAttribute('href'),
-    ).toBe(PAGINA.whatsappEstabelecimento);
+    expect(screen.getByRole('link', { name: 'Falar com o estabelecimento no WhatsApp' }).getAttribute('href')).toBe(
+      PAGINA.whatsappEstabelecimento,
+    );
     expect(screen.getByText('Atualizando em tempo real.')).toBeTruthy();
     expect(screen.getByText(/processado pelo Google Maps/)).toBeTruthy();
   });
@@ -101,7 +101,6 @@ describe('PaginaRastreio', () => {
 
     expect(await screen.findByText('Acompanhe seu pedido mesmo sem o mapa.')).toBeTruthy();
     expect(screen.queryByText(/Mapa indisponível/)).toBeNull();
-    // Variantes mobile e desktop do Figma ficam no DOM; o CSS mostra uma.
     expect(screen.getAllByText('13 min')).toHaveLength(2);
     expect(screen.getByText('Marcos está a caminho do seu endereço · 4,2 km restantes')).toBeTruthy();
     expect(screen.getByText('Marcos está a caminho · 4,2 km restantes')).toBeTruthy();
@@ -127,7 +126,9 @@ describe('PaginaRastreio', () => {
 
   it('antes de sair para entrega não carrega o mapa', async () => {
     vi.mocked(buscarRastreio).mockResolvedValue({ ...PAGINA, pedido: { ...PAGINA.pedido, status: 'PENDENTE' } });
-    tempoReal({ visao: { ...VISAO, status: 'PENDENTE', entregador: null, distanciaRestanteM: null, duracaoRestanteS: null } });
+    tempoReal({
+      visao: { ...VISAO, status: 'PENDENTE', entregador: null, distanciaRestanteM: null, duracaoRestanteS: null },
+    });
 
     render(<PaginaRastreio />);
 

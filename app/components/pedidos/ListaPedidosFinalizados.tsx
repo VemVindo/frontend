@@ -20,7 +20,10 @@ function textoDaConclusao(finalizadoEm: string | null): string {
 export default function ListaPedidosFinalizados({ pedidos }: ListaPedidosFinalizadosProps) {
   return (
     <>
-      <div aria-hidden className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}>
+      <div
+        aria-hidden
+        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}
+      >
         {TITULOS.map((titulo) => (
           <span key={titulo}>{titulo}</span>
         ))}

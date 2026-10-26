@@ -13,14 +13,18 @@ const DADOS = {
   uf: 'DF',
 };
 
-// Contrato das rotas da E-US01 a E-US03 com o backend.
 describe('api da empresa', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
   it.each([
-    ['cadastrarEmpresa', () => cadastrarEmpresa({ ...DADOS, cpf: '52998224725', senha: 'senhaForte1' }), 'POST', '/auth/cadastrar/empresa'],
+    [
+      'cadastrarEmpresa',
+      () => cadastrarEmpresa({ ...DADOS, cpf: '52998224725', senha: 'senhaForte1' }),
+      'POST',
+      '/auth/cadastrar/empresa',
+    ],
     ['buscarCadastroDaEmpresa', () => buscarCadastroDaEmpresa(), 'GET', '/empresa/cadastro'],
     ['atualizarCadastroDaEmpresa', () => atualizarCadastroDaEmpresa(DADOS), 'PUT', '/empresa/cadastro'],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {

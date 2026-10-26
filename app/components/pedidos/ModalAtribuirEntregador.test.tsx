@@ -26,8 +26,22 @@ const EM_ANDAMENTO: PedidoAtivo = { ...PENDENTE, entregador: 'Bruno Lima', statu
 describe('ModalAtribuirEntregador', () => {
   beforeEach(() => {
     vi.mocked(listarFrota).mockResolvedValue([
-      { nome: 'Ana Souza', cpf: '11144477735', telefone: '11999990001', tipoVeiculo: 'MOTO', placa: null, disponivel: true },
-      { nome: 'Caio Reis', cpf: '52998224725', telefone: '11999990002', tipoVeiculo: 'MOTO', placa: null, disponivel: false },
+      {
+        nome: 'Ana Souza',
+        cpf: '11144477735',
+        telefone: '11999990001',
+        tipoVeiculo: 'MOTO',
+        placa: null,
+        disponivel: true,
+      },
+      {
+        nome: 'Caio Reis',
+        cpf: '52998224725',
+        telefone: '11999990002',
+        tipoVeiculo: 'MOTO',
+        placa: null,
+        disponivel: false,
+      },
     ]);
     vi.mocked(atribuirEntregadorAoPedido).mockResolvedValue({ ...PENDENTE, entregador: 'Ana Souza' });
     vi.mocked(reatribuirEntregadorDoPedido).mockResolvedValue({ ...EM_ANDAMENTO, entregador: 'Ana Souza' });

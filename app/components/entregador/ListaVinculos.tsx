@@ -32,7 +32,9 @@ export default function ListaVinculos({ vinculos, ocupado, onResponder }: ListaV
               <li key={v.id} className={ITEM}>
                 <span className="flex items-center gap-2 text-[13px]">
                   <IconeEmpresa className="size-5 text-primaria" />
-                  <span><strong>{v.empresa}</strong> quer você na frota</span>
+                  <span>
+                    <strong>{v.empresa}</strong> quer você na frota
+                  </span>
                 </span>
                 <span className="flex gap-2">
                   <Botao variante="secundario" disabled={ocupado === v.id} onClick={() => onResponder(v.id, 'recusar')}>

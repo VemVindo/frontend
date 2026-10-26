@@ -54,9 +54,7 @@ async function requisitar<T>(caminho: string, init: RequestInit): Promise<T> {
     const body = (await res.json().catch(() => ({}))) as {
       message?: string | string[];
     } & Record<string, unknown>;
-    const mensagem = Array.isArray(body.message)
-      ? body.message.join('; ')
-      : body.message;
+    const mensagem = Array.isArray(body.message) ? body.message.join('; ') : body.message;
     throw new ApiError(res.status, mensagem ?? `Erro ${res.status}`, body);
   }
   if (res.status === 204) {
@@ -69,10 +67,7 @@ export async function checkHealth(): Promise<{ database: string }> {
   return requisitar('/health/db', { method: 'GET' });
 }
 
-export async function loginEmpresa(
-  email: string,
-  senha: string,
-): Promise<RespostaLogin<Empresa>> {
+export async function loginEmpresa(email: string, senha: string): Promise<RespostaLogin<Empresa>> {
   return requisitar('/auth/login/empresa', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
@@ -98,10 +93,7 @@ export async function atualizarCadastroDaEmpresa(dados: DadosCadastraisDaEmpresa
   });
 }
 
-export async function loginEntregador(
-  cpf: string,
-  senha: string,
-): Promise<RespostaLogin<Entregador>> {
+export async function loginEntregador(cpf: string, senha: string): Promise<RespostaLogin<Entregador>> {
   return requisitar('/auth/login/entregador', {
     method: 'POST',
     body: JSON.stringify({ cpf, senha }),
@@ -272,9 +264,7 @@ export async function salvarParametrosRemuneracao(parametros: ParametrosRemunera
   });
 }
 
-export async function atualizarConfiguracoes(
-  configuracoes: ConfiguracoesDaEmpresa,
-): Promise<ConfiguracoesDaEmpresa> {
+export async function atualizarConfiguracoes(configuracoes: ConfiguracoesDaEmpresa): Promise<ConfiguracoesDaEmpresa> {
   return requisitar('/empresa/configuracoes', {
     method: 'PATCH',
     body: JSON.stringify(configuracoes),

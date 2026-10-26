@@ -19,7 +19,11 @@ export default function PaginaEntregador() {
           </p>
         )}
         {pedidos && <ListaPedidosEntregador pedidos={pedidos} />}
-        {erro && <p role="alert" className="text-[13px] text-erro">{erro}</p>}
+        {erro && (
+          <p role="alert" className="text-[13px] text-erro">
+            {erro}
+          </p>
+        )}
         {vinculos && <ListaVinculos vinculos={vinculos} ocupado={ocupado} onResponder={responder} />}
       </div>
       {dados && (

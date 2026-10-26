@@ -28,7 +28,6 @@ const CADASTRO_VAZIO: ValoresDoCadastro = {
   confirmacaoSenha: '',
 };
 
-// E-US01: cadastro do estabelecimento por CNPJ ou por CPF.
 export default function PaginaCadastro() {
   const router = useRouter();
   const [valores, setValores] = useState(CADASTRO_VAZIO);
@@ -98,7 +97,9 @@ export default function PaginaCadastro() {
               <label
                 key={tipo}
                 className={`cursor-pointer rounded-[10px] border px-4 py-2 text-xs font-semibold ${
-                  valores.tipoDocumento === tipo ? 'border-primaria bg-primaria-clara text-primaria-escura' : 'border-borda text-texto-corpo'
+                  valores.tipoDocumento === tipo
+                    ? 'border-primaria bg-primaria-clara text-primaria-escura'
+                    : 'border-borda text-texto-corpo'
                 }`}
               >
                 <input
@@ -121,7 +122,9 @@ export default function PaginaCadastro() {
               value={valores.documento}
               erro={erros.documento}
               disabled={enviando}
-              onChange={(evento) => alterar('documento', normalizarDocumento(valores.tipoDocumento, evento.target.value))}
+              onChange={(evento) =>
+                alterar('documento', normalizarDocumento(valores.tipoDocumento, evento.target.value))
+              }
             />
             {ehCnpj && (
               <CampoTexto

@@ -6,8 +6,6 @@ export interface EtaSemMapaProps {
   duracaoRestanteS: number | null;
 }
 
-// R-US03, mapa desligado pela empresa: Figma "03B — Rastreio sem mapa"
-// (mobile, centralizado) e "03B — Rastreio sem mapa — Web" (desktop, card).
 export default function EtaSemMapa({ nomeEntregador, distanciaRestanteM, duracaoRestanteS }: EtaSemMapaProps) {
   const tempo = formatarTempoRestante(duracaoRestanteS);
   const distancia = formatarDistanciaRestante(distanciaRestanteM);

@@ -6,8 +6,6 @@ export interface PilulaTrajetoProps {
   className?: string;
 }
 
-// "◷ 8 min · 1,2 km restantes" sobre o mapa. No mobile o Figma usa Inter
-// 11,5 px; no desktop, Sora 12 px.
 export default function PilulaTrajeto({ distanciaRestanteM, duracaoRestanteS, className = '' }: PilulaTrajetoProps) {
   const tempo = formatarTempoRestante(duracaoRestanteS);
   const distancia = formatarDistanciaRestante(distanciaRestanteM);

@@ -122,11 +122,18 @@ export default function TrocarSenhaEntregador() {
         {dados && <PainelDadosCompartilhados dados={dados} />}
         {convites.length > 0 && (
           <p className="text-[13px] text-texto-suave">
-            Convites esperando sua resposta: <strong className="text-texto">{convites.map((v) => v.empresa).join(', ')}</strong>.
-            Você aceita ou recusa cada um depois de criar a senha.
+            Convites esperando sua resposta:{' '}
+            <strong className="text-texto">{convites.map((v) => v.empresa).join(', ')}</strong>. Você aceita ou recusa
+            cada um depois de criar a senha.
           </p>
         )}
-        <CaixaConfirmacao marcado={ciente} onAlterar={(valor) => { setCiente(valor); setErro(null); }}>
+        <CaixaConfirmacao
+          marcado={ciente}
+          onAlterar={(valor) => {
+            setCiente(valor);
+            setErro(null);
+          }}
+        >
           Vi quais dados as empresas veem sobre mim depois que eu aceitar um convite.
         </CaixaConfirmacao>
         <BotaoLogin carregando={carregando} erro={erro}>

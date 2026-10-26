@@ -15,8 +15,6 @@ function chaveDoPedido(idPedido: number) {
   return `vemvindo:compartilhar:${idPedido}`;
 }
 
-// Lembra a escolha do entregador: ao voltar para a tela, o compartilhamento
-// recomeça sem pedir o clique de novo (a permissão do navegador já foi dada).
 function lerEscolha(idPedido: number): boolean {
   try {
     return typeof window !== 'undefined' && window.localStorage.getItem(chaveDoPedido(idPedido)) === '1';
@@ -29,13 +27,9 @@ function gravarEscolha(idPedido: number, ligado: boolean) {
   try {
     if (ligado) window.localStorage.setItem(chaveDoPedido(idPedido), '1');
     else window.localStorage.removeItem(chaveDoPedido(idPedido));
-  } catch {
-    // Sem armazenamento local: só não lembra a escolha.
-  }
+  } catch {}
 }
 
-// EN-US02: a posição só é enviada depois do clique do entregador (que dispara o
-// pedido de permissão do navegador) e só com a entrega em andamento.
 export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolean) {
   const [ligado, setLigado] = useState(() => lerEscolha(idPedido));
   const [estado, setEstado] = useState<EstadoCompartilhamento>(() => (lerEscolha(idPedido) ? 'solicitando' : 'parado'));
@@ -44,7 +38,6 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
   const [visao, setVisao] = useState<VisaoDaEntrega | null>(null);
   const ultimoEnvio = useRef<number | null>(null);
 
-  // Só com a entrega em andamento: fora dela o mapa nem é mostrado.
   useEffect(() => {
     if (!emAndamento) return;
     let cancelado = false;
@@ -52,9 +45,7 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
       .then((resposta) => {
         if (!cancelado) setVisao(resposta);
       })
-      .catch(() => {
-        // Sem a rota inicial o mapa só espera a primeira posição.
-      });
+      .catch(() => {});
     return () => {
       cancelado = true;
     };
@@ -129,9 +120,6 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
     };
   }, [ativo, idPedido, parar]);
 
-  // Com a tela apagada o navegador para de entregar posições; o Wake Lock
-  // mantém a tela acesa enquanto o compartilhamento está ligado. Ao voltar
-  // para a aba, o navegador solta a trava e ela é pedida de novo.
   useEffect(() => {
     if (!ativo || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
     let cancelado = false;
@@ -144,9 +132,7 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
           if (cancelado) void nova.release();
           else trava = nova;
         })
-        .catch(() => {
-          // Bateria fraca ou aba em segundo plano: segue sem a trava.
-        });
+        .catch(() => {});
     }
     function aoVoltarParaAba() {
       if (document.visibilityState === 'visible') travarTela();
@@ -161,7 +147,6 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
     };
   }, [ativo]);
 
-  // Entrega encerrada: a escolha lembrada deixa de valer.
   useEffect(() => {
     if (!emAndamento) gravarEscolha(idPedido, false);
   }, [emAndamento, idPedido]);

@@ -104,10 +104,7 @@ describe('api', () => {
   });
 
   it('junta as mensagens quando a validação devolve uma lista', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(resposta(400, { message: ['cpf invalido', 'senha vazia'] })),
-    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(resposta(400, { message: ['cpf invalido', 'senha vazia'] })));
 
     await expect(buscarUsuarioAtual()).rejects.toThrow('cpf invalido; senha vazia');
   });
@@ -139,7 +136,8 @@ describe('api', () => {
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
     [
       'cadastrarEntregador',
-      () => cadastrarEntregador({ nome: 'Joana', cpf: '52998224725', telefone: '61988887777', tipoVeiculo: 'BICICLETA' }),
+      () =>
+        cadastrarEntregador({ nome: 'Joana', cpf: '52998224725', telefone: '61988887777', tipoVeiculo: 'BICICLETA' }),
       'POST',
       '/entregadores',
     ],
@@ -162,7 +160,12 @@ describe('api', () => {
     ['consultarRotaDoPedido', () => consultarRotaDoPedido(7), 'GET', '/pedidos/7/rota'],
     ['buscarDetalheDoPedido', () => buscarDetalheDoPedido(7), 'GET', '/pedidos/7'],
     ['buscarRastreio', () => buscarRastreio('abc_123'), 'GET', '/rastreio/abc_123'],
-    ['buscarLocalizacaoDoRastreio', () => buscarLocalizacaoDoRastreio('abc_123'), 'GET', '/rastreio/abc_123/localizacao'],
+    [
+      'buscarLocalizacaoDoRastreio',
+      () => buscarLocalizacaoDoRastreio('abc_123'),
+      'GET',
+      '/rastreio/abc_123/localizacao',
+    ],
     ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
     ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],

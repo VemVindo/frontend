@@ -4,8 +4,6 @@ const DOZE_ALFANUMERICOS_E_DOIS_DIGITOS = /^[A-Z0-9]{12}\d{2}$/;
 const MESMO_CARACTERE_REPETIDO = /^(.)\1{13}$/;
 const CODIGO_DO_ZERO = 48;
 
-// Mesmo cálculo do backend (src/common/validators/is-cnpj.validator.ts),
-// inclusive o CNPJ alfanumérico.
 export function cnpjValido(cnpj: string): boolean {
   if (!DOZE_ALFANUMERICOS_E_DOIS_DIGITOS.test(cnpj)) return false;
   if (MESMO_CARACTERE_REPETIDO.test(cnpj)) return false;
