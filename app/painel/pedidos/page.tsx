@@ -5,6 +5,7 @@ import FiltroDePeriodo from '@/app/components/pedidos/FiltroDePeriodo';
 import ListaPedidosAtivos from '@/app/components/pedidos/ListaPedidosAtivos';
 import ListaPedidosFinalizados from '@/app/components/pedidos/ListaPedidosFinalizados';
 import ModalAtribuirEntregador from '@/app/components/pedidos/ModalAtribuirEntregador';
+import NovoPedidoModal from '@/app/components/pedidos/NovoPedidoModal';
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import TituloPagina from '@/app/components/ui/TituloPagina';
@@ -16,6 +17,8 @@ import type { PedidoAtivo, PeriodoDeConclusao } from '@/app/lib/tipos';
 export default function PaginaPedidosAtivos() {
   const [pedidos, setPedidos] = useState<PedidoAtivo[] | null>(null);
   const [erro, setErro] = useState(false);
+  const [novoPedidoAberto, setNovoPedidoAberto] = useState(false);
+  const [versaoDaListagem, setVersaoDaListagem] = useState(0);
   const [pedidoParaAtribuir, setPedidoParaAtribuir] = useState<PedidoAtivo | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<'ativos' | 'finalizados'>('ativos');
@@ -25,7 +28,10 @@ export default function PaginaPedidosAtivos() {
     let cancelado = false;
     listarPedidosDaEmpresa()
       .then((lista) => {
-        if (!cancelado) setPedidos(lista);
+        if (!cancelado) {
+          setPedidos(lista);
+          setErro(false);
+        }
       })
       .catch(() => {
         if (!cancelado) setErro(true);
@@ -33,7 +39,7 @@ export default function PaginaPedidosAtivos() {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [versaoDaListagem]);
 
   const pedidosDaAba = pedidos?.filter((pedido) =>
     abaAtiva === 'ativos' ? pedidoEmAberto(pedido.status) : !pedidoEmAberto(pedido.status),
@@ -41,6 +47,12 @@ export default function PaginaPedidosAtivos() {
   const pedidosFiltrados =
     pedidosDaAba && abaAtiva === 'finalizados' ? filtrarPorConclusao(pedidosDaAba, periodo) : pedidosDaAba;
   const comPeriodo = periodo.de !== '' || periodo.ate !== '';
+
+  const fecharNovoPedido = useCallback(() => setNovoPedidoAberto(false), []);
+  function registrarCriacao() {
+    setAviso('Pedido criado com sucesso.');
+    setVersaoDaListagem((atual) => atual + 1);
+  }
 
   const fecharModal = useCallback(() => setPedidoParaAtribuir(null), []);
 
@@ -62,7 +74,11 @@ export default function PaginaPedidosAtivos() {
         acao={
           abaAtiva === 'ativos' ? (
             <div className="hidden md:block">
-              <Botao variante="primario" className="h-11 rounded-[14px] px-5 text-sm">
+              <Botao
+                variante="primario"
+                onClick={() => setNovoPedidoAberto(true)}
+                className="h-11 rounded-[14px] px-5 text-sm"
+              >
                 + Novo pedido
               </Botao>
             </div>
@@ -121,17 +137,22 @@ export default function PaginaPedidosAtivos() {
             ) : (
               <ListaPedidosFinalizados pedidos={pedidosFiltrados} />
             )}
-
-            {abaAtiva === 'ativos' && (
-              <div className="mt-4 md:hidden">
-                <Botao variante="primario" className="h-11 w-full rounded-[14px] px-5 text-sm">
-                  + Novo pedido
-                </Botao>
-              </div>
-            )}
           </>
         )}
+        {abaAtiva === 'ativos' && (
+          <div className="mt-4 md:hidden">
+            <Botao
+              variante="primario"
+              onClick={() => setNovoPedidoAberto(true)}
+              className="h-11 w-full rounded-[14px] px-5 text-sm"
+            >
+              + Novo pedido
+            </Botao>
+          </div>
+        )}
       </Card>
+
+      <NovoPedidoModal aberto={novoPedidoAberto} onFechar={fecharNovoPedido} onCriado={registrarCriacao} />
 
       {pedidoParaAtribuir && (
         <ModalAtribuirEntregador
