@@ -34,8 +34,15 @@ export default function HistoricoEntregadores({ idPedido }: HistoricoEntregadore
   }, [idPedido]);
 
   return (
-    <Card titulo="Histórico de entregadores" descricao="Cada atribuição e reatribuição do pedido, da mais antiga à mais recente.">
-      {erro && <p role="alert" className="text-xs text-erro">{erro}</p>}
+    <Card
+      titulo="Histórico de entregadores"
+      descricao="Cada atribuição e reatribuição do pedido, da mais antiga à mais recente."
+    >
+      {erro && (
+        <p role="alert" className="text-xs text-erro">
+          {erro}
+        </p>
+      )}
       {!trocas && !erro && <p className="text-xs text-texto-apoio">Carregando histórico...</p>}
       {trocas?.length === 0 && <p className="text-xs text-texto-apoio">O pedido ainda não teve entregador.</p>}
       {trocas && trocas.length > 0 && (

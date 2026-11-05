@@ -7,11 +7,17 @@ export interface CamposDaEmpresaProps {
   valores: ValoresDaEmpresa;
   erros: ErrosDoFormulario<ValoresDaEmpresa>;
   desabilitado?: boolean;
+  reservarEspacoDescricao?: boolean;
   onChange: (campo: keyof ValoresDaEmpresa, valor: string) => void;
 }
 
-// Campos comuns ao cadastro (E-US01) e à edição (E-US03).
-export default function CamposDaEmpresa({ valores, erros, desabilitado, onChange }: CamposDaEmpresaProps) {
+export default function CamposDaEmpresa({
+  valores,
+  erros,
+  desabilitado,
+  reservarEspacoDescricao = false,
+  onChange,
+}: CamposDaEmpresaProps) {
   const idUf = 'empresa-uf';
   const texto = (campo: keyof ValoresDaEmpresa) => ({
     id: `empresa-${campo}`,
@@ -23,8 +29,20 @@ export default function CamposDaEmpresa({ valores, erros, desabilitado, onChange
 
   return (
     <div className="grid gap-4 md:grid-cols-6">
-      <CampoTexto rotulo="Nome fantasia" autoComplete="organization" className="md:col-span-6" {...texto('nomeFantasia')} />
-      <CampoTexto rotulo="E-mail" type="email" autoComplete="email" className="md:col-span-3" {...texto('email')} />
+      <CampoTexto
+        rotulo="Nome fantasia"
+        autoComplete="organization"
+        className="md:col-span-6"
+        {...texto('nomeFantasia')}
+      />
+      <CampoTexto
+        rotulo="E-mail"
+        type="email"
+        autoComplete="email"
+        className="md:col-span-3"
+        reservarEspacoDescricao={reservarEspacoDescricao}
+        {...texto('email')}
+      />
       <CampoTexto
         rotulo="Telefone"
         descricao="Com DDD, só números"
@@ -50,7 +68,12 @@ export default function CamposDaEmpresa({ valores, erros, desabilitado, onChange
         {...texto('numero')}
         onChange={(evento) => onChange('numero', somenteDigitos(evento.target.value, 6))}
       />
-      <CampoTexto rotulo="Complemento (opcional)" autoComplete="address-line2" className="md:col-span-4" {...texto('complemento')} />
+      <CampoTexto
+        rotulo="Complemento (opcional)"
+        autoComplete="address-line2"
+        className="md:col-span-4"
+        {...texto('complemento')}
+      />
       <CampoTexto rotulo="Bairro" className="md:col-span-2" {...texto('bairro')} />
       <CampoTexto rotulo="Cidade" autoComplete="address-level2" className="md:col-span-3" {...texto('cidade')} />
       <div className="flex flex-col gap-1 md:col-span-1">

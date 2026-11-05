@@ -71,6 +71,27 @@ export interface DadosCompartilhados {
   disponivel: boolean;
 }
 
+export type TipoVeiculo = 'MOTO' | 'CARRO' | 'BICICLETA';
+
+export interface NovoEntregador {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  tipoVeiculo: TipoVeiculo;
+  placa?: string;
+}
+
+export interface EntregadorCadastrado {
+  entregador: { cpf: string; nome: string; tipoVeiculo: TipoVeiculo; placa: string | null };
+  status: 'PENDENTE';
+  senhaTemporaria: string;
+  senhaTemporariaExpiraEm: string;
+}
+
+export interface ConviteEnviado {
+  mensagem: string;
+}
+
 export type StatusVinculo = 'PENDENTE' | 'ATIVO';
 
 export interface Vinculo {
@@ -105,9 +126,18 @@ export interface PedidoAtivo {
   entregador: string | null;
   status: StatusPedido;
   criadoEm: string;
+  valorEntrega: number;
+  finalizadoEm: string | null;
+  nota: number | null;
 }
 
-// Contrato atual de POST /pedido/criar, separado dos tipos da listagem.
+export interface PeriodoDeConclusao {
+  de: string;
+  ate: string;
+}
+
+export type TipoRotaEntrega = 'DRIVE' | 'BICYCLE';
+
 export interface CriarPedidoRequisicao {
   nome_recebedor: string;
   telefone_recebedor: string;
@@ -119,20 +149,24 @@ export interface CriarPedidoRequisicao {
   cidade: string;
   uf: string;
   descricao: string;
-  valor_entrega: number;
-  distancia: number;
-  idEmpresa: number;
+  tipo_veiculo: TipoRotaEntrega;
   cpf_entregador?: string;
 }
 
-export interface CriarPedidoResposta extends Omit<CriarPedidoRequisicao, 'complemento' | 'cpf_entregador'> {
+export interface CriarPedidoResposta extends Omit<
+  CriarPedidoRequisicao,
+  'complemento' | 'cpf_entregador' | 'tipo_veiculo'
+> {
   id_pedido: number;
   complemento: string | null;
   cpf_entregador: string | null;
-  status: 'Pendente' | 'Em andamento';
+  status: StatusPedido;
   data_criacao: string;
   data_inicio_entrega: null;
   data_finalizacao: null;
+  valor_entrega: number;
+  distancia: number;
+  idEmpresa: number;
 }
 
 // Centavos: valor base por entrega e adicional por quilômetro.
@@ -181,6 +215,12 @@ export interface VisaoDaEntrega {
   duracaoRestanteS: number | null;
   estimado: boolean;
   atualizadaEm: string | null;
+  entregadorProximo: boolean;
+}
+
+export interface SituacaoDoAviso {
+  status: StatusPedido;
+  entregadorProximo: boolean;
 }
 
 // GET /rastreio/:token
@@ -256,4 +296,31 @@ export interface DetalheDoPedido {
   distancia: number;
   criadoEm: string;
   linhaDoTempo: MarcoDoPedido[];
+}
+
+export interface AvaliacaoDaEmpresa {
+  idPedido: number;
+  nota: number;
+  comentario: string | null;
+  data: string;
+  entregador: string | null;
+}
+
+export interface FiltroDeAvaliacoes {
+  notas: number[];
+  de: string;
+  ate: string;
+}
+
+export type SituacaoDaAvaliacao = 'aguardando' | 'disponivel' | 'avaliado' | 'expirada' | 'indisponivel';
+
+export interface AvaliacaoEnviada {
+  nota: number;
+  comentario: string | null;
+  data: string;
+}
+
+export interface AvaliacaoDoRecebedor {
+  situacao: SituacaoDaAvaliacao;
+  avaliacao: AvaliacaoEnviada | null;
 }

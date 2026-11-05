@@ -17,14 +17,31 @@ const PENDENTE: PedidoAtivo = {
   entregador: null,
   status: 'PENDENTE',
   criadoEm: '2026-10-19T12:00:00-03:00',
+  valorEntrega: 1430,
+  finalizadoEm: null,
+  nota: null,
 };
 const EM_ANDAMENTO: PedidoAtivo = { ...PENDENTE, entregador: 'Bruno Lima', status: 'EM_ANDAMENTO' };
 
 describe('ModalAtribuirEntregador', () => {
   beforeEach(() => {
     vi.mocked(listarFrota).mockResolvedValue([
-      { nome: 'Ana Souza', cpf: '11144477735', telefone: '11999990001', tipoVeiculo: 'MOTO', placa: null, disponivel: true },
-      { nome: 'Caio Reis', cpf: '52998224725', telefone: '11999990002', tipoVeiculo: 'MOTO', placa: null, disponivel: false },
+      {
+        nome: 'Ana Souza',
+        cpf: '11144477735',
+        telefone: '11999990001',
+        tipoVeiculo: 'MOTO',
+        placa: null,
+        disponivel: true,
+      },
+      {
+        nome: 'Caio Reis',
+        cpf: '52998224725',
+        telefone: '11999990002',
+        tipoVeiculo: 'MOTO',
+        placa: null,
+        disponivel: false,
+      },
     ]);
     vi.mocked(atribuirEntregadorAoPedido).mockResolvedValue({ ...PENDENTE, entregador: 'Ana Souza' });
     vi.mocked(reatribuirEntregadorDoPedido).mockResolvedValue({ ...EM_ANDAMENTO, entregador: 'Ana Souza' });

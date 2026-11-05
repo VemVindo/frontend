@@ -13,16 +13,12 @@ export interface MapaEntregaProps {
   rotuloDestino: string;
   entregador: Coordenada | null;
   rota: string | null;
-  // Conteúdo sobre o mapa, no canto superior esquerdo (a pílula de ETA).
   sobreposicao?: ReactNode;
   className?: string;
 }
 
-// A cor da rota é a --color-primaria; o Google desenha a linha fora do CSS.
 const COR_DA_ROTA = '#6c5dd3';
 
-// O fundo claro (quarteirões #E4E2F1 e ruas brancas) vem do estilo associado
-// ao Map ID no Google Cloud; o JSON está no CONFIGURAR-GOOGLE-CLOUD.md.
 const CENTRALIZADO = { anchorLeft: '-50%', anchorTop: '-50%' };
 
 export default function MapaEntrega({
@@ -82,8 +78,6 @@ export default function MapaEntrega({
   );
 }
 
-// Enquadra os pontos quando um novo aparece (loja, destino, entregador).
-// Depois disso o mapa fica onde a pessoa deixou.
 function Enquadramento({ pontos }: { pontos: (Coordenada | null)[] }) {
   const mapa = useMap();
   const enquadrados = useRef(0);
@@ -101,8 +95,6 @@ function Enquadramento({ pontos }: { pontos: (Coordenada | null)[] }) {
     const limites = new google.maps.LatLngBounds();
     presentes.forEach((ponto) => limites.extend(ponto));
     mapa.fitBounds(limites, 56);
-    // Só a chegada de um ponto novo reenquadra; o movimento do entregador não.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapa, quantidade]);
 
   return null;

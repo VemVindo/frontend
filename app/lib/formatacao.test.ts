@@ -5,7 +5,7 @@ import {
   linhasDadosCompartilhados,
   rotuloDoVeiculo,
 } from './dadosCompartilhados';
-import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, tomDoStatus } from './pedidos';
+import { etapaAlcancada, formatarDataHora, pedidoEmAberto, rotuloDoStatus, textoDaNota, tomDoStatus } from './pedidos';
 import { TELA_INICIAL, telaPedidoDoEntregador, telaPedidoDoPainel } from './rotas';
 import { formatarTelefone, iniciais, primeiroNome } from './texto';
 import { ERRO_ACAO, EXECUTAR_ACAO } from './vinculos';
@@ -71,6 +71,14 @@ describe('pedidos', () => {
 
   it('formata data e hora no padrão brasileiro', () => {
     expect(formatarDataHora('2026-10-07T14:02:00')).toBe('07/10, 14:02');
+  });
+
+  it.each([
+    [5, '5 de 5'],
+    [0, '0 de 5'],
+    [null, 'Sem avaliação'],
+  ])('mostra a nota %s como "%s"', (nota, esperado) => {
+    expect(textoDaNota(nota)).toBe(esperado);
   });
 });
 

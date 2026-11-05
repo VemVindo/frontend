@@ -84,7 +84,11 @@ export default function ModalAtribuirEntregador({
             : 'Selecione um entregador disponível para este pedido.'}
         </p>
 
-        {erro && <p role="alert" className="text-xs text-erro">{erro}</p>}
+        {erro && (
+          <p role="alert" className="text-xs text-erro">
+            {erro}
+          </p>
+        )}
         {!disponiveis && !erro && <p className="text-xs text-texto-apoio">Carregando entregadores...</p>}
         {disponiveis?.length === 0 && (
           <p className="text-xs text-texto-apoio">Nenhum entregador disponível no momento.</p>

@@ -28,7 +28,6 @@ const CADASTRO_VAZIO: ValoresDoCadastro = {
   confirmacaoSenha: '',
 };
 
-// E-US01: cadastro do estabelecimento por CNPJ ou por CPF.
 export default function PaginaCadastro() {
   const router = useRouter();
   const [valores, setValores] = useState(CADASTRO_VAZIO);
@@ -98,7 +97,9 @@ export default function PaginaCadastro() {
               <label
                 key={tipo}
                 className={`cursor-pointer rounded-[10px] border px-4 py-2 text-xs font-semibold ${
-                  valores.tipoDocumento === tipo ? 'border-primaria bg-primaria-clara text-primaria-escura' : 'border-borda text-texto-corpo'
+                  valores.tipoDocumento === tipo
+                    ? 'border-primaria bg-primaria-clara text-primaria-escura'
+                    : 'border-borda text-texto-corpo'
                 }`}
               >
                 <input
@@ -121,12 +122,15 @@ export default function PaginaCadastro() {
               value={valores.documento}
               erro={erros.documento}
               disabled={enviando}
-              onChange={(evento) => alterar('documento', normalizarDocumento(valores.tipoDocumento, evento.target.value))}
+              onChange={(evento) =>
+                alterar('documento', normalizarDocumento(valores.tipoDocumento, evento.target.value))
+              }
             />
             {ehCnpj && (
               <CampoTexto
                 id="empresa-razaoSocial"
                 rotulo="Razão social"
+                reservarEspacoDescricao
                 value={valores.razaoSocial}
                 erro={erros.razaoSocial}
                 disabled={enviando}
@@ -138,7 +142,13 @@ export default function PaginaCadastro() {
 
         <fieldset>
           <legend className="mb-3 text-xs font-semibold text-texto">Dados do estabelecimento</legend>
-          <CamposDaEmpresa valores={valores} erros={erros} desabilitado={enviando} onChange={alterar} />
+          <CamposDaEmpresa
+            valores={valores}
+            erros={erros}
+            desabilitado={enviando}
+            reservarEspacoDescricao
+            onChange={alterar}
+          />
         </fieldset>
 
         <fieldset className="grid gap-4 md:grid-cols-2">
@@ -157,6 +167,7 @@ export default function PaginaCadastro() {
           <CampoTexto
             id="empresa-confirmacaoSenha"
             rotulo="Confirme a senha"
+            reservarEspacoDescricao
             type="password"
             autoComplete="new-password"
             value={valores.confirmacaoSenha}

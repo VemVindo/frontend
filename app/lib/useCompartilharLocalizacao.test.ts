@@ -21,6 +21,7 @@ const VISAO: VisaoDaEntrega = {
   duracaoRestanteS: null,
   estimado: true,
   atualizadaEm: null,
+  entregadorProximo: false,
 };
 
 type Sucesso = (leitura: GeolocationPosition) => void;

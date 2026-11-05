@@ -7,13 +7,23 @@ export interface CampoTextoProps extends InputHTMLAttributes<HTMLInputElement> {
   descricao?: string;
   erro?: string;
   aparencia?: 'padrao' | 'modal';
+  reservarEspacoDescricao?: boolean;
 }
+
+const APARENCIAS = {
+  padrao: { rotulo: 'text-xs text-texto-corpo', campo: 'h-10 rounded-[7px] bg-superficie-suave text-[13px]' },
+  modal: {
+    rotulo: 'text-[11px] text-texto-apoio',
+    campo: 'min-w-0 h-9 rounded-lg bg-superficie text-xs placeholder:text-texto-apoio',
+  },
+};
 
 export default function CampoTexto({
   rotulo,
   descricao,
   erro,
   aparencia = 'padrao',
+  reservarEspacoDescricao = false,
   id,
   className = '',
   ...props
@@ -25,7 +35,7 @@ export default function CampoTexto({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <label htmlFor={idCampo} className={aparencia === 'modal' ? 'text-[11px] text-texto-apoio' : 'text-xs text-texto-corpo'}>
+      <label htmlFor={idCampo} className={APARENCIAS[aparencia].rotulo}>
         {rotulo}
       </label>
       {descricao && (
@@ -33,11 +43,12 @@ export default function CampoTexto({
           {descricao}
         </p>
       )}
+      {!descricao && reservarEspacoDescricao && <span aria-hidden="true" className="min-h-[17px]" />}
       <input
         id={idCampo}
         aria-invalid={erro ? true : undefined}
         aria-describedby={[descricao && idDescricao, erro && idErro].filter(Boolean).join(' ') || undefined}
-        className={`border px-3 text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${aparencia === 'modal' ? 'min-w-0 h-9 rounded-lg bg-superficie text-xs placeholder:text-texto-apoio' : 'h-10 rounded-[7px] bg-superficie-suave text-[13px]'} ${erro ? 'border-erro' : 'border-borda'}`}
+        className={`border px-3 text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${APARENCIAS[aparencia].campo} ${erro ? 'border-erro' : 'border-borda'}`}
         {...props}
       />
       {erro && (

@@ -22,6 +22,7 @@ const VISAO: VisaoDaEntrega = {
   duracaoRestanteS: 780,
   estimado: false,
   atualizadaEm: '2026-10-15T12:00:00Z',
+  entregadorProximo: false,
 };
 
 type Ouvinte = (...argumentos: unknown[]) => void;

@@ -15,9 +15,6 @@ const ROTULO_DA_ETAPA: Record<EtapaDoPedido, string> = {
   CANCELADO: 'Cancelado',
 };
 
-// R-US02: o caminho normal mostra as três etapas, as futuras sem horário.
-// Pedido cancelado troca o "Entregue" pelo cancelamento e só mostra a saída
-// para entrega se ela aconteceu.
 export function montarLinhaDoTempo(
   doServidor: MarcoDoPedido[],
   doTempoReal: MarcoDoPedido[],

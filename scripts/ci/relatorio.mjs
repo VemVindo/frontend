@@ -20,7 +20,7 @@ const METRICAS = [
 
 const ETAPAS = {
   'titulo-pr': 'Título do PR',
-  lint: 'Lint',
+  lint: 'Lint e formatação',
   typecheck: 'Typecheck',
   testes: 'Testes unitários',
   e2e: 'Testes e2e',

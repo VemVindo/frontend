@@ -46,7 +46,6 @@ export default function PaginaConfiguracoes() {
     }
   }
 
-  // Só um aviso por vez; sem nenhum, o Card fica sem corpo.
   const mensagem = erro ? (
     <p role="alert" className="text-[13px] text-erro">
       {erro}

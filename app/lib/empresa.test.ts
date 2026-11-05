@@ -76,9 +76,9 @@ describe('validarCadastro', () => {
 
   it('exige razão social só para CNPJ', () => {
     expect(validarCadastro({ ...CADASTRO, razaoSocial: '' }).razaoSocial).toBeDefined();
-    expect(
-      validarCadastro({ ...CADASTRO, tipoDocumento: 'CPF', documento: '52998224725', razaoSocial: '' }),
-    ).toEqual({});
+    expect(validarCadastro({ ...CADASTRO, tipoDocumento: 'CPF', documento: '52998224725', razaoSocial: '' })).toEqual(
+      {},
+    );
   });
 
   it('valida o documento conforme o tipo', () => {

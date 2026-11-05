@@ -12,11 +12,17 @@ import {
   buscarLocalizacaoDoRastreio,
   buscarParametrosRemuneracao,
   buscarRastreio,
+  consultarAvaliacao,
   consultarRotaDoPedido,
+  enviarComentario,
+  enviarNota,
   gerarLinkDeRastreio,
   buscarUsuarioAtual,
+  cadastrarEntregador,
   checkHealth,
+  convidarEntregador,
   encerrarVinculo,
+  listarAvaliacoes,
   finalizarPedido,
   listarFrota,
   listarVinculos,
@@ -88,10 +94,7 @@ describe('api', () => {
   });
 
   it('junta as mensagens quando a validação devolve uma lista', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(resposta(400, { message: ['cpf invalido', 'senha vazia'] })),
-    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(resposta(400, { message: ['cpf invalido', 'senha vazia'] })));
 
     await expect(buscarUsuarioAtual()).rejects.toThrow('cpf invalido; senha vazia');
   });
@@ -121,6 +124,14 @@ describe('api', () => {
     ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
     ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
+    [
+      'cadastrarEntregador',
+      () =>
+        cadastrarEntregador({ nome: 'Joana', cpf: '52998224725', telefone: '61988887777', tipoVeiculo: 'BICICLETA' }),
+      'POST',
+      '/entregadores',
+    ],
+    ['convidarEntregador', () => convidarEntregador('52998224725'), 'POST', '/entregadores/vinculo'],
     ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
     [
       'reatribuirEntregadorDoPedido',
@@ -133,11 +144,20 @@ describe('api', () => {
     ['consultarRotaDoPedido', () => consultarRotaDoPedido(7), 'GET', '/pedidos/7/rota'],
     ['buscarDetalheDoPedido', () => buscarDetalheDoPedido(7), 'GET', '/pedidos/7'],
     ['buscarRastreio', () => buscarRastreio('abc_123'), 'GET', '/rastreio/abc_123'],
-    ['buscarLocalizacaoDoRastreio', () => buscarLocalizacaoDoRastreio('abc_123'), 'GET', '/rastreio/abc_123/localizacao'],
+    [
+      'buscarLocalizacaoDoRastreio',
+      () => buscarLocalizacaoDoRastreio('abc_123'),
+      'GET',
+      '/rastreio/abc_123/localizacao',
+    ],
     ['buscarConfiguracoes', () => buscarConfiguracoes(), 'GET', '/empresa/configuracoes'],
     ['gerarLinkDeRastreio', () => gerarLinkDeRastreio(7), 'POST', '/pedidos/7/link-rastreio'],
     ['atualizarConfiguracoes', () => atualizarConfiguracoes({ exibirMapa: false }), 'PATCH', '/empresa/configuracoes'],
     ['buscarParametrosRemuneracao', () => buscarParametrosRemuneracao(), 'GET', '/empresa/remuneracao'],
+    ['listarAvaliacoes', () => listarAvaliacoes({ notas: [], de: '', ate: '' }), 'GET', '/avaliacoes'],
+    ['consultarAvaliacao', () => consultarAvaliacao('abc_123'), 'GET', '/rastreio/abc_123/avaliacao'],
+    ['enviarNota', () => enviarNota('abc_123', 4), 'POST', '/rastreio/abc_123/avaliacao'],
+    ['enviarComentario', () => enviarComentario('abc_123', 'Rapido'), 'PATCH', '/rastreio/abc_123/avaliacao'],
     [
       'salvarParametrosRemuneracao',
       () => salvarParametrosRemuneracao({ taxaFixa: 800, coeficienteKm: 150 }),
@@ -174,24 +194,41 @@ describe('api', () => {
   });
 });
 
-// E-US07: os comportamentos genéricos de requisitar são cobertos no describe acima.
 describe('criarPedido', () => {
   afterEach(() => vi.unstubAllGlobals());
-  it.each([{ nome: 'POST /pedido/criar' }])('$nome envia o DTO exato e devolve o pedido', async () => {
-    const payload = {
-      nome_recebedor: 'Carla', telefone_recebedor: '61999990000', cep: '70000000', logradouro: 'Rua A',
-      numero: 10, bairro: 'Centro', cidade: 'Brasília', uf: 'DF', descricao: '',
-      valor_entrega: 1500, distancia: 4200, idEmpresa: 42,
+  it('POST /pedidos envia o DTO exato e devolve o pedido', async () => {
+    const dadosDoPedido = {
+      nome_recebedor: 'Carla',
+      telefone_recebedor: '61999990000',
+      cep: '70000000',
+      logradouro: 'Rua A',
+      numero: 10,
+      bairro: 'Centro',
+      cidade: 'Brasília',
+      uf: 'DF',
+      descricao: '',
+      tipo_veiculo: 'DRIVE' as const,
     };
     const pedido = {
-      ...payload, id_pedido: 91, complemento: null, cpf_entregador: null, status: 'Pendente',
-      data_criacao: '2026-10-22T12:00:00.000Z', data_inicio_entrega: null, data_finalizacao: null,
+      ...dadosDoPedido,
+      id_pedido: 91,
+      complemento: null,
+      cpf_entregador: null,
+      status: 'PENDENTE',
+      valor_entrega: 1500,
+      distancia: 4200,
+      idEmpresa: 42,
+      data_criacao: '2026-10-22T12:00:00.000Z',
+      data_inicio_entrega: null,
+      data_finalizacao: null,
     };
-    const fetchMock = vi.fn().mockResolvedValue(resposta(201, pedido));
-    vi.stubGlobal('fetch', fetchMock);
-    expect(await criarPedido(payload)).toEqual(pedido);
-    expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`${API_URL}/pedido/criar`, {
-      method: 'POST', body: JSON.stringify(payload), credentials: 'include',
+    const fetchSimulado = vi.fn().mockResolvedValue(resposta(201, pedido));
+    vi.stubGlobal('fetch', fetchSimulado);
+    expect(await criarPedido(dadosDoPedido)).toEqual(pedido);
+    expect(fetchSimulado).toHaveBeenCalledExactlyOnceWith(`${API_URL}/pedidos`, {
+      method: 'POST',
+      body: JSON.stringify(dadosDoPedido),
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
   });

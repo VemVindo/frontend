@@ -16,7 +16,10 @@ const ACAO = 'cursor-pointer text-xs font-semibold text-destaque hover:underline
 export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidosAtivosProps) {
   return (
     <>
-      <div aria-hidden className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}>
+      <div
+        aria-hidden
+        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}
+      >
         {TITULOS.map((titulo) => (
           <span key={titulo}>{titulo}</span>
         ))}

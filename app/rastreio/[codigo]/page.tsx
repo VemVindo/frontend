@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
+import AvaliacaoDaEntrega from '@/app/components/avaliacao/AvaliacaoDaEntrega';
 import CabecalhoRecebedor from '@/app/components/layout/CabecalhoRecebedor';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import EtaSemMapa from '@/app/components/mapa/EtaSemMapa';
@@ -9,12 +10,14 @@ import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
 import { LinkWhatsapp } from '@/app/components/pedidos/BotaoWhatsapp';
 import EtiquetaStatus from '@/app/components/pedidos/EtiquetaStatus';
 import LinhaDoTempoDoPedido from '@/app/components/pedidos/LinhaDoTempoDoPedido';
+import AvisoFlutuante from '@/app/components/ui/AvisoFlutuante';
 import Card from '@/app/components/ui/Card';
 import { ApiError, buscarRastreio } from '@/app/lib/api';
+import { avisoDaMudanca } from '@/app/lib/avisos';
 import { montarLinhaDoTempo } from '@/app/lib/linhaDoTempo';
 import { formatarEndereco, pedidoEmAberto } from '@/app/lib/pedidos';
 import { iniciais } from '@/app/lib/texto';
-import type { PaginaDoRecebedor } from '@/app/lib/tipos';
+import type { PaginaDoRecebedor, SituacaoDoAviso } from '@/app/lib/tipos';
 import { type EstadoConexao, useRastreioTempoReal } from '@/app/lib/useRastreioTempoReal';
 
 type Falha = 'invalido' | 'encerrado' | 'erro';
@@ -41,7 +44,6 @@ const TEXTO_DA_CONEXAO: Record<EstadoConexao, string | null> = {
   encerrado: null,
 };
 
-// O [codigo] da URL é o token do link do recebedor, não o número do pedido.
 export default function PaginaRastreio() {
   const { codigo } = useParams<{ codigo: string }>();
   const [pagina, setPagina] = useState<PaginaDoRecebedor | null>(null);
@@ -71,6 +73,27 @@ export default function PaginaRastreio() {
   const encerrada = acessoNegado !== null || (statusAtual !== undefined && !pedidoEmAberto(statusAtual));
   const falhaVisivel: Falha | null = falha ?? (acessoNegado === 'invalido' ? 'invalido' : null);
 
+  const [aviso, setAviso] = useState<string | null>(null);
+  const situacaoAnterior = useRef<SituacaoDoAviso | null>(null);
+  const entregadorProximo = visao?.entregadorProximo ?? false;
+  const fecharAviso = useCallback(() => setAviso(null), []);
+
+  useEffect(() => {
+    if (!statusAtual) return;
+    const situacaoAtual = { status: statusAtual, entregadorProximo };
+    const novoAviso = avisoDaMudanca(situacaoAnterior.current, situacaoAtual);
+    situacaoAnterior.current = situacaoAtual;
+    if (novoAviso) setAviso(novoAviso);
+  }, [statusAtual, entregadorProximo]);
+
+  if (falhaVisivel === 'encerrado') {
+    return (
+      <main className="mx-auto w-full max-w-[640px] px-[18px] py-12">
+        <AvaliacaoDaEntrega token={codigo} />
+      </main>
+    );
+  }
+
   if (falhaVisivel) {
     const { titulo, texto } = MENSAGEM_DA_FALHA[falhaVisivel];
     return (
@@ -88,8 +111,6 @@ export default function PaginaRastreio() {
     );
   }
 
-  // O mapa só é carregado (e cobrado pelo Google) com a entrega em andamento:
-  // antes disso não há entregador para mostrar.
   const emAndamento = statusAtual === 'EM_ANDAMENTO' && !encerrada;
   const mapaLigado = visao?.exibirMapa ?? pagina.exibirMapa;
   const mostrarMapa = emAndamento && mapaLigado;
@@ -130,7 +151,8 @@ export default function PaginaRastreio() {
         </div>
       </Card>
 
-      {encerrada && (
+      {encerrada && statusAtual === 'FINALIZADO' && <AvaliacaoDaEntrega token={codigo} />}
+      {encerrada && statusAtual !== 'FINALIZADO' && (
         <Card
           titulo="Entrega encerrada"
           descricao="O rastreio em tempo real termina quando o pedido é finalizado ou cancelado."
@@ -140,9 +162,11 @@ export default function PaginaRastreio() {
         <Card titulo="Tempo estimado de chegada" descricao="O pedido ainda não saiu para entrega." />
       )}
 
-      {/* Depois da entrega o código não serve mais para nada. */}
       {!encerrada && (
-        <Card titulo="Código de recebimento" descricao="Informe este código ao entregador para confirmar o recebimento.">
+        <Card
+          titulo="Código de recebimento"
+          descricao="Informe este código ao entregador para confirmar o recebimento."
+        >
           <p className="font-titulo text-2xl font-bold tracking-[0.3em] text-texto">{pagina.codigoRecebedor}</p>
         </Card>
       )}
@@ -158,9 +182,6 @@ export default function PaginaRastreio() {
       />
       <main className="mx-auto w-full max-w-[1280px] px-[18px] pb-6 md:px-10 md:py-12">
         {mostrarMapa && (
-          // Figma "Recebedor — Desktop · Em andamento": cartões à esquerda (560)
-          // e mapa à direita (627 × 375). No mobile, o mapa vem primeiro e
-          // ocupa a largura toda (390 × 435).
           <div className="grid gap-5 lg:grid-cols-[560fr_627fr] lg:gap-[13px]">
             <div className="-mx-[18px] flex flex-col gap-3 md:mx-0 lg:order-2">
               <MapaEntrega
@@ -186,7 +207,6 @@ export default function PaginaRastreio() {
         )}
 
         {mostrarEtaSemMapa && (
-          // Figma "03B — Rastreio sem mapa" (mobile) e "— Web" (700 + 420).
           <>
             <div className="mb-[29px] hidden md:block">
               <h1 className="text-[28px] font-semibold text-texto-corpo">Rastreio ao vivo</h1>
@@ -208,6 +228,7 @@ export default function PaginaRastreio() {
 
         {!emAndamento && <div className="flex max-w-[640px] flex-col gap-5">{cartoesDoPedido}</div>}
       </main>
+      <AvisoFlutuante texto={aviso} onFechar={fecharAviso} />
     </>
   );
 }

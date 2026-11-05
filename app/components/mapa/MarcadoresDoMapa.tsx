@@ -1,9 +1,5 @@
 import Image from 'next/image';
 
-// Marcadores do Figma (Recebedor e Entregador, área do mapa), nos tamanhos
-// originais dos SVGs. O ponto de ancoragem é o centro do círculo; o rótulo
-// fica fora da caixa para não deslocar a âncora.
-
 const ROTULO = 'absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9.66px] font-bold leading-none';
 
 export function MarcadorOrigem({ nome }: { nome: string }) {
@@ -15,7 +11,6 @@ export function MarcadorOrigem({ nome }: { nome: string }) {
   );
 }
 
-// "Você" para o recebedor; para o entregador, o nome de quem recebe.
 export function MarcadorDestino({ rotulo }: { rotulo: string }) {
   return (
     <div className="relative">

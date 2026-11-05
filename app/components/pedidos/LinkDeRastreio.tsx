@@ -12,8 +12,6 @@ export interface LinkDeRastreioProps {
 
 type Etapa = 'inicio' | 'confirmando' | 'gerando';
 
-// O backend só guarda o hash do token, então o link não pode ser mostrado de
-// novo: cada clique gera outro, e quem acompanhava pelo anterior perde o acesso.
 export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
   const [etapa, setEtapa] = useState<Etapa>('inicio');
   const [gerado, setGerado] = useState<LinkGerado | null>(null);
