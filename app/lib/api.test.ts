@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   API_URL,
+  criarPedido,
   ApiError,
   aceitarVinculo,
   atribuirEntregadorAoPedido,
@@ -213,5 +214,45 @@ describe('api', () => {
     await buscarRastreio('a/b?c');
 
     expect(fetchMock.mock.calls[0][0]).toBe(`${API_URL}/rastreio/a%2Fb%3Fc`);
+  });
+});
+
+describe('criarPedido', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it('POST /pedidos envia o DTO exato e devolve o pedido', async () => {
+    const dadosDoPedido = {
+      nome_recebedor: 'Carla',
+      telefone_recebedor: '61999990000',
+      cep: '70000000',
+      logradouro: 'Rua A',
+      numero: 10,
+      bairro: 'Centro',
+      cidade: 'Brasília',
+      uf: 'DF',
+      descricao: '',
+      tipo_veiculo: 'DRIVE' as const,
+    };
+    const pedido = {
+      ...dadosDoPedido,
+      id_pedido: 91,
+      complemento: null,
+      cpf_entregador: null,
+      status: 'PENDENTE',
+      valor_entrega: 1500,
+      distancia: 4200,
+      idEmpresa: 42,
+      data_criacao: '2026-10-22T12:00:00.000Z',
+      data_inicio_entrega: null,
+      data_finalizacao: null,
+    };
+    const fetchSimulado = vi.fn().mockResolvedValue(resposta(201, pedido));
+    vi.stubGlobal('fetch', fetchSimulado);
+    expect(await criarPedido(dadosDoPedido)).toEqual(pedido);
+    expect(fetchSimulado).toHaveBeenCalledExactlyOnceWith(`${API_URL}/pedidos`, {
+      method: 'POST',
+      body: JSON.stringify(dadosDoPedido),
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
   });
 });

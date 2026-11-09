@@ -1,5 +1,7 @@
 import { consultaDasAvaliacoes } from '@/app/lib/comentarios';
 import type {
+  CriarPedidoRequisicao,
+  CriarPedidoResposta,
   AvaliacaoDaEmpresa,
   AvaliacaoDoRecebedor,
   CadastroDaEmpresa,
@@ -162,6 +164,10 @@ export async function convidarEntregador(cpf: string): Promise<ConviteEnviado> {
     method: 'POST',
     body: JSON.stringify({ cpf }),
   });
+}
+
+export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPedidoResposta> {
+  return requisitar('/pedidos', { method: 'POST', body: JSON.stringify(dados) });
 }
 
 export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {

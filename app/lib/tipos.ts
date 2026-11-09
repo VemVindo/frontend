@@ -144,6 +144,39 @@ export interface PeriodoDeConclusao {
   ate: string;
 }
 
+export type TipoRotaEntrega = 'DRIVE' | 'BICYCLE';
+
+export interface CriarPedidoRequisicao {
+  nome_recebedor: string;
+  telefone_recebedor: string;
+  cep: string;
+  logradouro: string;
+  numero: number;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  descricao: string;
+  tipo_veiculo: TipoRotaEntrega;
+  cpf_entregador?: string;
+}
+
+export interface CriarPedidoResposta extends Omit<
+  CriarPedidoRequisicao,
+  'complemento' | 'cpf_entregador' | 'tipo_veiculo'
+> {
+  id_pedido: number;
+  complemento: string | null;
+  cpf_entregador: string | null;
+  status: StatusPedido;
+  data_criacao: string;
+  data_inicio_entrega: null;
+  data_finalizacao: null;
+  valor_entrega: number;
+  distancia: number;
+  idEmpresa: number;
+}
+
 // Centavos: valor base por entrega e adicional por quilômetro.
 export interface ParametrosRemuneracao {
   taxaFixa: number;
