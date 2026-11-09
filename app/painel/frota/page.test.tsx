@@ -1,13 +1,24 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, cadastrarEntregador, convidarEntregador } from '@/app/lib/api';
+import { ApiError, cadastrarEntregador, convidarEntregador, editarEntregador, listarFrota } from '@/app/lib/api';
 import PaginaFrota from './page';
 
 vi.mock('@/app/lib/api', async (original) => ({
   ...(await original<typeof import('@/app/lib/api')>()),
   cadastrarEntregador: vi.fn(),
   convidarEntregador: vi.fn(),
+  listarFrota: vi.fn(),
+  editarEntregador: vi.fn(),
 }));
+
+const BRUNO = {
+  nome: 'Bruno Lima',
+  cpf: '98765432100',
+  telefone: '61910000002',
+  tipoVeiculo: 'CARRO',
+  placa: 'XYZ9E87',
+  disponivel: true,
+};
 
 const MENSAGEM_CONVITE = 'Se o CPF for de um entregador cadastrado, ele recebera o convite no app.';
 
@@ -36,11 +47,39 @@ describe('PaginaFrota', () => {
       senhaTemporariaExpiraEm: '2026-10-25T15:00:00Z',
     });
     vi.mocked(convidarEntregador).mockResolvedValue({ mensagem: MENSAGEM_CONVITE });
+    vi.mocked(listarFrota).mockResolvedValue([BRUNO]);
   });
 
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+  });
+
+  it('mostra os entregadores da frota', async () => {
+    render(<PaginaFrota />);
+
+    expect(await screen.findByText('Bruno Lima')).toBeTruthy();
+    expect(screen.getByText('Carro - XYZ9E87')).toBeTruthy();
+  });
+
+  it('edita o entregador e atualiza a lista', async () => {
+    vi.mocked(editarEntregador).mockResolvedValue(true);
+    render(<PaginaFrota />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Bruno Lima' }));
+    preencher('Nome do entregador', 'Bruno Lima Souza');
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+
+    expect(await screen.findByText('Dados de Bruno Lima Souza atualizados.')).toBeTruthy();
+    expect(screen.getByText('Bruno Lima Souza')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Salvar alterações' })).toBeNull();
+  });
+
+  it('avisa quando a frota não carrega', async () => {
+    vi.mocked(listarFrota).mockRejectedValue(new ApiError(500, 'Erro'));
+    render(<PaginaFrota />);
+
+    expect(await screen.findByText('Não foi possível carregar a frota agora.')).toBeTruthy();
   });
 
   it('cadastra o entregador e mostra a senha temporaria uma vez', async () => {

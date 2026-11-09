@@ -10,6 +10,7 @@ import type {
   DadosCadastraisDaEmpresa,
   DadosCompartilhados,
   DetalheDoPedido,
+  EdicaoDoEntregador,
   FiltroDeAvaliacoes,
   LinkDeRastreio,
   NovaEmpresa,
@@ -145,6 +146,13 @@ export async function listarFrota(): Promise<DadosCompartilhados[]> {
 export async function cadastrarEntregador(dados: NovoEntregador): Promise<EntregadorCadastrado> {
   return requisitar('/entregadores', {
     method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
+export async function editarEntregador(dados: EdicaoDoEntregador): Promise<boolean> {
+  return requisitar('/entregadores', {
+    method: 'PATCH',
     body: JSON.stringify(dados),
   });
 }
