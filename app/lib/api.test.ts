@@ -96,7 +96,13 @@ describe('api', () => {
   it('manda o cpf e os dados novos no corpo da edição do entregador', async () => {
     const fetchSimulado = vi.fn().mockResolvedValue(resposta(200, true));
     vi.stubGlobal('fetch', fetchSimulado);
-    const dados = { cpf: '52998224725', nome: 'Joana', telefone: '61988887777', veiculo: 'MOTO' as const, placa: 'ABC1D23' };
+    const dados = {
+      cpf: '52998224725',
+      nome: 'Joana',
+      telefone: '61988887777',
+      veiculo: 'MOTO' as const,
+      placa: 'ABC1D23',
+    };
 
     await expect(editarEntregador(dados)).resolves.toBe(true);
 

@@ -27,7 +27,11 @@ export interface FormularioEdicaoEntregadorProps {
   onCancelar: () => void;
 }
 
-export default function FormularioEdicaoEntregador({ entregador, onSalvo, onCancelar }: FormularioEdicaoEntregadorProps) {
+export default function FormularioEdicaoEntregador({
+  entregador,
+  onSalvo,
+  onCancelar,
+}: FormularioEdicaoEntregadorProps) {
   const [valores, setValores] = useState<ValoresDoEntregador>(valoresParaEditar(entregador));
   const [erros, setErros] = useState<ErrosDoFormulario<ValoresDoEntregador>>({});
   const [enviando, setEnviando] = useState(false);
