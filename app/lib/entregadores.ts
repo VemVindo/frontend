@@ -1,6 +1,6 @@
 import { cpfValido } from '@/app/lib/cpf';
 import type { ErrosDoFormulario } from '@/app/lib/empresa';
-import type { NovoEntregador, TipoVeiculo } from '@/app/lib/tipos';
+import type { DadosCompartilhados, EdicaoDoEntregador, NovoEntregador, TipoVeiculo } from '@/app/lib/tipos';
 
 export const TIPOS_DE_VEICULO: TipoVeiculo[] = ['MOTO', 'CARRO', 'BICICLETA'];
 
@@ -55,5 +55,36 @@ export function paraNovoEntregador(valores: ValoresDoEntregador): NovoEntregador
     telefone: valores.telefone,
     tipoVeiculo,
     ...(precisaDePlaca(tipoVeiculo) && { placa: valores.placa }),
+  };
+}
+
+export function valoresParaEditar(entregador: DadosCompartilhados): ValoresDoEntregador {
+  return {
+    nome: entregador.nome,
+    cpf: entregador.cpf,
+    telefone: entregador.telefone.replace(/\D/g, ''),
+    tipoVeiculo: entregador.tipoVeiculo as TipoVeiculo,
+    placa: entregador.placa ?? '',
+  };
+}
+
+export function paraEdicaoDoEntregador(valores: ValoresDoEntregador): EdicaoDoEntregador {
+  const veiculo = valores.tipoVeiculo as TipoVeiculo;
+  return {
+    cpf: valores.cpf,
+    nome: valores.nome.trim(),
+    telefone: valores.telefone,
+    veiculo,
+    ...(precisaDePlaca(veiculo) && { placa: valores.placa }),
+  };
+}
+
+export function entregadorEditado(antes: DadosCompartilhados, edicao: EdicaoDoEntregador): DadosCompartilhados {
+  return {
+    ...antes,
+    nome: edicao.nome,
+    telefone: edicao.telefone,
+    tipoVeiculo: edicao.veiculo,
+    placa: edicao.placa ?? antes.placa,
   };
 }
