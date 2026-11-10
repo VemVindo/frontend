@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
-import Card from '@/app/components/ui/Card';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { ApiError, convidarEntregador } from '@/app/lib/api';
 import { cpfValido, somenteDigitosCpf } from '@/app/lib/cpf';
@@ -42,10 +41,10 @@ export default function FormularioConviteEntregador({ cpfInicial = '' }: Formula
   }
 
   return (
-    <Card
-      titulo="Convidar entregador"
-      descricao="Para quem já usa o VemVindo em outro estabelecimento. Basta o CPF: ele aceita o convite no app."
-    >
+    <>
+      <p className="mb-4 text-xs text-texto-apoio">
+        Para quem já usa o VemVindo em outro estabelecimento. Basta o CPF: ele aceita o convite no app.
+      </p>
       <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
         <CampoTexto
           id="convite-cpf"
@@ -75,6 +74,6 @@ export default function FormularioConviteEntregador({ cpfInicial = '' }: Formula
           {enviando ? 'Enviando...' : 'Enviar convite'}
         </Botao>
       </form>
-    </Card>
+    </>
   );
 }

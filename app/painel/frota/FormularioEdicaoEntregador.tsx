@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
-import Card from '@/app/components/ui/Card';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { ApiError, editarEntregador } from '@/app/lib/api';
 import { somenteDigitos, type ErrosDoFormulario } from '@/app/lib/empresa';
@@ -74,7 +73,8 @@ export default function FormularioEdicaoEntregador({
   });
 
   return (
-    <Card titulo={`Editar ${entregador.nome}`} descricao="O CPF não muda. Altere só o que precisar.">
+    <>
+      <p className="mb-4 text-xs text-texto-apoio">O CPF não muda. Altere só o que precisar.</p>
       <form onSubmit={salvar} noValidate className="grid gap-4 md:grid-cols-2">
         <CampoTexto
           rotulo="Nome do entregador"
@@ -126,6 +126,6 @@ export default function FormularioEdicaoEntregador({
           </Botao>
         </div>
       </form>
-    </Card>
+    </>
   );
 }

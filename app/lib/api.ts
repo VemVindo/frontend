@@ -32,6 +32,8 @@ import type {
   Vinculo,
   VisaoDaEntrega,
 } from '@/app/lib/tipos';
+import type { DesempenhoEntregador } from '@/app/lib/tiposDesempenho';
+import type { ResultadoDaRemocaoDoEntregador } from '@/app/lib/tiposRemocaoEntregador';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -145,6 +147,14 @@ export async function listarFrota(): Promise<DadosCompartilhados[]> {
   return requisitar('/entregadores', { method: 'GET' });
 }
 
+export async function buscarDesempenhoEntregador(
+  cpf: string,
+  periodo: { de: string; ate: string },
+): Promise<DesempenhoEntregador> {
+  const parametros = new URLSearchParams(periodo);
+  return requisitar(`/entregadores/${encodeURIComponent(cpf)}/desempenho?${parametros}`, { method: 'GET' });
+}
+
 export async function cadastrarEntregador(dados: NovoEntregador): Promise<EntregadorCadastrado> {
   return requisitar('/entregadores', {
     method: 'POST',
@@ -157,6 +167,10 @@ export async function editarEntregador(dados: EdicaoDoEntregador): Promise<boole
     method: 'PATCH',
     body: JSON.stringify(dados),
   });
+}
+
+export async function removerEntregador(cpf: string): Promise<ResultadoDaRemocaoDoEntregador> {
+  return requisitar(`/entregadores/${encodeURIComponent(cpf)}/vinculo`, { method: 'DELETE' });
 }
 
 export async function convidarEntregador(cpf: string): Promise<ConviteEnviado> {
