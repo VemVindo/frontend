@@ -1,27 +1,67 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Card from '@/app/components/ui/Card';
+import Botao from '@/app/components/ui/Botao';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-import { listarFrota } from '@/app/lib/api';
+import { buscarDesempenhoEntregador, listarFrota } from '@/app/lib/api';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
+import ConfirmacaoRemocaoEntregador from './ConfirmacaoRemocaoEntregador';
+import DialogoFrota from './DialogoFrota';
 import FormularioCadastroEntregador from './FormularioCadastroEntregador';
 import FormularioConviteEntregador from './FormularioConviteEntregador';
 import FormularioEdicaoEntregador from './FormularioEdicaoEntregador';
-import ListaDaFrota from './ListaDaFrota';
+import PainelDaFrota from './PainelDaFrota';
+import { type EstadoDesempenho } from './ListaDaFrota';
+import useRemocaoEntregador from './useRemocaoEntregador';
 
 export default function PaginaFrota() {
   const [cpfParaConvite, setCpfParaConvite] = useState('');
   const [frota, setFrota] = useState<DadosCompartilhados[] | null>(null);
   const [erroDaFrota, setErroDaFrota] = useState(false);
+  const [desempenhoPorCpf, setDesempenhoPorCpf] = useState<Record<string, EstadoDesempenho>>({});
   const [emEdicao, setEmEdicao] = useState<DadosCompartilhados | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [cadastroAberto, setCadastroAberto] = useState(false);
+  const [conviteAberto, setConviteAberto] = useState(false);
+  const remocao = useRemocaoEntregador((cpf) => {
+    setFrota((atuais) => atuais?.filter((entregador) => entregador.cpf !== cpf) ?? null);
+    setDesempenhoPorCpf((atuais) => {
+      const atualizado = { ...atuais };
+      delete atualizado[cpf];
+      return atualizado;
+    });
+  });
 
   useEffect(() => {
     let cancelado = false;
     listarFrota()
       .then((lista) => {
-        if (!cancelado) setFrota(lista);
+        if (cancelado) return;
+        setFrota(lista);
+        setErroDaFrota(false);
+
+        const periodo = {
+          de: '1970-01-01T00:00:00.000Z',
+          ate: new Date().toISOString(),
+        };
+        for (const { cpf } of lista) {
+          buscarDesempenhoEntregador(cpf, periodo)
+            .then((dados) => {
+              if (!cancelado) {
+                setDesempenhoPorCpf((anteriores) => ({
+                  ...anteriores,
+                  [cpf]: { estado: 'carregado', dados },
+                }));
+              }
+            })
+            .catch(() => {
+              if (!cancelado) {
+                setDesempenhoPorCpf((anteriores) => ({
+                  ...anteriores,
+                  [cpf]: { estado: 'erro' },
+                }));
+              }
+            });
+        }
       })
       .catch(() => {
         if (!cancelado) setErroDaFrota(true);
@@ -31,44 +71,75 @@ export default function PaginaFrota() {
     };
   }, []);
 
-  function escolherParaEditar(entregador: DadosCompartilhados) {
-    setEmEdicao(entregador);
-    setAviso(null);
-  }
-
   function registrarEdicao(atualizado: DadosCompartilhados) {
     setFrota((atuais) => atuais?.map((atual) => (atual.cpf === atualizado.cpf ? atualizado : atual)) ?? null);
     setEmEdicao(null);
-    setAviso(`Dados de ${atualizado.nome} atualizados.`);
+  }
+
+  function abrirConvite(cpf = '') {
+    setCpfParaConvite(cpf);
+    setCadastroAberto(false);
+    setConviteAberto(true);
   }
 
   return (
     <div>
-      <TituloPagina titulo="Frota" subtitulo="Cadastre entregadores novos ou convide quem já usa o VemVindo" />
-      <div className="flex flex-col gap-5">
-        {emEdicao && (
+      <div className="mx-auto max-w-[1020px]">
+        <TituloPagina
+          titulo="Frota"
+          subtitulo={
+            frota
+              ? `${frota.length} ${frota.length === 1 ? 'entregador vinculado' : 'entregadores vinculados'} a este estabelecimento`
+              : 'Entregadores vinculados a este estabelecimento'
+          }
+          acao={
+            <Botao
+              variante="primario"
+              onClick={() => setCadastroAberto(true)}
+              className="h-11 w-full rounded-[14px] px-5 text-xs md:w-[300px]"
+            >
+              + Cadastrar entregador
+            </Botao>
+          }
+        />
+
+        <PainelDaFrota
+          entregadores={frota}
+          erro={erroDaFrota}
+          aviso={remocao.aviso}
+          desempenhoPorCpf={desempenhoPorCpf}
+          onEditar={setEmEdicao}
+          onRemover={remocao.escolher}
+          onConvidar={() => abrirConvite()}
+        />
+      </div>
+
+      <DialogoFrota aberto={cadastroAberto} titulo="Cadastrar entregador" onFechar={() => setCadastroAberto(false)}>
+        <FormularioCadastroEntregador onCpfJaCadastrado={abrirConvite} />
+      </DialogoFrota>
+
+      <DialogoFrota aberto={conviteAberto} titulo="Convidar entregador" onFechar={() => setConviteAberto(false)}>
+        <FormularioConviteEntregador key={cpfParaConvite} cpfInicial={cpfParaConvite} />
+      </DialogoFrota>
+
+      {emEdicao && (
+        <DialogoFrota aberto titulo={`Editar ${emEdicao.nome}`} onFechar={() => setEmEdicao(null)}>
           <FormularioEdicaoEntregador
             key={emEdicao.cpf}
             entregador={emEdicao}
             onSalvo={registrarEdicao}
             onCancelar={() => setEmEdicao(null)}
           />
-        )}
-        <Card titulo="Entregadores da frota">
-          {aviso && (
-            <p role="status" className="mb-3 text-xs text-sucesso-texto">
-              {aviso}
-            </p>
-          )}
-          {erroDaFrota && <p className="text-xs text-erro">Não foi possível carregar a frota agora.</p>}
-          {!frota && !erroDaFrota && <p className="text-xs text-texto-apoio">Carregando a frota...</p>}
-          {frota && <ListaDaFrota entregadores={frota} onEditar={escolherParaEditar} />}
-        </Card>
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <FormularioCadastroEntregador onCpfJaCadastrado={setCpfParaConvite} />
-          <FormularioConviteEntregador key={cpfParaConvite} cpfInicial={cpfParaConvite} />
-        </div>
-      </div>
+        </DialogoFrota>
+      )}
+
+      <ConfirmacaoRemocaoEntregador
+        entregador={remocao.paraRemover}
+        removendo={remocao.removendo}
+        erro={remocao.erroDaRemocao}
+        onFechar={remocao.fechar}
+        onConfirmar={remocao.confirmar}
+      />
     </div>
   );
 }

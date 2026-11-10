@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
-import Card from '@/app/components/ui/Card';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { ApiError, cadastrarEntregador } from '@/app/lib/api';
 import { somenteDigitosCpf } from '@/app/lib/cpf';
@@ -68,11 +67,7 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
   }
 
   if (cadastrado) {
-    return (
-      <Card titulo="Cadastrar entregador">
-        <SenhaTemporariaGerada cadastrado={cadastrado} onCadastrarOutro={recomecar} />
-      </Card>
-    );
+    return <SenhaTemporariaGerada cadastrado={cadastrado} onCadastrarOutro={recomecar} />;
   }
 
   const cpfJaCadastrado = falhaDoEnvio instanceof ApiError && falhaDoEnvio.status === CPF_JA_CADASTRADO;
@@ -83,10 +78,10 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
   });
 
   return (
-    <Card
-      titulo="Cadastrar entregador"
-      descricao="Para quem ainda não usa o VemVindo. O cadastro gera uma senha temporária para o primeiro acesso."
-    >
+    <>
+      <p className="mb-4 text-xs text-texto-apoio">
+        Para quem ainda não usa o VemVindo. O cadastro gera uma senha temporária para o primeiro acesso.
+      </p>
       <form onSubmit={enviar} noValidate className="grid gap-4 md:grid-cols-2">
         <CampoTexto
           rotulo="Nome completo"
@@ -149,6 +144,6 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
           {enviando ? 'Cadastrando...' : 'Cadastrar entregador'}
         </Botao>
       </form>
-    </Card>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import {
   atribuirEntregadorAoPedido,
   atualizarConfiguracoes,
   buscarConfiguracoes,
+  buscarDesempenhoEntregador,
   buscarDetalheDoPedido,
   buscarDadosCompartilhados,
   buscarLocalizacaoDoRastreio,
@@ -30,6 +31,7 @@ import {
   loginEmpresa,
   loginEntregador,
   reatribuirEntregadorDoPedido,
+  removerEntregador,
   recusarVinculo,
   registrarPosicao,
   salvarParametrosRemuneracao,
@@ -142,6 +144,16 @@ describe('api', () => {
     ['encerrarVinculo', () => encerrarVinculo(3), 'POST', '/entregador/vinculos/3/encerrar'],
     ['listarFrota', () => listarFrota(), 'GET', '/entregadores'],
     [
+      'buscarDesempenhoEntregador',
+      () =>
+        buscarDesempenhoEntregador('52998224725', {
+          de: '2026-01-01T00:00:00.000Z',
+          ate: '2026-11-09T00:00:00.000Z',
+        }),
+      'GET',
+      '/entregadores/52998224725/desempenho?de=2026-01-01T00%3A00%3A00.000Z&ate=2026-11-09T00%3A00%3A00.000Z',
+    ],
+    [
       'cadastrarEntregador',
       () =>
         cadastrarEntregador({ nome: 'Joana', cpf: '52998224725', telefone: '61988887777', tipoVeiculo: 'BICICLETA' }),
@@ -155,6 +167,7 @@ describe('api', () => {
       'PATCH',
       '/entregadores',
     ],
+    ['removerEntregador', () => removerEntregador('52998224725'), 'DELETE', '/entregadores/52998224725/vinculo'],
     ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
     [
       'reatribuirEntregadorDoPedido',
