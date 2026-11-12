@@ -27,15 +27,15 @@ export default function DetalhePedidoEntregador({ pedido, onStatusAlterado }: De
       <div className="grid gap-5 lg:grid-cols-[1.3fr_0.9fr]">
         <MapaDoEntregador pedido={pedido} />
 
-        <div className="flex flex-col rounded-[18px] bg-superficie p-4 shadow-sm ring-1 ring-borda">
-          <h2 className="text-[15px] md:text-[18px] font-bold text-texto">{pedido.recebedor}</h2>
-          <p className="mt-2 text-[14px] text-texto-apoio">{pedido.endereco}</p>
+        <div className="flex flex-col rounded-[18px] bg-superficie p-4 shadow-sm ring-1 ring-borda md:p-5">
+          <h2 className="font-titulo text-lg font-bold text-texto md:text-xl">{pedido.recebedor}</h2>
+          <p className="mt-2 text-[15px] leading-snug text-texto-corpo">{pedido.endereco}</p>
 
-          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
+          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 border-t border-borda pt-4 text-sm">
             {linhas.map(({ rotulo, valor }) => (
               <div key={rotulo} className="contents">
-                <dt className="text-texto-suave">{rotulo}</dt>
-                <dd className="font-medium text-texto">{valor}</dd>
+                <dt className="text-texto-apoio">{rotulo}</dt>
+                <dd className="font-semibold text-texto">{valor}</dd>
               </div>
             ))}
           </dl>

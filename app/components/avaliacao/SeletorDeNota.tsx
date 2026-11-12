@@ -36,7 +36,7 @@ export default function SeletorDeNota({ nota, desabilitado, onEscolher }: Seleto
         aria-checked={nota === 0}
         disabled={desabilitado}
         onClick={() => onEscolher(0)}
-        className={`cursor-pointer text-[11px] underline disabled:cursor-not-allowed ${nota === 0 ? 'text-texto' : 'text-texto-suave'}`}
+        className={`cursor-pointer text-xs underline disabled:cursor-not-allowed ${nota === 0 ? 'text-texto' : 'text-texto-suave'}`}
       >
         Nenhuma estrela (nota 0)
       </button>

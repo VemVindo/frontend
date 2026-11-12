@@ -129,7 +129,7 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
 
         {falhaDoEnvio && (
           <div role="alert" className="flex flex-col items-start gap-2 md:col-span-2">
-            <p className="text-[13px] text-erro">
+            <p className="text-sm text-erro">
               {falhaDoEnvio instanceof ApiError ? falhaDoEnvio.message : falhaDoEnvio}
             </p>
             {cpfJaCadastrado && (

@@ -13,7 +13,7 @@ export default function EtapasDaEntrega({ status }: EtapasDaEntregaProps) {
           <li
             key={etapa}
             aria-current={etapa === status ? 'step' : undefined}
-            className={`flex items-center gap-2 text-[11px] ${alcancada ? 'text-white' : 'text-lilas'}`}
+            className={`flex items-center gap-2 text-xs ${alcancada ? 'text-white' : 'text-lilas'}`}
           >
             <span className={`size-2.5 rounded-full border border-white ${alcancada ? 'bg-white' : ''}`} />
             {rotuloDoStatus(etapa)}

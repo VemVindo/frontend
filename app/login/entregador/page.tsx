@@ -69,7 +69,7 @@ export default function LoginEntregador() {
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar
         </BotaoLogin>
-        <Link href="/" className="text-center text-[13px] text-primaria font-medium">
+        <Link href="/" className="text-center text-sm text-primaria font-medium">
           Sou empresa
         </Link>
       </form>

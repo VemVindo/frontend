@@ -10,11 +10,11 @@ export interface SenhaTemporariaGeradaProps {
 export default function SenhaTemporariaGerada({ cadastrado, onCadastrarOutro }: SenhaTemporariaGeradaProps) {
   return (
     <div role="status" className="flex flex-col gap-4">
-      <p className="text-[13px] text-sucesso-texto">{cadastrado.entregador.nome} foi cadastrado.</p>
+      <p className="text-sm text-sucesso-texto">{cadastrado.entregador.nome} foi cadastrado.</p>
       <div className="rounded-[8px] border border-borda bg-superficie-suave px-4 py-3">
         <p className="text-xs text-texto-apoio">Senha temporária</p>
         <p className="mt-1 select-all font-mono text-lg font-semibold text-texto">{cadastrado.senhaTemporaria}</p>
-        <p className="mt-1 text-[11px] text-texto-apoio">
+        <p className="mt-1 text-xs text-texto-apoio">
           Vale até {formatarDataHora(cadastrado.senhaTemporariaExpiraEm)}.
         </p>
       </div>

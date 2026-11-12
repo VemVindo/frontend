@@ -55,7 +55,7 @@ export default function ListaDaFrota({
     <>
       <div
         aria-hidden="true"
-        className="mb-[10px] hidden grid-cols-[minmax(190px,1fr)_130px_110px_110px_140px_40px] items-center gap-3 rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio md:grid"
+        className="mb-[10px] hidden grid-cols-[minmax(190px,1fr)_130px_110px_110px_140px_40px] items-center gap-3 rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-xs uppercase text-texto-apoio md:grid"
       >
         <span>Entregador</span>
         <span>Status</span>
@@ -81,7 +81,7 @@ export default function ListaDaFrota({
                 <Avatar iniciais={iniciais(entregador.nome)} tamanho={36} />
                 <span className="flex min-w-0 flex-col gap-1">
                   <span className="truncate font-semibold">{entregador.nome}</span>
-                  <span className="text-[11px] text-texto-apoio">{rotuloDoVeiculo(entregador.tipoVeiculo)}</span>
+                  <span className="text-xs text-texto-apoio">{rotuloDoVeiculo(entregador.tipoVeiculo)}</span>
                 </span>
               </span>
 
@@ -97,7 +97,7 @@ export default function ListaDaFrota({
                 </span>
 
                 {desempenho?.estado === 'erro' ? (
-                  <span role="alert" className="text-[11px] text-erro md:col-span-2">
+                  <span role="alert" className="text-xs text-erro md:col-span-2">
                     Não foi possível carregar o desempenho.
                   </span>
                 ) : (
@@ -117,7 +117,7 @@ export default function ListaDaFrota({
                     <span className="text-texto-corpo">{entregas}</span>
                   </>
                 )}
-                <span className="text-[11px] font-medium text-texto-corpo">
+                <span className="text-xs font-medium text-texto-corpo">
                   <span className="text-texto-apoio md:hidden">Total ganho: </span>
                   {erroTotalPago
                     ? 'Indisponível'

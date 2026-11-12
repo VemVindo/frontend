@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Botao from '@/app/components/ui/Botao';
 import TituloPagina from '@/app/components/ui/TituloPagina';
 import { buscarDesempenhoEntregador, consultarResumoDashboard, listarFrota } from '@/app/lib/api';
+import { comEntregadorAtualizado, semEntregador } from '@/app/lib/entregadores';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
 import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
+import AcoesDaFrota from './AcoesDaFrota';
 import ConfirmacaoRemocaoEntregador from './ConfirmacaoRemocaoEntregador';
 import DialogoFrota from './DialogoFrota';
 import FormularioCadastroEntregador from './FormularioCadastroEntregador';
@@ -26,7 +27,7 @@ export default function PaginaFrota() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [conviteAberto, setConviteAberto] = useState(false);
   const remocao = useRemocaoEntregador((cpf) => {
-    setFrota((atuais) => atuais?.filter((entregador) => entregador.cpf !== cpf) ?? null);
+    setFrota((atuais) => semEntregador(atuais, cpf));
     setDesempenhoPorCpf((atuais) => {
       const atualizado = { ...atuais };
       delete atualizado[cpf];
@@ -101,7 +102,7 @@ export default function PaginaFrota() {
   }, []);
 
   function registrarEdicao(atualizado: DadosCompartilhados) {
-    setFrota((atuais) => atuais?.map((atual) => (atual.cpf === atualizado.cpf ? atualizado : atual)) ?? null);
+    setFrota((atuais) => comEntregadorAtualizado(atuais, atualizado));
     setEmEdicao(null);
   }
 
@@ -122,15 +123,11 @@ export default function PaginaFrota() {
               : 'Entregadores vinculados a este estabelecimento'
           }
           acao={
-            <div className="hidden md:block">
-              <Botao
-                variante="primario"
-                onClick={() => setCadastroAberto(true)}
-                className="h-11 rounded-[14px] px-5 text-sm"
-              >
-                + Cadastrar entregador
-              </Botao>
-            </div>
+            <AcoesDaFrota
+              onCadastrar={() => setCadastroAberto(true)}
+              onConvidar={() => abrirConvite()}
+              className="hidden md:flex"
+            />
           }
         />
 

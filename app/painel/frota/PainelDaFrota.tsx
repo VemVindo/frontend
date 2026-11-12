@@ -1,6 +1,6 @@
-import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
+import AcoesDaFrota from './AcoesDaFrota';
 import ListaDaFrota, { type EstadoDesempenho } from './ListaDaFrota';
 
 export interface PainelDaFrotaProps {
@@ -51,18 +51,7 @@ export default function PainelDaFrota({
           onRemover={onRemover}
         />
       )}
-      <div className="mt-4 md:hidden">
-        <Botao variante="primario" onClick={onCadastrar} className="h-11 w-full rounded-[14px] px-5 text-sm">
-          + Cadastrar entregador
-        </Botao>
-      </div>
-      <button
-        type="button"
-        onClick={onConvidar}
-        className="mt-4 cursor-pointer text-xs font-semibold text-destaque hover:underline focus-visible:outline-2 focus-visible:outline-primaria"
-      >
-        Convidar entregador que já usa o VemVindo
-      </button>
+      <AcoesDaFrota onCadastrar={onCadastrar} onConvidar={onConvidar} className="mt-4 md:hidden" />
     </Card>
   );
 }

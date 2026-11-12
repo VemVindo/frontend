@@ -31,7 +31,7 @@ export default function PaginaComponentes() {
 
       <Card titulo="Tipografia">
         <p className="font-titulo font-bold text-[26px]">Sora: títulos</p>
-        <p className="text-[13px]">Inter: textos corridos, rótulos e campos</p>
+        <p className="text-sm">Inter: textos corridos, rótulos e campos</p>
       </Card>
 
       <Card titulo="Botões">

@@ -48,7 +48,7 @@ export default function AcoesDeStatus({ idPedido, statusAtual, onAlterado }: Aco
   }
 
   const aviso = erro && (
-    <p role="alert" className="text-[13px] text-erro">
+    <p role="alert" className="text-sm text-erro">
       {erro}
     </p>
   );

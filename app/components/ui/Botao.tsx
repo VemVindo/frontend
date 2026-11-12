@@ -24,7 +24,7 @@ export default function Botao({
   return (
     <button
       type={type}
-      className={`font-titulo font-bold text-[13px] rounded-[14px] h-12 px-6 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${estilosPorVariante[variante]} ${larguraTotal ? 'w-full' : ''} ${className}`}
+      className={`font-titulo font-bold text-sm rounded-[14px] h-12 px-6 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${estilosPorVariante[variante]} ${larguraTotal ? 'w-full' : ''} ${className}`}
       {...props}
     />
   );

@@ -17,7 +17,7 @@ export default function Avatar({ iniciais, variante = 'claro', tamanho = 44 }: A
     <span
       aria-hidden
       style={{ width: tamanho, height: tamanho }}
-      className={`inline-flex shrink-0 items-center justify-center font-titulo font-bold text-[13px] ${estilosPorVariante[variante]}`}
+      className={`inline-flex shrink-0 items-center justify-center font-titulo font-bold text-sm ${estilosPorVariante[variante]}`}
     >
       {iniciais}
     </span>

@@ -112,7 +112,7 @@ export default function FormularioEdicaoEntregador({
         )}
 
         {falha && (
-          <p role="alert" className="text-[13px] text-erro md:col-span-2">
+          <p role="alert" className="text-sm text-erro md:col-span-2">
             {falha}
           </p>
         )}

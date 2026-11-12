@@ -122,14 +122,14 @@ export default function PaginaRastreio() {
   const rodapeDoRastreio = (
     <div className="flex flex-col gap-1 px-[18px] md:px-0">
       {visao?.estimado && duracao !== null && (
-        <p className="text-[11px] text-texto-suave">Estimativa aproximada, calculada em linha reta.</p>
+        <p className="text-xs text-texto-suave">Estimativa aproximada, calculada em linha reta.</p>
       )}
       {textoDaConexao && (
-        <p role="status" className="text-[11px] text-texto-suave">
+        <p role="status" className="text-xs text-texto-suave">
           {textoDaConexao}
         </p>
       )}
-      <p className="text-[11px] text-texto-suave">
+      <p className="text-xs text-texto-suave">
         O endereço de entrega é processado pelo Google Maps para calcular a rota. A localização do entregador só aparece
         durante a entrega e é apagada quando ela termina.
       </p>
@@ -210,7 +210,7 @@ export default function PaginaRastreio() {
           <>
             <div className="mb-[29px] hidden md:block">
               <h1 className="text-[28px] font-semibold text-texto-corpo">Rastreio ao vivo</h1>
-              <p className="mt-1 text-[13px] text-texto-apoio">Acompanhe seu pedido mesmo sem o mapa.</p>
+              <p className="mt-1 text-sm text-texto-apoio">Acompanhe seu pedido mesmo sem o mapa.</p>
             </div>
             <div className="grid gap-5 lg:grid-cols-[700fr_420fr] lg:gap-7">
               <div className="-mx-[18px] flex flex-col gap-3 md:mx-0">

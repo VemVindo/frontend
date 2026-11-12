@@ -26,7 +26,7 @@ export default function CabecalhoEntregador({ nome, iniciais, veiculo, acao }: C
           <Avatar iniciais={iniciais} variante="escuro" tamanho={42} />
           <div>
             <p className="font-titulo font-bold text-[15px]">{nome}</p>
-            {veiculo && <p className="text-[11px] text-texto-suave">{veiculo}</p>}
+            {veiculo && <p className="text-xs text-texto-suave">{veiculo}</p>}
           </div>
         </button>
 

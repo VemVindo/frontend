@@ -21,7 +21,7 @@ export default function CaixaConfirmacao({ marcado, onAlterar, children }: Caixa
         onChange={(e) => onAlterar(e.target.checked)}
         className="mt-0.5 h-5 w-5 shrink-0 accent-primaria hover:cursor-pointer"
       />
-      <label htmlFor={id} className="text-[13px] text-texto hover:cursor-pointer">
+      <label htmlFor={id} className="text-sm text-texto hover:cursor-pointer">
         {children}
       </label>
     </div>

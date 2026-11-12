@@ -47,7 +47,7 @@ function CamposOpcionais({ dadosDoFormulario, erros, atualizarCampo, idDoDialogo
       {' '}
       {(['itens', 'observacoes'] as const).map((campo) => (
         <div key={campo} className="flex flex-col gap-1">
-          <label htmlFor={`${idDoDialogo}-${campo}`} className="text-[11px] text-texto-apoio">
+          <label htmlFor={`${idDoDialogo}-${campo}`} className="text-xs text-texto-apoio">
             {campo === 'itens' ? 'Itens do pedido (opcional)' : 'Observações (opcional)'}
           </label>
           <textarea
@@ -62,7 +62,7 @@ function CamposOpcionais({ dadosDoFormulario, erros, atualizarCampo, idDoDialogo
             className={`min-w-0 resize-y rounded-lg border bg-superficie px-3 py-2 text-xs text-texto-corpo placeholder:text-texto-apoio focus:border-primaria focus:outline-none focus:ring-2 focus:ring-primaria-clara ${erros[campo] ? 'border-erro' : 'border-borda'}`}
           />
           {erros[campo] && (
-            <p id={`${idDoDialogo}-${campo}-erro`} className="text-[11px] text-erro">
+            <p id={`${idDoDialogo}-${campo}-erro`} className="text-xs text-erro">
               {erros[campo]}
             </p>
           )}
@@ -103,7 +103,7 @@ export default function CamposNovoPedido(propriedades: CamposNovoPedidoProps) {
       <CamposEndereco {...propriedades} />
       {localNoMapa}
       <div className="flex min-w-0 flex-col gap-1">
-        <label htmlFor={`${idDoDialogo}-veiculo`} className="text-[11px] text-texto-apoio">
+        <label htmlFor={`${idDoDialogo}-veiculo`} className="text-xs text-texto-apoio">
           Tipo de veículo
         </label>
         <select
@@ -123,7 +123,7 @@ export default function CamposNovoPedido(propriedades: CamposNovoPedidoProps) {
           <option value="BICYCLE">Bicicleta</option>
         </select>
         {erros.tipo_veiculo && (
-          <p id={`${idDoDialogo}-veiculo-erro`} className="text-[11px] text-erro">
+          <p id={`${idDoDialogo}-veiculo-erro`} className="text-xs text-erro">
             {erros.tipo_veiculo}
           </p>
         )}

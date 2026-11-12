@@ -130,17 +130,15 @@ export default function FormularioRemuneracao() {
               />
             ))}
 
-            <p className="text-[11px] text-texto-apoio">
+            <p className="text-xs text-texto-apoio">
               {vigenteDesde
                 ? `Valores em vigor desde ${formatarDataHora(vigenteDesde)}.`
                 : 'Nenhum parâmetro salvo ainda. Defina os valores para calcular as entregas.'}
             </p>
 
             <div className="mt-2 rounded-[8px] border border-borda bg-superficie-suave px-[11px] py-3 md:mt-[10px] md:border-0 md:px-4 md:py-[14px]">
-              <p className="text-[11px] font-semibold text-texto-corpo md:text-xs md:font-normal">
-                Como o ganho é calculado
-              </p>
-              <p className="mt-1 text-[10px] text-texto-apoio md:mt-3 md:text-xs">
+              <p className="text-xs font-semibold text-texto-corpo md:font-normal">Como o ganho é calculado</p>
+              <p className="mt-1 text-xs text-texto-apoio md:mt-3">
                 Valor base + (adicional por quilômetro x distância percorrida)
               </p>
             </div>

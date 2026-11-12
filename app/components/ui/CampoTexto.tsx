@@ -11,9 +11,9 @@ export interface CampoTextoProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const APARENCIAS = {
-  padrao: { rotulo: 'text-xs text-texto-corpo', campo: 'h-10 rounded-[7px] bg-superficie-suave text-[13px]' },
+  padrao: { rotulo: 'text-sm font-medium text-texto-corpo', campo: 'h-10 rounded-[7px] bg-superficie-suave text-sm' },
   modal: {
-    rotulo: 'text-[11px] text-texto-apoio',
+    rotulo: 'text-xs font-medium text-texto-corpo',
     campo: 'min-w-0 h-9 rounded-lg bg-superficie text-xs placeholder:text-texto-apoio',
   },
 };
@@ -39,7 +39,7 @@ export default function CampoTexto({
         {rotulo}
       </label>
       {descricao && (
-        <p id={idDescricao} className="text-[11px] text-texto-apoio">
+        <p id={idDescricao} className="text-xs text-texto-apoio">
           {descricao}
         </p>
       )}
@@ -52,7 +52,7 @@ export default function CampoTexto({
         {...props}
       />
       {erro && (
-        <p id={idErro} className="text-[11px] text-erro">
+        <p id={idErro} className="text-xs text-erro">
           {erro}
         </p>
       )}

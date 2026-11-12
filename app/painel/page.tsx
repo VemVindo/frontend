@@ -276,7 +276,7 @@ export default function PaginaDashboard() {
   return (
     <div className="space-y-5 md:space-y-6">
       <section className="rounded-[22px] bg-primaria px-5 py-5 text-white md:px-7 md:py-6">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-white/75">Visão geral do estabelecimento</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-white/75">Visão geral do estabelecimento</p>
         <h1 className="mt-2 font-titulo text-[22px] font-bold leading-tight md:text-[28px]">
           {resumo
             ? `${resumo.totalPedidosConcluidos.toLocaleString('pt-BR')} ${
@@ -286,7 +286,7 @@ export default function PaginaDashboard() {
         </h1>
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
           <div className="flex min-h-[76px] flex-col justify-center rounded-[14px] bg-white/15 px-4 py-3">
-            <span className="text-[11px] text-white/75">Pedidos</span>
+            <span className="text-xs text-white/75">Pedidos</span>
             <span className="mt-1 text-lg font-bold md:text-xl">
               {resumo ? resumo.totalPedidos.toLocaleString('pt-BR') : '—'}
             </span>
@@ -296,7 +296,7 @@ export default function PaginaDashboard() {
               key={item.rotulo}
               className="flex min-h-[76px] flex-col justify-center rounded-[14px] bg-white/15 px-4 py-3"
             >
-              <span className="text-[11px] text-white/75">{item.rotulo}</span>
+              <span className="text-xs text-white/75">{item.rotulo}</span>
               <span className="mt-1 text-lg font-bold md:text-xl">{item.valor}</span>
             </div>
           ))}
@@ -359,8 +359,8 @@ export default function PaginaDashboard() {
                   >
                     <span className="text-xs font-semibold text-texto-corpo">#{pedido.id}</span>
                     <span className="truncate text-xs text-texto-corpo">{pedido.recebedor}</span>
-                    <span className="text-[11px] text-texto-apoio">{tempoDesde(pedido.criadoEm)}</span>
-                    <span className="hidden rounded-full bg-primaria-clara px-2 py-1 text-[10px] font-medium text-primaria-escura sm:inline-flex">
+                    <span className="text-xs text-texto-apoio">{tempoDesde(pedido.criadoEm)}</span>
+                    <span className="hidden rounded-full bg-primaria-clara px-2 py-1 text-xs font-medium text-primaria-escura sm:inline-flex">
                       Pendente
                     </span>
                   </li>
@@ -391,7 +391,7 @@ export default function PaginaDashboard() {
                     key={`${barra.rotulo}-${indice}`}
                     className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
                   >
-                    <span className="text-[10px] text-texto-apoio">{barra.total || ''}</span>
+                    <span className="text-xs text-texto-apoio">{barra.total || ''}</span>
                     <div className="flex h-[88px] w-full max-w-[46px] items-end rounded-t-[9px] bg-primaria-clara">
                       <div
                         role="img"
@@ -400,7 +400,7 @@ export default function PaginaDashboard() {
                         style={{ height: `${barra.total === 0 ? 0 : Math.max(12, (barra.total / maiorBarra) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[9px] text-texto-suave md:text-[10px]">{barra.rotulo}</span>
+                    <span className="text-[11px] text-texto-suave md:text-xs">{barra.rotulo}</span>
                   </div>
                 ))}
               </div>
@@ -441,7 +441,7 @@ export default function PaginaDashboard() {
                   {STATUS.map((status) => {
                     const total = resumo[status.campo];
                     return (
-                      <li key={status.campo} className="flex items-center gap-1.5 text-[11px] text-texto-apoio">
+                      <li key={status.campo} className="flex items-center gap-1.5 text-xs text-texto-apoio">
                         <span aria-hidden="true" className={`size-2 rounded-full ${status.cor}`} />
                         {status.rotulo} <span className="font-medium text-texto-corpo">{total}</span>
                       </li>
@@ -478,7 +478,7 @@ export default function PaginaDashboard() {
                         />
                         <span className="truncate">{entregador.nome}</span>
                       </span>
-                      <span className="text-right text-[11px] text-texto-apoio">
+                      <span className="text-right text-xs text-texto-apoio">
                         {desempenho
                           ? `${desempenho.totalPedidosAndamento + desempenho.totalPedidosConcluidos} entregas · ${
                               desempenho.totalPago === null || desempenho.totalPago === undefined
@@ -520,18 +520,18 @@ export default function PaginaDashboard() {
                   .map((avaliacao) => (
                     <li key={avaliacao.idPedido} className="border-b border-borda pb-3 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-alerta" aria-label={`${avaliacao.nota} de 5 estrelas`}>
+                        <span className="text-sm text-alerta" aria-label={`${avaliacao.nota} de 5 estrelas`}>
                           {'★'.repeat(avaliacao.nota)}
                           {'☆'.repeat(Math.max(0, 5 - avaliacao.nota))}
                         </span>
-                        <time dateTime={avaliacao.data} className="shrink-0 text-[10px] text-texto-apoio">
+                        <time dateTime={avaliacao.data} className="shrink-0 text-xs text-texto-apoio">
                           {formatarDataHora(avaliacao.data)}
                         </time>
                       </div>
-                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-texto-corpo">
+                      <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-texto-corpo">
                         {avaliacao.comentario ? `“${avaliacao.comentario}”` : 'Sem comentário escrito.'}
                       </p>
-                      <p className="mt-1 truncate text-[10px] text-texto-apoio">
+                      <p className="mt-1 truncate text-xs text-texto-apoio">
                         {avaliacao.entregador ?? 'Entregador não informado'}
                       </p>
                     </li>

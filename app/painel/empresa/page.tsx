@@ -25,8 +25,8 @@ function formatarData(dataIso: string): string {
 function Informacao({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-[11px] text-texto-apoio">{rotulo}</dt>
-      <dd className="text-[13px] text-texto-corpo">{valor}</dd>
+      <dt className="text-xs text-texto-apoio">{rotulo}</dt>
+      <dd className="text-sm text-texto-corpo">{valor}</dd>
     </div>
   );
 }
@@ -170,7 +170,7 @@ export default function PaginaEmpresa() {
           </Card>
         )}
 
-        <p className="text-[11px] text-texto-apoio">
+        <p className="text-xs text-texto-apoio">
           Cadastro criado em {formatarData(cadastro.criadaEm)}. Última atualização em{' '}
           {formatarData(cadastro.atualizadaEm)}.
         </p>

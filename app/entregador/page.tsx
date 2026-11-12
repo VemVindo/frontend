@@ -14,13 +14,13 @@ export default function PaginaEntregador() {
     <div className="flex flex-col gap-5 md:flex-row md:items-start">
       <div className="flex flex-1 flex-col gap-5">
         {erroPedidos && (
-          <p role="alert" className="text-[13px] text-erro">
+          <p role="alert" className="text-sm text-erro">
             Não foi possível carregar suas entregas agora.
           </p>
         )}
         {pedidos && <ListaPedidosEntregador pedidos={pedidos} />}
         {erro && (
-          <p role="alert" className="text-[13px] text-erro">
+          <p role="alert" className="text-sm text-erro">
             {erro}
           </p>
         )}

@@ -43,7 +43,7 @@ export default function EntregasDaEmpresa({ empresa }: EntregasDaEmpresaProps) {
 
   if (erro) {
     return (
-      <p role="alert" className="text-[13px] text-erro">
+      <p role="alert" className="text-sm text-erro">
         Não foi possível carregar suas entregas agora.
       </p>
     );
@@ -59,11 +59,11 @@ export default function EntregasDaEmpresa({ empresa }: EntregasDaEmpresaProps) {
           href={telaPedidoDoEntregador(entregaAtual.id)}
           className="w-full rounded-[28px] bg-primaria px-6 py-6 text-left text-white shadow-sm transition-opacity hover:opacity-95 md:px-8"
         >
-          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-lilas">
+          <div className="text-xs font-bold uppercase tracking-[0.12em] text-lilas">
             Entrega atual - pedido #{entregaAtual.id} - {rotuloDoStatus(entregaAtual.status)}
           </div>
           <h1 className="mt-4 text-[28px] font-bold leading-tight md:text-[34px]">{entregaAtual.recebedor}</h1>
-          <p className="mt-2 text-[13px] text-lilas">
+          <p className="mt-2 text-sm text-lilas">
             {entregaAtual.endereco} - {formatarDistancia(entregaAtual.distancia)}
           </p>
           <div className="mt-7">
@@ -88,10 +88,10 @@ export default function EntregasDaEmpresa({ empresa }: EntregasDaEmpresaProps) {
                   className="flex items-center justify-between gap-3 rounded-[12px] border border-borda bg-superficie-suave px-3 py-3"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="text-[11px] font-bold text-destaque">#{pedido.id}</span>
-                    <span className="text-[13px] font-semibold text-texto-corpo">{pedido.recebedor}</span>
+                    <span className="text-xs font-bold text-destaque">#{pedido.id}</span>
+                    <span className="text-sm font-semibold text-texto-corpo">{pedido.recebedor}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-texto-apoio">
+                  <div className="flex items-center gap-3 text-xs text-texto-apoio">
                     <span>{formatarDistancia(pedido.distancia)}</span>
                     <EtiquetaStatus status={pedido.status} />
                   </div>
@@ -104,15 +104,15 @@ export default function EntregasDaEmpresa({ empresa }: EntregasDaEmpresaProps) {
         <aside className="rounded-[18px] bg-superficie px-4 py-4 shadow-sm ring-1 ring-borda md:px-5">
           <h2 className="text-[18px] font-bold text-texto">Resumo diário</h2>
           <div className="mt-4 space-y-3">
-            <div className="flex items-center justify-between gap-3 border-b border-borda py-2 text-[13px] text-texto-apoio">
+            <div className="flex items-center justify-between gap-3 border-b border-borda py-2 text-sm text-texto-apoio">
               <span>Entregas concluídas</span>
               <span className="font-semibold text-texto">{resumo.concluidas}</span>
             </div>
-            <div className="flex items-center justify-between gap-3 border-b border-borda py-2 text-[13px] text-texto-apoio">
+            <div className="flex items-center justify-between gap-3 border-b border-borda py-2 text-sm text-texto-apoio">
               <span>Ganhos no dia</span>
               <span className="font-semibold text-primaria">{resumo.ganhos}</span>
             </div>
-            <div className="flex items-center justify-between gap-3 py-2 text-[13px] text-texto-apoio">
+            <div className="flex items-center justify-between gap-3 py-2 text-sm text-texto-apoio">
               <span>Tempo médio</span>
               <span className="font-semibold text-texto">{resumo.tempoMedio}</span>
             </div>
@@ -121,7 +121,7 @@ export default function EntregasDaEmpresa({ empresa }: EntregasDaEmpresaProps) {
       </div>
 
       {empresa && (
-        <div className="rounded-[18px] border border-dashed border-borda bg-superficie-suave px-4 py-3 text-[12px] text-texto-apoio">
+        <div className="rounded-[18px] border border-dashed border-borda bg-superficie-suave px-4 py-3 text-xs text-texto-apoio">
           Empresa ativa: <span className="font-semibold text-texto">{empresa}</span>
         </div>
       )}
