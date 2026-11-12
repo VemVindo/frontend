@@ -67,7 +67,7 @@ describe('MapaDoEntregador', () => {
   it('só compartilha depois do clique do entregador', () => {
     render(<MapaDoEntregador pedido={PEDIDO} />);
 
-    expect(screen.getByText('Localização não compartilhada.')).toBeTruthy();
+    expect(screen.getByText('Localização não compartilhada')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Compartilhar localização' }));
 
     expect(iniciar).toHaveBeenCalledTimes(1);
@@ -129,14 +129,31 @@ describe('MapaDoEntregador', () => {
     expect(screen.queryByTestId('mapa')).toBeNull();
   });
 
-  it('mostra a margem de erro e alerta quando a leitura é imprecisa', () => {
+  it('não mostra mais o aviso sobre o navegador manter a tela aberta', () => {
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.queryByText(/O navegador só envia/)).toBeNull();
+  });
+
+  it('esconde a margem de erro boa e alerta quando a leitura é imprecisa', () => {
     estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 12 });
     render(<MapaDoEntregador pedido={PEDIDO} />);
-    expect(screen.getByText('Margem de erro de cerca de 10 m.').className).toContain('text-texto-suave');
+    expect(screen.queryByText(/Margem de erro/)).toBeNull();
     cleanup();
 
     estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 4000 });
     render(<MapaDoEntregador pedido={PEDIDO} />);
     expect(screen.getByText(/Localização imprecisa/).className).toContain('text-erro');
+  });
+
+  it('antes da primeira resposta da rota, pede para compartilhar e navega pelo endereço', () => {
+    estado({ visao: null });
+
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.getByText('A distância e o tempo aparecem quando a localização for compartilhada.')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir no Google Maps' }).getAttribute('href')).toBe(
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PEDIDO.endereco)}`,
+    );
   });
 });

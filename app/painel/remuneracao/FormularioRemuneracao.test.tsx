@@ -94,4 +94,32 @@ describe('FormularioRemuneracao', () => {
     expect(await screen.findByText(/Valores em vigor desde/)).toBeTruthy();
     expect(buscarParametrosRemuneracao).toHaveBeenCalledTimes(2);
   });
+
+  it('mostra uma mensagem genérica quando o salvamento falha fora do backend', async () => {
+    vi.mocked(salvarParametrosRemuneracao).mockRejectedValue(new Error('rede caiu'));
+    render(<FormularioRemuneracao />);
+    await screen.findByText(/Valores em vigor desde/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar parâmetros' }));
+
+    expect(await screen.findByText('Não foi possível salvar. Tente de novo.')).toBeTruthy();
+  });
+
+  it.each([
+    ['chega', (busca: PromiseWithResolvers<typeof SALVOS>) => busca.resolve(SALVOS)],
+    ['falha', (busca: PromiseWithResolvers<typeof SALVOS>) => busca.reject(new Error('falha'))],
+  ])('ignora a resposta que %s depois de sair da tela', async (_, responder) => {
+    const busca = Promise.withResolvers<typeof SALVOS>();
+    vi.mocked(buscarParametrosRemuneracao).mockReturnValue(busca.promise);
+    const erroNoConsole = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { unmount } = render(<FormularioRemuneracao />);
+
+    unmount();
+    responder(busca);
+    await busca.promise.catch(() => undefined);
+    await new Promise((resolver) => setTimeout(resolver, 0));
+
+    expect(erroNoConsole).not.toHaveBeenCalled();
+    erroNoConsole.mockRestore();
+  });
 });

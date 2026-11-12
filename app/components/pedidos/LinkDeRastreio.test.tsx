@@ -75,4 +75,26 @@ describe('LinkDeRastreio', () => {
     expect((await screen.findByRole('alert')).textContent).toMatch(/Pedido encerrado/);
     expect(screen.queryByRole('textbox')).toBeNull();
   });
+
+  it('mostra uma mensagem genérica quando a falha não vem do backend', async () => {
+    vi.mocked(gerarLinkDeRastreio).mockRejectedValue(new Error('rede caiu'));
+    render(<LinkDeRastreio idPedido={7} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar link de rastreio' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar link' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe('Não foi possível gerar o link agora.');
+  });
+
+  it('seleciona o link inteiro ao focar o campo', async () => {
+    render(<LinkDeRastreio idPedido={7} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar link de rastreio' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar link' }));
+    const campo = (await screen.findByRole('textbox', { name: 'Link de rastreio' })) as HTMLInputElement;
+    fireEvent.focus(campo);
+
+    expect(campo.selectionStart).toBe(0);
+    expect(campo.selectionEnd).toBe(LINK.link.length);
+  });
 });

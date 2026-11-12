@@ -69,11 +69,11 @@ function preencherCadastro(tipoVeiculo = 'MOTO') {
 }
 
 function abrirCadastro() {
-  fireEvent.click(screen.getAllByRole('button', { name: '+ Cadastrar entregador' })[0]);
+  fireEvent.click(screen.getAllByRole('button', { name: 'Cadastrar entregador' })[0]);
 }
 
 async function abrirConvite() {
-  fireEvent.click(await screen.findByRole('button', { name: 'Convidar entregador que já usa o VemVindo' }));
+  fireEvent.click((await screen.findAllByRole('button', { name: 'Convidar entregador que já usa o VemVindo' }))[0]);
 }
 
 describe('PaginaFrota', () => {
@@ -256,7 +256,7 @@ describe('PaginaFrota', () => {
 
     abrirCadastro();
     preencherCadastro();
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar entregador' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
 
     expect(await screen.findByText('Kx7#pQ2m')).toBeTruthy();
     expect(cadastrarEntregador).toHaveBeenCalledWith({
@@ -280,7 +280,7 @@ describe('PaginaFrota', () => {
     preencherCadastro('BICICLETA');
 
     expect(screen.queryByLabelText('Placa')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar entregador' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
     await vi.waitFor(() => expect(cadastrarEntregador).toHaveBeenCalled());
     expect(vi.mocked(cadastrarEntregador).mock.calls[0][0]).not.toHaveProperty('placa');
   });
@@ -289,7 +289,7 @@ describe('PaginaFrota', () => {
     render(<PaginaFrota />);
 
     abrirCadastro();
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar entregador' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
 
     expect(screen.getByText('Escolha o tipo de veículo')).toBeTruthy();
     expect(cadastrarEntregador).not.toHaveBeenCalled();
@@ -303,7 +303,7 @@ describe('PaginaFrota', () => {
 
     abrirCadastro();
     preencherCadastro();
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar entregador' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Convidar este CPF' }));
 
     expect(campo('CPF do entregador').value).toBe('52998224725');
@@ -318,7 +318,7 @@ describe('PaginaFrota', () => {
 
     abrirCadastro();
     preencherCadastro();
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar entregador' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
 
     expect((await screen.findByRole('alert')).textContent).toContain('Too Many Requests');
     expect(screen.queryByRole('button', { name: 'Convidar este CPF' })).toBeNull();
@@ -345,5 +345,100 @@ describe('PaginaFrota', () => {
 
     expect(screen.getByText('CPF inválido')).toBeTruthy();
     expect(convidarEntregador).not.toHaveBeenCalled();
+  });
+
+  it('mostra o total ganho como indisponível quando o resumo não carrega', async () => {
+    vi.mocked(consultarResumoDashboard).mockRejectedValue(new ApiError(500, 'Erro'));
+    render(<PaginaFrota />);
+
+    expect(await screen.findByText('Indisponível')).toBeTruthy();
+  });
+
+  it('no celular, cadastra e convida pelos botões no fim do card', async () => {
+    render(<PaginaFrota />);
+    await screen.findByText('Bruno Lima');
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Cadastrar entregador' })[1]);
+    expect(within(screen.getByRole('dialog')).getByRole('heading', { name: 'Cadastrar entregador' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar cadastrar entregador' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Convidar entregador que já usa o VemVindo' })[1]);
+    expect(within(screen.getByRole('dialog')).getByRole('heading', { name: 'Convidar entregador' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar convidar entregador' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('fecha a edição pelo botão de cancelar e pelo de fechar', async () => {
+    render(<PaginaFrota />);
+    await screen.findByText('Bruno Lima');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar editar bruno lima' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(editarEntregador).not.toHaveBeenCalled();
+  });
+
+  describe('respostas que chegam depois de sair da tela', () => {
+    async function esperarRespostas(...promessas: Promise<unknown>[]) {
+      await Promise.allSettled(promessas);
+      await new Promise((resolver) => setTimeout(resolver, 0));
+    }
+
+    type Resumo = Awaited<ReturnType<typeof consultarResumoDashboard>>;
+    type Frota = Awaited<ReturnType<typeof listarFrota>>;
+
+    it('ignora o desempenho e o resumo que chegam ou falham depois', async () => {
+      const ana = { ...BRUNO, nome: 'Ana Souza', cpf: '22222222222' };
+      vi.mocked(listarFrota).mockResolvedValue([BRUNO, ana]);
+      const desempenhoDoBruno = Promise.withResolvers<DesempenhoEntregador>();
+      const desempenhoDaAna = Promise.withResolvers<DesempenhoEntregador>();
+      vi.mocked(buscarDesempenhoEntregador).mockImplementation((cpf) =>
+        cpf === BRUNO.cpf ? desempenhoDoBruno.promise : desempenhoDaAna.promise,
+      );
+      const resumo = Promise.withResolvers<Resumo>();
+      vi.mocked(consultarResumoDashboard).mockReturnValue(resumo.promise);
+      const erroNoConsole = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { unmount } = render(<PaginaFrota />);
+      await screen.findByText('Ana Souza');
+
+      unmount();
+      desempenhoDoBruno.resolve(DESEMPENHO);
+      desempenhoDaAna.reject(new Error('falha'));
+      resumo.resolve({ relatorioPorEntregador: [] } as unknown as Resumo);
+      await esperarRespostas(desempenhoDoBruno.promise, desempenhoDaAna.promise, resumo.promise);
+
+      expect(erroNoConsole).not.toHaveBeenCalled();
+      erroNoConsole.mockRestore();
+    });
+
+    it.each([
+      ['a frota chega e o resumo falha', 'resolve', 'reject'],
+      ['a frota falha e o resumo chega', 'reject', 'resolve'],
+    ] as const)('ignora quando %s depois', async (_, frotaResponde, resumoResponde) => {
+      const frota = Promise.withResolvers<Frota>();
+      const resumo = Promise.withResolvers<Resumo>();
+      vi.mocked(listarFrota).mockReturnValue(frota.promise);
+      vi.mocked(consultarResumoDashboard).mockReturnValue(resumo.promise);
+      const erroNoConsole = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { unmount } = render(<PaginaFrota />);
+
+      unmount();
+      if (frotaResponde === 'resolve') frota.resolve([BRUNO]);
+      else frota.reject(new Error('falha'));
+      if (resumoResponde === 'resolve') resumo.resolve({ relatorioPorEntregador: [] } as unknown as Resumo);
+      else resumo.reject(new Error('falha'));
+      await esperarRespostas(frota.promise, resumo.promise);
+
+      expect(buscarDesempenhoEntregador).not.toHaveBeenCalled();
+      expect(erroNoConsole).not.toHaveBeenCalled();
+      erroNoConsole.mockRestore();
+    });
   });
 });
