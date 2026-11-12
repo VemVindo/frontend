@@ -70,6 +70,9 @@ function preencher() {
 function botaoLocalizar() {
   return screen.getByRole('button', { name: /Localizar/ });
 }
+function enviar() {
+  fireEvent.submit(document.querySelector('form')!);
+}
 
 beforeEach(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
@@ -108,9 +111,42 @@ describe('NovoPedidoModal com ponto no mapa', () => {
       cidade: 'Brasília',
       uf: 'DF',
     });
-    fireEvent.submit(document.querySelector('form')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar este local' }));
+    enviar();
     await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
     expect(vi.mocked(criarPedido).mock.calls[0][0]).toMatchObject({ destino_lat: -15.6, destino_lng: -47.6 });
+  });
+
+  it('não cria o pedido antes de localizar e confirmar o pino', async () => {
+    vi.mocked(localizarEndereco).mockResolvedValue(achado({ precisao: 'aproximado' }));
+    render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
+    preencher();
+    enviar();
+    expect((await screen.findByRole('alert')).textContent).toMatch(/Confirme o ponto de entrega/);
+    expect(document.activeElement).toBe(botaoLocalizar());
+
+    fireEvent.click(botaoLocalizar());
+    const confirmar = await screen.findByRole('button', { name: 'Confirmar este local' });
+    expect(screen.queryByRole('alert')).toBeNull();
+    enviar();
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(criarPedido).not.toHaveBeenCalled();
+
+    fireEvent.click(confirmar);
+    expect(screen.queryByRole('alert')).toBeNull();
+    enviar();
+    await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
+  });
+
+  it('arrastar o pino também confirma o local', async () => {
+    vi.mocked(localizarEndereco).mockResolvedValue(achado({ precisao: 'aproximado' }));
+    render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
+    preencher();
+    fireEvent.click(botaoLocalizar());
+    fireEvent.click(await screen.findByRole('button', { name: 'tocar no mapa' }));
+    expect(screen.queryByRole('button', { name: 'Confirmar este local' })).toBeNull();
+    enviar();
+    await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
   });
 
   it('sem resultado, usa o ponto tocado no mapa', async () => {
@@ -121,22 +157,22 @@ describe('NovoPedidoModal com ponto no mapa', () => {
     preencher();
     fireEvent.click(botaoLocalizar());
     fireEvent.click(await screen.findByRole('button', { name: 'tocar no mapa' }));
-    fireEvent.submit(document.querySelector('form')!);
+    enviar();
     await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
     expect(vi.mocked(criarPedido).mock.calls[0][0]).toMatchObject({ destino_lat: -15.5, destino_lng: -47.5 });
   });
 
-  it('descarta o pino quando o endereço muda', async () => {
+  it('descarta o pino confirmado quando o endereço muda', async () => {
     vi.mocked(localizarEndereco).mockResolvedValue(achado());
     render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
     preencher();
     fireEvent.click(botaoLocalizar());
-    await screen.findByText('Ponto de entrega');
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirmar este local' }));
     fireEvent.change(document.querySelector('[name="numero"]')!, { target: { value: '12' } });
     expect(screen.queryByTestId('mapa')).toBeNull();
-    fireEvent.submit(document.querySelector('form')!);
-    await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
-    expect(vi.mocked(criarPedido).mock.calls[0][0]).not.toHaveProperty('destino_lat');
+    enviar();
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(criarPedido).not.toHaveBeenCalled();
   });
 
   it('ignora a resposta de uma busca feita para o endereço antigo', async () => {
