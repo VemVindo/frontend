@@ -4,6 +4,7 @@ import {
   ApiError,
   buscarDesempenhoEntregador,
   cadastrarEntregador,
+  consultarResumoDashboard,
   convidarEntregador,
   editarEntregador,
   listarFrota,
@@ -16,6 +17,7 @@ vi.mock('@/app/lib/api', async (original) => ({
   ...(await original<typeof import('@/app/lib/api')>()),
   buscarDesempenhoEntregador: vi.fn(),
   cadastrarEntregador: vi.fn(),
+  consultarResumoDashboard: vi.fn(),
   convidarEntregador: vi.fn(),
   listarFrota: vi.fn(),
   editarEntregador: vi.fn(),
@@ -67,7 +69,7 @@ function preencherCadastro(tipoVeiculo = 'MOTO') {
 }
 
 function abrirCadastro() {
-  fireEvent.click(screen.getByRole('button', { name: '+ Cadastrar entregador' }));
+  fireEvent.click(screen.getAllByRole('button', { name: '+ Cadastrar entregador' })[0]);
 }
 
 async function abrirConvite() {
@@ -95,6 +97,27 @@ describe('PaginaFrota', () => {
       senhaTemporariaExpiraEm: '2026-10-25T15:00:00Z',
     });
     vi.mocked(convidarEntregador).mockResolvedValue({ mensagem: MENSAGEM_CONVITE });
+    vi.mocked(consultarResumoDashboard).mockResolvedValue({
+      idEmpresa: 1,
+      totalPedidos: 59,
+      totalPedidosPendentes: 0,
+      totalPedidosAndamento: 0,
+      totalPedidosConcluidos: 59,
+      totalPedidosCancelados: 0,
+      mediaAvaliacoes: 5,
+      tempoMedioEntregaMinutos: 20,
+      totalDistanciaPercorrida: 10000,
+      relatorioPorEntregador: [
+        {
+          cpf: BRUNO.cpf,
+          nome: BRUNO.nome,
+          totalPedidosAndamento: 0,
+          totalPedidosConcluidos: 59,
+          valorMedioEntrega: 1000,
+          totalPago: 59000,
+        },
+      ],
+    });
     vi.mocked(listarFrota).mockResolvedValue([BRUNO]);
     vi.mocked(removerEntregador).mockResolvedValue({ reatribuidos: [], pendentes: [] });
     vi.mocked(buscarDesempenhoEntregador).mockImplementation(async (cpf, periodo) => ({
@@ -123,7 +146,14 @@ describe('PaginaFrota', () => {
     expect(screen.getByText('Disponível')).toBeTruthy();
     expect(await screen.findByText('5.0')).toBeTruthy();
     expect(screen.getByText('59 entregas')).toBeTruthy();
+    expect(await screen.findByText(/R\$\s*590,00/)).toBeTruthy();
     expect(screen.getByText('1 entregador vinculado a este estabelecimento')).toBeTruthy();
+    expect(consultarResumoDashboard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataInicio: '1970-01-01T00:00:00.000Z',
+        dataFinal: expect.any(String),
+      }),
+    );
     expect(buscarDesempenhoEntregador).toHaveBeenCalledWith(
       BRUNO.cpf,
       expect.objectContaining({ de: '1970-01-01T00:00:00.000Z', ate: expect.any(String) }),

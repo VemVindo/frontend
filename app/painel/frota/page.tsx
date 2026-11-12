@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Botao from '@/app/components/ui/Botao';
 import TituloPagina from '@/app/components/ui/TituloPagina';
-import { buscarDesempenhoEntregador, listarFrota } from '@/app/lib/api';
+import { buscarDesempenhoEntregador, consultarResumoDashboard, listarFrota } from '@/app/lib/api';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
+import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
 import ConfirmacaoRemocaoEntregador from './ConfirmacaoRemocaoEntregador';
 import DialogoFrota from './DialogoFrota';
 import FormularioCadastroEntregador from './FormularioCadastroEntregador';
@@ -19,12 +20,19 @@ export default function PaginaFrota() {
   const [frota, setFrota] = useState<DadosCompartilhados[] | null>(null);
   const [erroDaFrota, setErroDaFrota] = useState(false);
   const [desempenhoPorCpf, setDesempenhoPorCpf] = useState<Record<string, EstadoDesempenho>>({});
+  const [totalPagoPorCpf, setTotalPagoPorCpf] = useState<Record<string, number>>({});
+  const [erroTotalPago, setErroTotalPago] = useState(false);
   const [emEdicao, setEmEdicao] = useState<DadosCompartilhados | null>(null);
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [conviteAberto, setConviteAberto] = useState(false);
   const remocao = useRemocaoEntregador((cpf) => {
     setFrota((atuais) => atuais?.filter((entregador) => entregador.cpf !== cpf) ?? null);
     setDesempenhoPorCpf((atuais) => {
+      const atualizado = { ...atuais };
+      delete atualizado[cpf];
+      return atualizado;
+    });
+    setTotalPagoPorCpf((atuais) => {
       const atualizado = { ...atuais };
       delete atualizado[cpf];
       return atualizado;
@@ -71,6 +79,27 @@ export default function PaginaFrota() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelado = false;
+    consultarResumoDashboard({
+      dataInicio: '1970-01-01T00:00:00.000Z',
+      dataFinal: new Date().toISOString(),
+    })
+      .then((resumo: ResumoDoDashboard) => {
+        if (cancelado) return;
+        setTotalPagoPorCpf(
+          Object.fromEntries(resumo.relatorioPorEntregador.map(({ cpf, totalPago }) => [cpf, totalPago])),
+        );
+        setErroTotalPago(false);
+      })
+      .catch(() => {
+        if (!cancelado) setErroTotalPago(true);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
   function registrarEdicao(atualizado: DadosCompartilhados) {
     setFrota((atuais) => atuais?.map((atual) => (atual.cpf === atualizado.cpf ? atualizado : atual)) ?? null);
     setEmEdicao(null);
@@ -93,13 +122,15 @@ export default function PaginaFrota() {
               : 'Entregadores vinculados a este estabelecimento'
           }
           acao={
-            <Botao
-              variante="primario"
-              onClick={() => setCadastroAberto(true)}
-              className="h-11 w-full rounded-[14px] px-5 text-xs md:w-[300px]"
-            >
-              + Cadastrar entregador
-            </Botao>
+            <div className="hidden md:block">
+              <Botao
+                variante="primario"
+                onClick={() => setCadastroAberto(true)}
+                className="h-11 rounded-[14px] px-5 text-sm"
+              >
+                + Cadastrar entregador
+              </Botao>
+            </div>
           }
         />
 
@@ -108,6 +139,9 @@ export default function PaginaFrota() {
           erro={erroDaFrota}
           aviso={remocao.aviso}
           desempenhoPorCpf={desempenhoPorCpf}
+          totalPagoPorCpf={totalPagoPorCpf}
+          erroTotalPago={erroTotalPago}
+          onCadastrar={() => setCadastroAberto(true)}
           onEditar={setEmEdicao}
           onRemover={remocao.escolher}
           onConvidar={() => abrirConvite()}

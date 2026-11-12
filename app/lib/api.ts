@@ -33,6 +33,7 @@ import type {
   VisaoDaEntrega,
 } from '@/app/lib/tipos';
 import type { DesempenhoEntregador } from '@/app/lib/tiposDesempenho';
+import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
 import type { ResultadoDaRemocaoDoEntregador } from '@/app/lib/tiposRemocaoEntregador';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -69,6 +70,14 @@ async function requisitar<T>(caminho: string, init: RequestInit): Promise<T> {
 
 export async function checkHealth(): Promise<{ database: string }> {
   return requisitar('/health/db', { method: 'GET' });
+}
+
+export async function consultarResumoDashboard(periodo: {
+  dataInicio: string;
+  dataFinal: string;
+}): Promise<ResumoDoDashboard> {
+  const parametros = new URLSearchParams(periodo);
+  return requisitar(`/dashboard?${parametros}`, { method: 'GET' });
 }
 
 export async function loginEmpresa(email: string, senha: string): Promise<RespostaLogin<Empresa>> {

@@ -1,3 +1,4 @@
+import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
 import ListaDaFrota, { type EstadoDesempenho } from './ListaDaFrota';
@@ -7,6 +8,9 @@ export interface PainelDaFrotaProps {
   erro: boolean;
   aviso: string | null;
   desempenhoPorCpf: Record<string, EstadoDesempenho>;
+  totalPagoPorCpf: Record<string, number>;
+  erroTotalPago: boolean;
+  onCadastrar: () => void;
   onEditar: (entregador: DadosCompartilhados) => void;
   onRemover: (entregador: DadosCompartilhados) => void;
   onConvidar: () => void;
@@ -17,6 +21,9 @@ export default function PainelDaFrota({
   erro,
   aviso,
   desempenhoPorCpf,
+  totalPagoPorCpf,
+  erroTotalPago,
+  onCadastrar,
   onEditar,
   onRemover,
   onConvidar,
@@ -38,10 +45,17 @@ export default function PainelDaFrota({
         <ListaDaFrota
           entregadores={entregadores}
           desempenhoPorCpf={desempenhoPorCpf}
+          totalPagoPorCpf={totalPagoPorCpf}
+          erroTotalPago={erroTotalPago}
           onEditar={onEditar}
           onRemover={onRemover}
         />
       )}
+      <div className="mt-4 md:hidden">
+        <Botao variante="primario" onClick={onCadastrar} className="h-11 w-full rounded-[14px] px-5 text-sm">
+          + Cadastrar entregador
+        </Botao>
+      </div>
       <button
         type="button"
         onClick={onConvidar}
