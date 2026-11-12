@@ -1,11 +1,6 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  consultarResumoDashboard,
-  listarAvaliacoes,
-  listarFrota,
-  listarPedidosDaEmpresa,
-} from '@/app/lib/api';
+import { consultarResumoDashboard, listarAvaliacoes, listarFrota, listarPedidosDaEmpresa } from '@/app/lib/api';
 import type { DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
 import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
 import PaginaDashboard from './page';
@@ -27,6 +22,27 @@ const pedido: PedidoAtivo = {
   valorEntrega: 1500,
   finalizadoEm: null,
   nota: null,
+};
+
+const pedidoDeCincoDias: PedidoAtivo = {
+  ...pedido,
+  id: 4831,
+  recebedor: 'Rafael Nunes',
+  criadoEm: new Date(Date.now() - 5 * 24 * 60 * 60_000).toISOString(),
+};
+
+const pedidoDeQuinzeDias: PedidoAtivo = {
+  ...pedido,
+  id: 4832,
+  recebedor: 'João Pereira',
+  criadoEm: new Date(Date.now() - 15 * 24 * 60 * 60_000).toISOString(),
+};
+
+const pedidoDeTrintaECincoDias: PedidoAtivo = {
+  ...pedido,
+  id: 4833,
+  recebedor: 'Thiago Andrade',
+  criadoEm: new Date(Date.now() - 35 * 24 * 60 * 60_000).toISOString(),
 };
 
 const entregador: DadosCompartilhados = {
@@ -93,5 +109,31 @@ describe('Dashboard', () => {
     expect(consultarResumoDashboard).toHaveBeenCalledWith(
       expect.objectContaining({ dataInicio: expect.any(String), dataFinal: expect.any(String) }),
     );
+  });
+
+  it('filtra pedidos pendentes pelo período selecionado', async () => {
+    vi.mocked(listarPedidosDaEmpresa).mockResolvedValue([
+      pedido,
+      pedidoDeCincoDias,
+      pedidoDeQuinzeDias,
+      pedidoDeTrintaECincoDias,
+    ]);
+
+    render(<PaginaDashboard />);
+
+    expect(await screen.findByText('Carla Menezes')).toBeTruthy();
+    expect(screen.getByText('Rafael Nunes')).toBeTruthy();
+    expect(screen.queryByText('João Pereira')).toBeNull();
+    expect(screen.queryByText('Thiago Andrade')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hoje' }));
+    expect(screen.getByText('Carla Menezes')).toBeTruthy();
+    expect(screen.queryByText('Rafael Nunes')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '30 dias' }));
+    expect(screen.getByText('Carla Menezes')).toBeTruthy();
+    expect(screen.getByText('Rafael Nunes')).toBeTruthy();
+    expect(screen.getByText('João Pereira')).toBeTruthy();
+    expect(screen.queryByText('Thiago Andrade')).toBeNull();
   });
 });

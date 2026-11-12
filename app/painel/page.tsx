@@ -8,7 +8,7 @@ import { TELA_PEDIDOS } from '@/app/lib/rotas';
 import type { AvaliacaoDaEmpresa, DadosCompartilhados, PedidoAtivo } from '@/app/lib/tipos';
 import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
 
-type Periodo = 'hoje' | '7dias' | 'mes';
+type Periodo = 'hoje' | '7dias' | '30dias';
 
 interface Intervalo {
   inicio: Date;
@@ -20,7 +20,7 @@ const STATUS = [
   { campo: 'totalPedidosAndamento', rotulo: 'Em andamento', cor: 'bg-primaria' },
   { campo: 'totalPedidosConcluidos', rotulo: 'Concluída', cor: 'bg-sucesso' },
   { campo: 'totalPedidosCancelados', rotulo: 'Cancelada', cor: 'bg-texto-suave' },
-];
+] as const;
 
 function inicioDoDia(data: Date): Date {
   return new Date(data.getFullYear(), data.getMonth(), data.getDate());
@@ -30,7 +30,7 @@ function intervaloDoPeriodo(periodo: Periodo, agora = new Date()): Intervalo {
   const fim = new Date(agora);
   const inicio = inicioDoDia(agora);
   if (periodo === '7dias') inicio.setDate(inicio.getDate() - 6);
-  if (periodo === 'mes') inicio.setDate(1);
+  if (periodo === '30dias') inicio.setDate(inicio.getDate() - 29);
   return { inicio, fim };
 }
 
@@ -103,13 +103,15 @@ function criarBarras(entregas: string[], periodo: Periodo, intervalo: Intervalo)
     });
   }
 
-  const quantidadeDeSemanas = Math.ceil(intervalo.fim.getDate() / 7);
+  const diasNoPeriodo =
+    Math.floor((inicioDoDia(intervalo.fim).getTime() - intervalo.inicio.getTime()) / 86_400_000) + 1;
+  const quantidadeDeSemanas = Math.ceil(diasNoPeriodo / 7);
   return Array.from({ length: quantidadeDeSemanas }, (_, indice) => {
     const inicio = new Date(intervalo.inicio);
-    inicio.setDate(indice * 7 + 1);
+    inicio.setDate(inicio.getDate() + indice * 7);
     const fim = new Date(inicio);
     fim.setDate(inicio.getDate() + 7);
-    const ultimoDia = Math.min(indice * 7 + 7, intervalo.fim.getDate());
+    const ultimoDia = Math.min(indice * 7 + 7, diasNoPeriodo);
     return {
       rotulo: `${indice * 7 + 1}–${ultimoDia}`,
       inicio,
@@ -146,10 +148,6 @@ export default function PaginaDashboard() {
   const [erroAvaliacoes, setErroAvaliacoes] = useState(false);
 
   const intervalo = useMemo(() => intervaloDoPeriodo(periodo), [periodo]);
-  const pedidosNoPeriodo = useMemo(
-    () => pedidos?.filter((pedido) => estaNoIntervalo(pedido.criadoEm, intervalo)) ?? [],
-    [intervalo, pedidos],
-  );
   const entregasNoPeriodo = useMemo(
     () =>
       (pedidos ?? []).flatMap((pedido) =>
@@ -162,18 +160,16 @@ export default function PaginaDashboard() {
   const pedidosPendentes = useMemo(
     () =>
       (pedidos ?? [])
-        .filter((pedido) => pedido.status === 'PENDENTE')
+        .filter((pedido) => pedido.status === 'PENDENTE' && estaNoIntervalo(pedido.criadoEm, intervalo))
         .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime())
         .slice(0, 4),
-    [pedidos],
+    [intervalo, pedidos],
   );
   const barras = useMemo(
     () => criarBarras(entregasNoPeriodo, periodo, intervalo),
     [entregasNoPeriodo, intervalo, periodo],
   );
-  const totalDeStatus = resumo
-    ? STATUS.reduce((total, status) => total + resumo[status.campo], 0)
-    : 0;
+  const totalDeStatus = resumo ? STATUS.reduce((total, status) => total + resumo[status.campo], 0) : 0;
   const maiorBarra = Math.max(1, ...barras.map((barra) => barra.total));
 
   useEffect(() => {
@@ -278,9 +274,7 @@ export default function PaginaDashboard() {
           {resumo
             ? `${resumo.totalPedidosConcluidos.toLocaleString('pt-BR')} ${
                 resumo.totalPedidosConcluidos === 1 ? 'entrega concluída' : 'entregas concluídas'
-              } ${
-                periodo === 'hoje' ? 'hoje' : periodo === 'mes' ? 'neste mês' : 'em 7 dias'
-              }`
+              } ${periodo === 'hoje' ? 'hoje' : periodo === '30dias' ? 'em 30 dias' : 'em 7 dias'}`
             : 'Resumo das entregas'}
         </h1>
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -291,7 +285,10 @@ export default function PaginaDashboard() {
             </span>
           </div>
           {indicadores.map((item) => (
-            <div key={item.rotulo} className="flex min-h-[76px] flex-col justify-center rounded-[14px] bg-white/15 px-4 py-3">
+            <div
+              key={item.rotulo}
+              className="flex min-h-[76px] flex-col justify-center rounded-[14px] bg-white/15 px-4 py-3"
+            >
               <span className="text-[11px] text-white/75">{item.rotulo}</span>
               <span className="mt-1 text-lg font-bold md:text-xl">{item.valor}</span>
             </div>
@@ -305,18 +302,22 @@ export default function PaginaDashboard() {
       </section>
 
       <div className="flex w-fit rounded-[13px] bg-superficie p-1" role="group" aria-label="Período do dashboard">
-        {([
-          ['hoje', 'Hoje'],
-          ['7dias', '7 dias'],
-          ['mes', 'Mês'],
-        ] as const).map(([valor, rotulo]) => (
+        {(
+          [
+            ['hoje', 'Hoje'],
+            ['7dias', '7 dias'],
+            ['30dias', '30 dias'],
+          ] as const
+        ).map(([valor, rotulo]) => (
           <button
             key={valor}
             type="button"
             aria-pressed={periodo === valor}
             onClick={() => setPeriodo(valor)}
             className={`min-w-[78px] cursor-pointer rounded-[10px] px-3 py-2 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-primaria ${
-              periodo === valor ? 'bg-primaria-clara font-semibold text-primaria-escura' : 'text-texto-apoio hover:text-texto'
+              periodo === valor
+                ? 'bg-primaria-clara font-semibold text-primaria-escura'
+                : 'text-texto-apoio hover:text-texto'
             }`}
           >
             {rotulo}
@@ -328,10 +329,16 @@ export default function PaginaDashboard() {
         <div className="space-y-4">
           <section className="rounded-[18px] bg-superficie p-4 md:p-5" aria-labelledby="pedidos-pendentes">
             <header className="mb-4 flex items-center justify-between gap-3">
-              <h2 id="pedidos-pendentes" className="font-titulo text-[15px] font-bold">Pedidos pendentes</h2>
+              <h2 id="pedidos-pendentes" className="font-titulo text-[15px] font-bold">
+                Pedidos pendentes
+              </h2>
               <LinkVerTodos href={TELA_PEDIDOS} rotulo="Ver todos" />
             </header>
-            {erroPedidos && <p role="alert" className="text-xs text-erro">Não foi possível carregar os pedidos.</p>}
+            {erroPedidos && (
+              <p role="alert" className="text-xs text-erro">
+                Não foi possível carregar os pedidos.
+              </p>
+            )}
             {!pedidos && !erroPedidos && <p className="text-xs text-texto-apoio">Carregando pedidos...</p>}
             {pedidos && pedidosPendentes.length === 0 && (
               <p className="text-xs text-texto-apoio">Nenhum pedido pendente no momento.</p>
@@ -339,7 +346,10 @@ export default function PaginaDashboard() {
             {pedidosPendentes.length > 0 && (
               <ul className="divide-y divide-borda">
                 {pedidosPendentes.map((pedido) => (
-                  <li key={pedido.id} className="grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[62px_minmax(0,1fr)_auto_auto]">
+                  <li
+                    key={pedido.id}
+                    className="grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[62px_minmax(0,1fr)_auto_auto]"
+                  >
                     <span className="text-xs font-semibold text-texto-corpo">#{pedido.id}</span>
                     <span className="truncate text-xs text-texto-corpo">{pedido.recebedor}</span>
                     <span className="text-[11px] text-texto-apoio">{tempoDesde(pedido.criadoEm)}</span>
@@ -354,17 +364,26 @@ export default function PaginaDashboard() {
 
           <section className="rounded-[18px] bg-superficie p-4 md:p-5" aria-labelledby="pedidos-periodo">
             <header className="mb-4 flex items-center justify-between gap-3">
-              <h2 id="pedidos-periodo" className="font-titulo text-[15px] font-bold">Entregas por período</h2>
+              <h2 id="pedidos-periodo" className="font-titulo text-[15px] font-bold">
+                Entregas por período
+              </h2>
               <span className="text-xs text-texto-apoio">
                 {entregasNoPeriodo.length} {entregasNoPeriodo.length === 1 ? 'entrega' : 'entregas'}
               </span>
             </header>
-            {erroPedidos && <p role="alert" className="text-xs text-erro">Não foi possível carregar os pedidos.</p>}
+            {erroPedidos && (
+              <p role="alert" className="text-xs text-erro">
+                Não foi possível carregar os pedidos.
+              </p>
+            )}
             {!pedidos && !erroPedidos && <p className="text-xs text-texto-apoio">Carregando pedidos...</p>}
             {pedidos && (
               <div className="flex h-[148px] items-end justify-around gap-2 pt-2">
                 {barras.map((barra, indice) => (
-                  <div key={`${barra.rotulo}-${indice}`} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+                  <div
+                    key={`${barra.rotulo}-${indice}`}
+                    className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
+                  >
                     <span className="text-[10px] text-texto-apoio">{barra.total || ''}</span>
                     <div className="flex h-[88px] w-full max-w-[46px] items-end rounded-t-[9px] bg-primaria-clara">
                       <div
@@ -384,12 +403,21 @@ export default function PaginaDashboard() {
 
         <div className="space-y-4">
           <section className="rounded-[18px] bg-superficie p-4 md:p-5" aria-labelledby="status-pedidos">
-            <h2 id="status-pedidos" className="font-titulo text-[15px] font-bold">Status dos pedidos</h2>
-            {erroResumo && <p role="alert" className="mt-3 text-xs text-erro">Não foi possível carregar os status dos pedidos.</p>}
+            <h2 id="status-pedidos" className="font-titulo text-[15px] font-bold">
+              Status dos pedidos
+            </h2>
+            {erroResumo && (
+              <p role="alert" className="mt-3 text-xs text-erro">
+                Não foi possível carregar os status dos pedidos.
+              </p>
+            )}
             {!resumo && !erroResumo && <p className="mt-3 text-xs text-texto-apoio">Carregando status...</p>}
             {resumo && (
               <>
-                <div className="mt-3 flex h-[10px] overflow-hidden rounded-full bg-superficie-suave" aria-label={`${totalDeStatus} pedidos no período`}>
+                <div
+                  className="mt-3 flex h-[10px] overflow-hidden rounded-full bg-superficie-suave"
+                  aria-label={`${totalDeStatus} pedidos no período`}
+                >
                   {STATUS.map((status) => {
                     const total = resumo[status.campo];
                     return total > 0 ? (
@@ -419,10 +447,16 @@ export default function PaginaDashboard() {
 
           <section className="rounded-[18px] bg-superficie p-4 md:p-5" aria-labelledby="frota-dashboard">
             <header className="mb-4 flex items-center justify-between gap-3">
-              <h2 id="frota-dashboard" className="font-titulo text-[15px] font-bold">Frota</h2>
+              <h2 id="frota-dashboard" className="font-titulo text-[15px] font-bold">
+                Frota
+              </h2>
               <LinkVerTodos href="/painel/frota" rotulo="Ver todos" />
             </header>
-            {erroFrota && <p role="alert" className="text-xs text-erro">Não foi possível carregar a frota.</p>}
+            {erroFrota && (
+              <p role="alert" className="text-xs text-erro">
+                Não foi possível carregar a frota.
+              </p>
+            )}
             {!frota && !erroFrota && <p className="text-xs text-texto-apoio">Carregando frota...</p>}
             {frota && frota.length === 0 && <p className="text-xs text-texto-apoio">Nenhum entregador vinculado.</p>}
             {frota && frota.length > 0 && (
@@ -432,7 +466,9 @@ export default function PaginaDashboard() {
                   return (
                     <li key={entregador.cpf} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs">
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className={`size-2 shrink-0 rounded-full ${entregador.disponivel ? 'bg-sucesso' : 'bg-texto-suave'}`} />
+                        <span
+                          className={`size-2 shrink-0 rounded-full ${entregador.disponivel ? 'bg-sucesso' : 'bg-texto-suave'}`}
+                        />
                         <span className="truncate">{entregador.nome}</span>
                       </span>
                       <span className="text-right text-[11px] text-texto-apoio">
@@ -455,12 +491,20 @@ export default function PaginaDashboard() {
 
           <section className="rounded-[18px] bg-superficie p-4 md:p-5" aria-labelledby="avaliacoes-recentes">
             <header className="mb-4 flex items-center justify-between gap-3">
-              <h2 id="avaliacoes-recentes" className="font-titulo text-[15px] font-bold">Avaliações recentes</h2>
+              <h2 id="avaliacoes-recentes" className="font-titulo text-[15px] font-bold">
+                Avaliações recentes
+              </h2>
               <LinkVerTodos href="/painel/avaliacoes" rotulo="Ver todas" />
             </header>
-            {erroAvaliacoes && <p role="alert" className="text-xs text-erro">Não foi possível carregar as avaliações.</p>}
+            {erroAvaliacoes && (
+              <p role="alert" className="text-xs text-erro">
+                Não foi possível carregar as avaliações.
+              </p>
+            )}
             {!avaliacoes && !erroAvaliacoes && <p className="text-xs text-texto-apoio">Carregando avaliações...</p>}
-            {avaliacoes && avaliacoes.length === 0 && <p className="text-xs text-texto-apoio">Nenhuma avaliação neste período.</p>}
+            {avaliacoes && avaliacoes.length === 0 && (
+              <p className="text-xs text-texto-apoio">Nenhuma avaliação neste período.</p>
+            )}
             {avaliacoes && avaliacoes.length > 0 && (
               <ul className="space-y-3">
                 {[...avaliacoes]
@@ -470,7 +514,8 @@ export default function PaginaDashboard() {
                     <li key={avaliacao.idPedido} className="border-b border-borda pb-3 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[11px] text-alerta" aria-label={`${avaliacao.nota} de 5 estrelas`}>
-                          {'★'.repeat(avaliacao.nota)}{'☆'.repeat(Math.max(0, 5 - avaliacao.nota))}
+                          {'★'.repeat(avaliacao.nota)}
+                          {'☆'.repeat(Math.max(0, 5 - avaliacao.nota))}
                         </span>
                         <time dateTime={avaliacao.data} className="shrink-0 text-[10px] text-texto-apoio">
                           {formatarDataHora(avaliacao.data)}
@@ -479,7 +524,9 @@ export default function PaginaDashboard() {
                       <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-texto-corpo">
                         {avaliacao.comentario ? `“${avaliacao.comentario}”` : 'Sem comentário escrito.'}
                       </p>
-                      <p className="mt-1 truncate text-[10px] text-texto-apoio">{avaliacao.entregador ?? 'Entregador não informado'}</p>
+                      <p className="mt-1 truncate text-[10px] text-texto-apoio">
+                        {avaliacao.entregador ?? 'Entregador não informado'}
+                      </p>
                     </li>
                   ))}
               </ul>
