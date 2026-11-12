@@ -15,6 +15,12 @@ interface Intervalo {
   fim: Date;
 }
 
+interface ResultadoDaConsulta<T> {
+  chave: string;
+  dados: T | null;
+  erro: boolean;
+}
+
 const STATUS = [
   { campo: 'totalPedidosPendentes', rotulo: 'Pendente', cor: 'bg-alerta' },
   { campo: 'totalPedidosAndamento', rotulo: 'Em andamento', cor: 'bg-primaria' },
@@ -142,12 +148,17 @@ export default function PaginaDashboard() {
   const [erroPedidos, setErroPedidos] = useState(false);
   const [frota, setFrota] = useState<DadosCompartilhados[] | null>(null);
   const [erroFrota, setErroFrota] = useState(false);
-  const [resumo, setResumo] = useState<ResumoDoDashboard | null>(null);
-  const [erroResumo, setErroResumo] = useState(false);
-  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoDaEmpresa[] | null>(null);
-  const [erroAvaliacoes, setErroAvaliacoes] = useState(false);
+  const [resultadoResumo, setResultadoResumo] = useState<ResultadoDaConsulta<ResumoDoDashboard> | null>(null);
+  const [resultadoAvaliacoes, setResultadoAvaliacoes] = useState<ResultadoDaConsulta<AvaliacaoDaEmpresa[]> | null>(
+    null,
+  );
 
   const intervalo = useMemo(() => intervaloDoPeriodo(periodo), [periodo]);
+  const chaveIntervalo = `${intervalo.inicio.toISOString()}|${intervalo.fim.toISOString()}`;
+  const resumo = resultadoResumo?.chave === chaveIntervalo ? resultadoResumo.dados : null;
+  const erroResumo = resultadoResumo?.chave === chaveIntervalo && resultadoResumo.erro;
+  const avaliacoes = resultadoAvaliacoes?.chave === chaveIntervalo ? resultadoAvaliacoes.dados : null;
+  const erroAvaliacoes = resultadoAvaliacoes?.chave === chaveIntervalo && resultadoAvaliacoes.erro;
   const entregasNoPeriodo = useMemo(
     () =>
       (pedidos ?? []).flatMap((pedido) =>
@@ -201,32 +212,27 @@ export default function PaginaDashboard() {
 
   useEffect(() => {
     let cancelado = false;
-    setResumo(null);
-    setErroResumo(false);
     consultarResumoDashboard({
       dataInicio: intervalo.inicio.toISOString(),
       dataFinal: intervalo.fim.toISOString(),
     })
       .then((dados) => {
         if (!cancelado) {
-          setResumo(dados);
-          setErroResumo(false);
+          setResultadoResumo({ chave: chaveIntervalo, dados, erro: false });
         }
       })
       .catch(() => {
         if (!cancelado) {
-          setErroResumo(true);
+          setResultadoResumo({ chave: chaveIntervalo, dados: null, erro: true });
         }
       });
     return () => {
       cancelado = true;
     };
-  }, [intervalo]);
+  }, [chaveIntervalo, intervalo]);
 
   useEffect(() => {
     let cancelado = false;
-    setAvaliacoes(null);
-    setErroAvaliacoes(false);
     const filtro = {
       notas: [],
       de: dataParaFiltro(intervalo.inicio),
@@ -235,17 +241,18 @@ export default function PaginaDashboard() {
     listarAvaliacoes(filtro)
       .then((lista) => {
         if (!cancelado) {
-          setAvaliacoes(lista);
-          setErroAvaliacoes(false);
+          setResultadoAvaliacoes({ chave: chaveIntervalo, dados: lista, erro: false });
         }
       })
       .catch(() => {
-        if (!cancelado) setErroAvaliacoes(true);
+        if (!cancelado) {
+          setResultadoAvaliacoes({ chave: chaveIntervalo, dados: null, erro: true });
+        }
       });
     return () => {
       cancelado = true;
     };
-  }, [intervalo]);
+  }, [chaveIntervalo, intervalo]);
 
   const indicadores = [
     {
