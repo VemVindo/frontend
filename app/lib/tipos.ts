@@ -159,11 +159,25 @@ export interface CriarPedidoRequisicao {
   descricao: string;
   tipo_veiculo: TipoRotaEntrega;
   cpf_entregador?: string;
+  destino_lat?: number;
+  destino_lng?: number;
 }
+
+export interface EnderecoLocalizado {
+  coordenada: Coordenada | null;
+  // "aproximado": o Google só achou a rua, o bairro ou a área do CEP, não a porta.
+  precisao: 'exato' | 'aproximado' | null;
+  enderecoEncontrado: string | null;
+}
+
+export type EnderecoParaLocalizar = Pick<
+  CriarPedidoRequisicao,
+  'cep' | 'logradouro' | 'numero' | 'bairro' | 'cidade' | 'uf'
+>;
 
 export interface CriarPedidoResposta extends Omit<
   CriarPedidoRequisicao,
-  'complemento' | 'cpf_entregador' | 'tipo_veiculo'
+  'complemento' | 'cpf_entregador' | 'tipo_veiculo' | 'destino_lat' | 'destino_lng'
 > {
   id_pedido: number;
   complemento: string | null;

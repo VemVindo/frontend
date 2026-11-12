@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import type { ErrosNovoPedido, FormularioNovoPedido } from '@/app/lib/novoPedido';
 interface CamposNovoPedidoProps {
   dadosDoFormulario: FormularioNovoPedido;
   erros: ErrosNovoPedido;
   idDoDialogo: string;
+  localNoMapa?: ReactNode;
   atualizarCampo: <Campo extends keyof FormularioNovoPedido>(campo: Campo, valor: FormularioNovoPedido[Campo]) => void;
 }
 
@@ -70,7 +72,7 @@ function CamposOpcionais({ dadosDoFormulario, erros, atualizarCampo, idDoDialogo
   );
 }
 export default function CamposNovoPedido(propriedades: CamposNovoPedidoProps) {
-  const { dadosDoFormulario, erros, atualizarCampo, idDoDialogo } = propriedades;
+  const { dadosDoFormulario, erros, atualizarCampo, idDoDialogo, localNoMapa } = propriedades;
   return (
     <>
       {' '}
@@ -99,6 +101,7 @@ export default function CamposNovoPedido(propriedades: CamposNovoPedidoProps) {
         onChange={(evento) => atualizarCampo('telefone', evento.target.value)}
       />
       <CamposEndereco {...propriedades} />
+      {localNoMapa}
       <div className="flex min-w-0 flex-col gap-1">
         <label htmlFor={`${idDoDialogo}-veiculo`} className="text-[11px] text-texto-apoio">
           Tipo de veículo

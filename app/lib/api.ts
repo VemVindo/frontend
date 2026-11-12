@@ -2,6 +2,8 @@ import { consultaDasAvaliacoes } from '@/app/lib/comentarios';
 import type {
   CriarPedidoRequisicao,
   CriarPedidoResposta,
+  EnderecoLocalizado,
+  EnderecoParaLocalizar,
   AvaliacaoDaEmpresa,
   AvaliacaoDoRecebedor,
   CadastroDaEmpresa,
@@ -191,6 +193,10 @@ export async function convidarEntregador(cpf: string): Promise<ConviteEnviado> {
 
 export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPedidoResposta> {
   return requisitar('/pedidos', { method: 'POST', body: JSON.stringify(dados) });
+}
+
+export async function localizarEndereco(endereco: EnderecoParaLocalizar): Promise<EnderecoLocalizado> {
+  return requisitar('/pedidos/localizar-endereco', { method: 'POST', body: JSON.stringify(endereco) });
 }
 
 export async function listarPedidosDaEmpresa(): Promise<PedidoAtivo[]> {
