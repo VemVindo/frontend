@@ -1,16 +1,16 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { ApiError, criarPedido } from '@/app/lib/api';
+import { ApiError, criarPedido, localizarEndereco } from '@/app/lib/api';
 import { useSessao } from '@/app/lib/useSessao';
 import {
   CAMPOS_DO_ENDERECO,
   criarFluxoEnvioPedido,
+  enderecoParaLocalizar,
   validarNovoPedido,
   type ErrosNovoPedido,
   type FormularioNovoPedido,
 } from '@/app/lib/novoPedido';
-import type { CriarPedidoResposta } from '@/app/lib/tipos';
-import { useLocalDoPedido } from './useLocalDoPedido';
-
+import type { Coordenada, CriarPedidoResposta, EnderecoLocalizado } from '@/app/lib/tipos';
+import type { EtapaDoLocal } from './LocalNoMapa';
 const FORMULARIO_INICIAL: FormularioNovoPedido = {
   nome_recebedor: '',
   telefone: '',
@@ -25,6 +25,11 @@ const FORMULARIO_INICIAL: FormularioNovoPedido = {
   observacoes: '',
   tipo_veiculo: '',
 };
+
+function etapaDaBusca(achou: boolean, precisao: EnderecoLocalizado['precisao']): EtapaDoLocal {
+  if (!achou) return 'nao-encontrado';
+  return precisao === 'exato' ? 'encontrado' : 'aproximado';
+}
 
 function mensagemDeFalha(erro: unknown): string {
   let mensagemDeErro = 'Não foi possível concluir o cadastro. Verifique sua conexão e tente novamente.';
@@ -53,11 +58,48 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
   const [erros, definirErros] = useState<ErrosNovoPedido>({});
   const [aviso, definirAviso] = useState('');
   const [erroDeEnvio, definirErroDeEnvio] = useState('');
-  const local = useLocalDoPedido(dadosDoFormulario);
+  const [destino, definirDestino] = useState<Coordenada | null>(null);
+  const [etapaDoLocal, definirEtapaDoLocal] = useState<EtapaDoLocal>('pendente');
+  const [tentativa, definirTentativa] = useState(0);
+  const [enderecoEncontrado, definirEnderecoEncontrado] = useState<string | null>(null);
+  // Uma busca antiga não pode sobrescrever o pino depois que o endereço mudou.
+  const buscaAtual = useRef(0);
+
+  function esquecerLocal() {
+    buscaAtual.current += 1;
+    definirDestino(null);
+    definirEnderecoEncontrado(null);
+    definirEtapaDoLocal('pendente');
+  }
+
+  async function localizar() {
+    const endereco = enderecoParaLocalizar(dadosDoFormulario);
+    if (!endereco) return;
+    const busca = ++buscaAtual.current;
+    definirEtapaDoLocal('localizando');
+    try {
+      const { coordenada, precisao, enderecoEncontrado: encontrado } = await localizarEndereco(endereco);
+      if (busca !== buscaAtual.current) return;
+      definirDestino(coordenada);
+      definirEnderecoEncontrado(coordenada ? encontrado : null);
+      definirEtapaDoLocal(etapaDaBusca(coordenada !== null, precisao));
+    } catch {
+      if (busca !== buscaAtual.current) return;
+      definirDestino(null);
+      definirEnderecoEncontrado(null);
+      definirEtapaDoLocal('falhou');
+    }
+    definirTentativa((atual) => atual + 1);
+  }
+
+  function marcarDestino(ponto: Coordenada) {
+    definirDestino(ponto);
+    definirEtapaDoLocal('marcado');
+  }
 
   function atualizarCampo<Campo extends keyof FormularioNovoPedido>(campo: Campo, valor: FormularioNovoPedido[Campo]) {
     definirDadosDoFormulario((atuais) => ({ ...atuais, [campo]: valor }));
-    if (CAMPOS_DO_ENDERECO.has(campo)) local.esquecer();
+    if (CAMPOS_DO_ENDERECO.has(campo)) esquecerLocal();
     definirErros((atuais) => ({ ...atuais, [campo]: undefined }));
     definirAviso('');
     definirErroDeEnvio('');
@@ -76,13 +118,12 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
       if (campo instanceof HTMLElement) campo.focus();
       return;
     }
-    if (local.faltaConfirmar(evento.currentTarget)) return;
     if (!empresa) return;
     envioEmCurso.current = true;
     definirEnviando(true);
     let pedido: CriarPedidoResposta;
     try {
-      const resultado = await fluxoDeEnvio.current(dadosDoFormulario, empresa, local.destino);
+      const resultado = await fluxoDeEnvio.current(dadosDoFormulario, empresa, destino);
       if (resultado.estado !== 'criado') return;
       pedido = resultado.pedido;
     } catch (erro) {
@@ -95,7 +136,7 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
     // Callbacks ficam fora do catch da API: falha na página não significa falha no cadastro.
     definirDadosDoFormulario(FORMULARIO_INICIAL);
     definirErros({});
-    local.esquecer();
+    esquecerLocal();
     definirAviso(`Pedido #${pedido.id_pedido} criado com sucesso.`);
     onFechar();
     onCriado?.(pedido);
@@ -122,6 +163,14 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
     empresa,
     mensagemDeEstado,
     erroDeEnvio,
-    local: local.propriedades,
+    local: {
+      etapa: etapaDoLocal,
+      destino,
+      tentativa,
+      enderecoEncontrado,
+      podeLocalizar: enderecoParaLocalizar(dadosDoFormulario) !== null,
+      aoLocalizar: localizar,
+      aoMarcar: marcarDestino,
+    },
   };
 }

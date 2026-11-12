@@ -51,7 +51,6 @@ function renderizar(propriedades: Partial<LocalNoMapaProps> = {}) {
     podeLocalizar: true,
     aoLocalizar: vi.fn(),
     aoMarcar: vi.fn(),
-    aoConfirmar: vi.fn(),
   };
   const props = { ...padrao, ...propriedades };
   render(<LocalNoMapa {...props} />);
@@ -103,28 +102,6 @@ describe('LocalNoMapa', () => {
   ] as const)('com o pino ($etapa), explica o que conferir', ({ etapa, mensagem }) => {
     renderizar({ etapa, destino: { lat: -15.6, lng: -47.6 } });
     expect(screen.getByRole('status').textContent).toMatch(mensagem);
-  });
-
-  it.each(['encontrado', 'aproximado'] as const)('com o pino achado (%s), pede para confirmar', (etapa) => {
-    const { aoConfirmar } = renderizar({ etapa, destino: { lat: -15.6, lng: -47.6 } });
-    fireEvent.click(screen.getByRole('button', { name: 'Confirmar este local' }));
-    expect(aoConfirmar).toHaveBeenCalledOnce();
-  });
-
-  it('não pede confirmação sem pino ou com o ponto já marcado', () => {
-    renderizar({ etapa: 'marcado', destino: { lat: -15.6, lng: -47.6 } });
-    expect(screen.queryByRole('button', { name: 'Confirmar este local' })).toBeNull();
-    cleanup();
-    renderizar({ etapa: 'nao-encontrado' });
-    expect(screen.queryByRole('button', { name: 'Confirmar este local' })).toBeNull();
-  });
-
-  it('mostra o aviso de confirmação pendente', () => {
-    renderizar({ erro: 'Confirme o ponto de entrega no mapa antes de criar o pedido.' });
-    expect(screen.getByRole('alert').textContent).toMatch(/Confirme o ponto/);
-    cleanup();
-    renderizar();
-    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('mostra o endereço achado até o ponto ser marcado à mão', () => {
