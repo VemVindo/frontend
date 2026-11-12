@@ -1,3 +1,4 @@
+import { UFS } from './empresa';
 import type {
   Coordenada,
   CriarPedidoRequisicao,
@@ -24,7 +25,7 @@ export interface FormularioNovoPedido {
 
 export type ErrosNovoPedido = Partial<Record<keyof FormularioNovoPedido, string>>;
 
-const UFS = new Set('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' '));
+const UFS_VALIDAS: ReadonlySet<string> = new Set(UFS);
 
 function telefoneValido(telefone: string): boolean {
   const digitos = telefone.replace(/[\s()+.-]/g, '');
@@ -67,7 +68,7 @@ export function validarNovoPedido(dados: FormularioNovoPedido): ErrosNovoPedido 
   if (!erros.numero && !numeroValido(dados.numero)) {
     erros.numero = 'Informe um número inteiro de 1 a 2147483647.';
   }
-  if (!erros.uf && !UFS.has(dados.uf.trim().toUpperCase())) {
+  if (!erros.uf && !UFS_VALIDAS.has(dados.uf.trim().toUpperCase())) {
     erros.uf = 'Informe uma UF brasileira válida, como DF.';
   }
   validarVeiculo(dados.tipo_veiculo, erros);

@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react';
+import { somenteValorEmReais } from '@/app/lib/entrada';
 
 export interface CampoParametroProps {
   id: string;
@@ -51,7 +52,7 @@ export default function CampoParametro({
           disabled={desabilitado}
           aria-invalid={erro ? true : undefined}
           aria-describedby={erro ? `${idDescricao} ${idErro}` : idDescricao}
-          onChange={(evento: ChangeEvent<HTMLInputElement>) => onChange(evento.target.value)}
+          onChange={(evento: ChangeEvent<HTMLInputElement>) => onChange(somenteValorEmReais(evento.target.value))}
           className="w-full min-w-0 bg-transparent outline-none disabled:opacity-50"
         />
       </div>

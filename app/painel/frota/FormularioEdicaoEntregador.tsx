@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
+import { somenteLetras } from '@/app/lib/entrada';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { ApiError, editarEntregador } from '@/app/lib/api';
 import { somenteDigitos, type ErrosDoFormulario } from '@/app/lib/empresa';
@@ -81,7 +82,7 @@ export default function FormularioEdicaoEntregador({
           autoComplete="off"
           className="md:col-span-2"
           value={valores.nome}
-          onChange={(evento) => alterar('nome', evento.target.value)}
+          onChange={(evento) => alterar('nome', somenteLetras(evento.target.value))}
           {...campo('nome')}
         />
         <CampoTexto

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import CampoTexto from '@/app/components/ui/CampoTexto';
+import { somenteDigitos, UFS } from '@/app/lib/empresa';
+import { somenteLetras } from '@/app/lib/entrada';
 import type { ErrosNovoPedido, FormularioNovoPedido } from '@/app/lib/novoPedido';
 interface CamposNovoPedidoProps {
   dadosDoFormulario: FormularioNovoPedido;
@@ -9,20 +11,88 @@ interface CamposNovoPedidoProps {
   atualizarCampo: <Campo extends keyof FormularioNovoPedido>(campo: Campo, valor: FormularioNovoPedido[Campo]) => void;
 }
 
-function CamposEndereco({ dadosDoFormulario, erros, atualizarCampo }: CamposNovoPedidoProps) {
+type CampoDeEndereco = 'cep' | 'logradouro' | 'numero' | 'complemento' | 'bairro' | 'cidade';
+
+const CAMPOS_DE_ENDERECO: ReadonlyArray<{
+  campo: CampoDeEndereco;
+  rotulo: string;
+  placeholder: string;
+  autoComplete: string;
+  numerico?: boolean;
+  filtrar?: (texto: string) => string;
+}> = [
+  {
+    campo: 'cep',
+    rotulo: 'CEP',
+    placeholder: '70000000',
+    autoComplete: 'postal-code',
+    numerico: true,
+    filtrar: (texto) => somenteDigitos(texto, 8),
+  },
+  { campo: 'logradouro', rotulo: 'Logradouro', placeholder: 'Rua ou avenida', autoComplete: 'address-line1' },
+  {
+    campo: 'numero',
+    rotulo: 'Número',
+    placeholder: 'Ex.: 10',
+    autoComplete: 'off',
+    numerico: true,
+    filtrar: (texto) => somenteDigitos(texto, 6),
+  },
+  {
+    campo: 'complemento',
+    rotulo: 'Complemento (opcional)',
+    placeholder: 'Apartamento, bloco',
+    autoComplete: 'address-line2',
+  },
+  { campo: 'bairro', rotulo: 'Bairro', placeholder: 'Ex.: Centro', autoComplete: 'address-level3' },
+  {
+    campo: 'cidade',
+    rotulo: 'Cidade',
+    placeholder: 'Ex.: Brasília',
+    autoComplete: 'address-level2',
+    filtrar: somenteLetras,
+  },
+];
+
+function CampoUf({ dadosDoFormulario, erros, atualizarCampo, idDoDialogo }: CamposNovoPedidoProps) {
+  const id = `${idDoDialogo}-uf`;
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <label htmlFor={id} className="text-xs font-medium text-texto-corpo">
+        UF
+      </label>
+      <select
+        id={id}
+        name="uf"
+        required
+        autoComplete="address-level1"
+        value={dadosDoFormulario.uf}
+        onChange={(evento) => atualizarCampo('uf', evento.target.value)}
+        aria-invalid={erros.uf ? true : undefined}
+        aria-describedby={erros.uf ? `${id}-erro` : undefined}
+        className={`h-9 min-w-0 rounded-lg border bg-superficie px-3 text-xs text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${erros.uf ? 'border-erro' : 'border-borda'}`}
+      >
+        <option value="">Selecione o estado</option>
+        {UFS.map((uf) => (
+          <option key={uf} value={uf}>
+            {uf}
+          </option>
+        ))}
+      </select>
+      {erros.uf && (
+        <p id={`${id}-erro`} className="text-xs text-erro">
+          {erros.uf}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CamposEndereco(propriedades: CamposNovoPedidoProps) {
+  const { dadosDoFormulario, erros, atualizarCampo } = propriedades;
   return (
     <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-      {(
-        [
-          ['cep', 'CEP', '70000-000', 'postal-code'],
-          ['logradouro', 'Logradouro', 'Rua ou avenida', 'address-line1'],
-          ['numero', 'Número', 'Ex.: 10', 'off'],
-          ['complemento', 'Complemento (opcional)', 'Apartamento, bloco', 'address-line2'],
-          ['bairro', 'Bairro', 'Ex.: Centro', 'address-level3'],
-          ['cidade', 'Cidade', 'Ex.: Brasília', 'address-level2'],
-          ['uf', 'UF', 'Ex.: DF', 'address-level1'],
-        ] as const
-      ).map(([campo, rotulo, placeholder, autoComplete]) => (
+      {CAMPOS_DE_ENDERECO.map(({ campo, rotulo, placeholder, autoComplete, numerico, filtrar }) => (
         <CampoTexto
           key={campo}
           aparencia="modal"
@@ -30,14 +100,14 @@ function CamposEndereco({ dadosDoFormulario, erros, atualizarCampo }: CamposNovo
           name={campo}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          inputMode={campo === 'numero' || campo === 'cep' ? 'numeric' : undefined}
-          autoCapitalize={campo === 'uf' ? 'characters' : undefined}
+          inputMode={numerico ? 'numeric' : undefined}
           required={campo !== 'complemento'}
           value={dadosDoFormulario[campo]}
           erro={erros[campo]}
-          onChange={(evento) => atualizarCampo(campo, evento.target.value)}
+          onChange={(evento) => atualizarCampo(campo, filtrar ? filtrar(evento.target.value) : evento.target.value)}
         />
       ))}
+      <CampoUf {...propriedades} />
     </div>
   );
 }
@@ -85,20 +155,20 @@ export default function CamposNovoPedido(propriedades: CamposNovoPedidoProps) {
         required
         value={dadosDoFormulario.nome_recebedor}
         erro={erros.nome_recebedor}
-        onChange={(evento) => atualizarCampo('nome_recebedor', evento.target.value)}
+        onChange={(evento) => atualizarCampo('nome_recebedor', somenteLetras(evento.target.value))}
       />
       <CampoTexto
         aparencia="modal"
         rotulo="Telefone"
         name="telefone"
         type="tel"
-        inputMode="tel"
+        inputMode="numeric"
         autoComplete="tel-national"
-        placeholder="(61) 99999-0000"
+        placeholder="DDD e número, ex.: 61999990000"
         required
         value={dadosDoFormulario.telefone}
         erro={erros.telefone}
-        onChange={(evento) => atualizarCampo('telefone', evento.target.value)}
+        onChange={(evento) => atualizarCampo('telefone', somenteDigitos(evento.target.value, 11))}
       />
       <CamposEndereco {...propriedades} />
       {localNoMapa}
