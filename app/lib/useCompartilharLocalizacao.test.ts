@@ -97,6 +97,27 @@ describe('useCompartilharLocalizacao', () => {
     expect(result.current.posicao).toEqual({ lat: -15.792, lng: -47.882 });
   });
 
+  it('não troca uma leitura do GPS por outra pior logo em seguida', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-15T12:00:00Z'));
+    const { result } = renderHook(() => useCompartilharLocalizacao(7, true));
+    act(() => result.current.iniciar());
+
+    act(() => sucesso!(leitura(-15.79, -47.88, 15)));
+    vi.setSystemTime(new Date('2026-10-15T12:00:10Z'));
+    act(() => sucesso!(leitura(-15.7, -47.8, 3000)));
+
+    expect(result.current.posicao).toEqual({ lat: -15.79, lng: -47.88 });
+    expect(result.current.precisao).toBe(15);
+    expect(registrarPosicao).toHaveBeenCalledTimes(1);
+
+    vi.setSystemTime(new Date('2026-10-15T12:00:40Z'));
+    act(() => sucesso!(leitura(-15.7, -47.8, 3000)));
+
+    expect(result.current.posicao).toEqual({ lat: -15.7, lng: -47.8 });
+    expect(result.current.precisao).toBe(3000);
+  });
+
   it('para e explica quando a permissão é negada', () => {
     const { result } = renderHook(() => useCompartilharLocalizacao(7, true));
     act(() => result.current.iniciar());

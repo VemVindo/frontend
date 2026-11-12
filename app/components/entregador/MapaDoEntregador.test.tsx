@@ -48,6 +48,7 @@ function estado(parcial: Partial<ReturnType<typeof useCompartilharLocalizacao>> 
     estado: 'parado',
     erro: null,
     posicao: null,
+    precisao: null,
     visao: VISAO,
     iniciar,
     parar,
@@ -102,6 +103,16 @@ describe('MapaDoEntregador', () => {
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
+  it('com a posição do aparelho, o Google Maps parte de onde a entregadora está', () => {
+    estado({ posicao: { lat: -15.801, lng: -47.89 } });
+
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.getByRole('link', { name: 'Abrir no Google Maps' }).getAttribute('href')).toBe(
+      'https://www.google.com/maps/dir/?api=1&origin=-15.801%2C-47.89&destination=-15.8135%2C-47.9046',
+    );
+  });
+
   it('mostra o erro de localização', () => {
     estado({ erro: 'A permissão de localização foi negada.' });
 
@@ -116,5 +127,16 @@ describe('MapaDoEntregador', () => {
     expect(useCompartilharLocalizacao).toHaveBeenCalledWith(7, false);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.queryByTestId('mapa')).toBeNull();
+  });
+
+  it('mostra a margem de erro e alerta quando a leitura é imprecisa', () => {
+    estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 12 });
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+    expect(screen.getByText('Margem de erro de cerca de 10 m.').className).toContain('text-texto-suave');
+    cleanup();
+
+    estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 4000 });
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+    expect(screen.getByText(/Localização imprecisa/).className).toContain('text-erro');
   });
 });

@@ -4,7 +4,7 @@ import Botao from '@/app/components/ui/Botao';
 import MapaEntrega from '@/app/components/mapa/MapaEntrega';
 import PilulaTrajeto from '@/app/components/mapa/PilulaTrajeto';
 import ResumoTrajeto from '@/app/components/mapa/ResumoTrajeto';
-import { linkDeNavegacao } from '@/app/lib/mapa';
+import { descreverPrecisao, linkDeNavegacao, PRECISAO_RUIM_M } from '@/app/lib/mapa';
 import { primeiroNome } from '@/app/lib/texto';
 import type { PedidoDoEntregador } from '@/app/lib/tipos';
 import { useCompartilharLocalizacao } from '@/app/lib/useCompartilharLocalizacao';
@@ -19,9 +19,18 @@ const TEXTO_DO_ESTADO = {
   compartilhando: 'Compartilhando a localização com o recebedor.',
 } as const;
 
+function AvisoDePrecisao({ metros }: { metros: number | null }) {
+  if (metros === null) return null;
+  return (
+    <p className={`text-[12px] ${metros > PRECISAO_RUIM_M ? 'text-erro' : 'text-texto-suave'}`}>
+      {descreverPrecisao(metros)}
+    </p>
+  );
+}
+
 export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
   const emAndamento = pedido.status === 'EM_ANDAMENTO';
-  const { estado, erro, posicao, visao, iniciar, parar } = useCompartilharLocalizacao(pedido.id, emAndamento);
+  const { estado, erro, posicao, precisao, visao, iniciar, parar } = useCompartilharLocalizacao(pedido.id, emAndamento);
 
   const destino = visao?.destino ?? null;
   const entregador = posicao ?? visao?.entregador ?? null;
@@ -61,6 +70,7 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
           />
           {TEXTO_DO_ESTADO[estado]}
         </p>
+        {estado === 'compartilhando' && <AvisoDePrecisao metros={precisao} />}
         {erro && (
           <p role="alert" className="text-[13px] text-erro">
             {erro}
@@ -85,7 +95,7 @@ export default function MapaDoEntregador({ pedido }: MapaDoEntregadorProps) {
             </Botao>
           )}
           <a
-            href={linkDeNavegacao(destino, pedido.endereco)}
+            href={linkDeNavegacao(destino, pedido.endereco, entregador)}
             target="_blank"
             rel="noopener noreferrer"
             className="font-titulo flex h-12 flex-1 items-center justify-center rounded-[14px] bg-primaria-clara px-6 text-[13px] font-bold text-primaria-escura transition-colors hover:bg-lilas"

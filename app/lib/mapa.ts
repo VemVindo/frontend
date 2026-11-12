@@ -32,9 +32,38 @@ export function horarioDeChegada(segundos: number | null, agora: Date = new Date
   return chegada.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-export function linkDeNavegacao(destino: Coordenada | null, endereco: string): string {
+export function linkDeNavegacao(
+  destino: Coordenada | null,
+  endereco: string,
+  origem: Coordenada | null = null,
+): string {
+  // Sem origem, o Google Maps usa a localização que ele mesmo estimar, que pode estar longe do entregador.
+  const partida = origem ? `&origin=${encodeURIComponent(`${origem.lat},${origem.lng}`)}` : '';
   const alvo = destino ? `${destino.lat},${destino.lng}` : endereco;
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(alvo)}`;
+  return `https://www.google.com/maps/dir/?api=1${partida}&destination=${encodeURIComponent(alvo)}`;
+}
+
+// Acima disso a leitura veio da rede (Wi-Fi ou IP), não do GPS, e pode estar a quarteirões do entregador.
+export const PRECISAO_RUIM_M = 200;
+
+// Uma leitura pior só substitui a melhor depois desse tempo, para o ponto não ficar parado se o GPS piorar.
+export const VALIDADE_DA_LEITURA_MS = 30_000;
+
+export interface LeituraDoGps {
+  coordenada: Coordenada;
+  precisaoM: number;
+  em: number;
+}
+
+export function deveTrocarLeitura(atual: LeituraDoGps | null, nova: LeituraDoGps): boolean {
+  if (!atual || nova.precisaoM <= atual.precisaoM) return true;
+  return nova.em - atual.em >= VALIDADE_DA_LEITURA_MS;
+}
+
+export function descreverPrecisao(metros: number): string {
+  const margem = formatarDistanciaRestante(Math.max(metros, 10));
+  if (metros <= PRECISAO_RUIM_M) return `Margem de erro de cerca de ${margem}.`;
+  return `Localização imprecisa: margem de erro de cerca de ${margem}. Use o celular com o GPS ligado; no computador o navegador estima a posição pela rede.`;
 }
 
 export function deveEnviarPosicao(ultimoEnvio: number | null, agora: number): boolean {
