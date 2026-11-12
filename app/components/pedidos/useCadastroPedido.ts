@@ -72,24 +72,27 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
     definirEtapaDoLocal('pendente');
   }
 
-  async function localizar() {
+  async function localizar(): Promise<Coordenada | null> {
     const endereco = enderecoParaLocalizar(dadosDoFormulario);
-    if (!endereco) return;
+    if (!endereco) return null;
     const busca = ++buscaAtual.current;
     definirEtapaDoLocal('localizando');
     try {
       const { coordenada, precisao, enderecoEncontrado: encontrado } = await localizarEndereco(endereco);
-      if (busca !== buscaAtual.current) return;
+      if (busca !== buscaAtual.current) return null;
       definirDestino(coordenada);
       definirEnderecoEncontrado(coordenada ? encontrado : null);
       definirEtapaDoLocal(etapaDaBusca(coordenada !== null, precisao));
+      definirTentativa((atual) => atual + 1);
+      return coordenada;
     } catch {
-      if (busca !== buscaAtual.current) return;
+      if (busca !== buscaAtual.current) return null;
       definirDestino(null);
       definirEnderecoEncontrado(null);
       definirEtapaDoLocal('falhou');
+      definirTentativa((atual) => atual + 1);
+      return null;
     }
-    definirTentativa((atual) => atual + 1);
   }
 
   function marcarDestino(ponto: Coordenada) {
@@ -123,7 +126,8 @@ export function useCadastroPedido(onFechar: () => void, onCriado?: (pedido: Cria
     definirEnviando(true);
     let pedido: CriarPedidoResposta;
     try {
-      const resultado = await fluxoDeEnvio.current(dadosDoFormulario, empresa, destino);
+      const destinoDoPedido = destino ?? (await localizar());
+      const resultado = await fluxoDeEnvio.current(dadosDoFormulario, empresa, destinoDoPedido);
       if (resultado.estado !== 'criado') return;
       pedido = resultado.pedido;
     } catch (erro) {

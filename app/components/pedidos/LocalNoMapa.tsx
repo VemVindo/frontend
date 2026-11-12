@@ -19,7 +19,7 @@ export interface LocalNoMapaProps {
 }
 
 const MENSAGENS: Record<EtapaDoLocal, string> = {
-  pendente: 'Preencha o endereço e localize no mapa para conferir o ponto de entrega.',
+  pendente: 'O endereço será localizado ao criar o pedido. Você também pode localizá-lo agora para conferir o ponto.',
   localizando: 'Procurando o endereço...',
   encontrado: 'Confira o pino. Se estiver no lugar errado, arraste ou toque no ponto certo.',
   aproximado: 'Achamos só a região, não a porta. Arraste o pino ou toque no local exato da entrega.',

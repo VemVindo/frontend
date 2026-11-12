@@ -93,6 +93,41 @@ afterEach(() => {
 });
 
 describe('NovoPedidoModal com ponto no mapa', () => {
+  it('localiza e envia o endereço ao criar sem precisar marcar no mapa', async () => {
+    vi.mocked(localizarEndereco).mockResolvedValue(achado());
+    render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
+    preencher();
+
+    fireEvent.submit(document.querySelector('form')!);
+
+    await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
+    expect(localizarEndereco).toHaveBeenCalledWith({
+      cep: '70000000',
+      logradouro: 'Rua A',
+      numero: 10,
+      bairro: 'Centro',
+      cidade: 'Brasília',
+      uf: 'DF',
+    });
+    expect(vi.mocked(criarPedido).mock.calls[0][0]).toMatchObject({
+      destino_lat: -15.6,
+      destino_lng: -47.6,
+    });
+  });
+
+  it('continua o cadastro se a busca automática não encontrar o endereço', async () => {
+    vi.mocked(localizarEndereco).mockResolvedValue(
+      achado({ coordenada: null, precisao: null, enderecoEncontrado: null }),
+    );
+    render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
+    preencher();
+
+    fireEvent.submit(document.querySelector('form')!);
+
+    await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
+    expect(vi.mocked(criarPedido).mock.calls[0][0]).not.toHaveProperty('destino_lat');
+  });
+
   it('localiza o endereço e envia o ponto conferido no cadastro', async () => {
     vi.mocked(localizarEndereco).mockResolvedValue(achado());
     render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
@@ -126,8 +161,10 @@ describe('NovoPedidoModal com ponto no mapa', () => {
     expect(vi.mocked(criarPedido).mock.calls[0][0]).toMatchObject({ destino_lat: -15.5, destino_lng: -47.5 });
   });
 
-  it('descarta o pino quando o endereço muda', async () => {
-    vi.mocked(localizarEndereco).mockResolvedValue(achado());
+  it('localiza o endereço atualizado em vez de reutilizar o pino anterior', async () => {
+    vi.mocked(localizarEndereco)
+      .mockResolvedValueOnce(achado())
+      .mockResolvedValueOnce(achado({ coordenada: { lat: -15.7, lng: -47.7 } }));
     render(<NovoPedidoModal aberto onFechar={vi.fn()} />);
     preencher();
     fireEvent.click(botaoLocalizar());
@@ -136,7 +173,19 @@ describe('NovoPedidoModal com ponto no mapa', () => {
     expect(screen.queryByTestId('mapa')).toBeNull();
     fireEvent.submit(document.querySelector('form')!);
     await waitFor(() => expect(criarPedido).toHaveBeenCalledOnce());
-    expect(vi.mocked(criarPedido).mock.calls[0][0]).not.toHaveProperty('destino_lat');
+    expect(localizarEndereco).toHaveBeenCalledTimes(2);
+    expect(localizarEndereco).toHaveBeenLastCalledWith({
+      cep: '70000000',
+      logradouro: 'Rua A',
+      numero: 12,
+      bairro: 'Centro',
+      cidade: 'Brasília',
+      uf: 'DF',
+    });
+    expect(vi.mocked(criarPedido).mock.calls[0][0]).toMatchObject({
+      destino_lat: -15.7,
+      destino_lng: -47.7,
+    });
   });
 
   it('ignora a resposta de uma busca feita para o endereço antigo', async () => {
