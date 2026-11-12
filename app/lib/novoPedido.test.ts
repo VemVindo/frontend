@@ -179,3 +179,9 @@ describe('prepararCriacaoPedido com ponto no mapa', () => {
     expect(prepararCriacaoPedido(formulario, empresa, null)).not.toHaveProperty('destino_lng');
   });
 });
+
+describe('prepararCriacaoPedido com formulário inválido', () => {
+  it('recusa montar o envio quando a UF não está na lista', () => {
+    expect(() => prepararCriacaoPedido({ ...formulario, uf: 'XX' }, empresa)).toThrow('Formulário inválido.');
+  });
+});

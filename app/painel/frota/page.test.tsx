@@ -441,4 +441,28 @@ describe('PaginaFrota', () => {
       erroNoConsole.mockRestore();
     });
   });
+
+  it('no cadastro, o nome do entregador não aceita números', async () => {
+    render(<PaginaFrota />);
+    await screen.findByText('Bruno Lima');
+    abrirCadastro();
+
+    preencher('Nome completo', 'Joana7 Lima');
+
+    expect(campo('Nome completo').value).toBe('Joana Lima');
+  });
+
+  it('sem conexão, o cadastro pede para tentar de novo', async () => {
+    vi.mocked(cadastrarEntregador).mockRejectedValue(new Error('rede caiu'));
+    render(<PaginaFrota />);
+    await screen.findByText('Bruno Lima');
+    abrirCadastro();
+
+    preencherCadastro();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cadastrar entregador' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'Não foi possível cadastrar agora. Tente de novo.',
+    );
+  });
 });

@@ -107,4 +107,13 @@ describe('PaginaEmpresa', () => {
 
     expect(await screen.findByText('Não foi possível carregar os dados')).toBeTruthy();
   });
+
+  it('na edição, a cidade não aceita números', async () => {
+    render(<PaginaEmpresa />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar' }));
+
+    fireEvent.change(screen.getByLabelText('Cidade'), { target: { value: 'Brasilia2' } });
+
+    expect((screen.getByLabelText('Cidade') as HTMLInputElement).value).toBe('Brasilia');
+  });
 });
