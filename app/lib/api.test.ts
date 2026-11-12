@@ -8,6 +8,7 @@ import {
   atualizarConfiguracoes,
   buscarConfiguracoes,
   buscarDesempenhoEntregador,
+  consultarResumoDashboard,
   buscarDetalheDoPedido,
   buscarDadosCompartilhados,
   buscarLocalizacaoDoRastreio,
@@ -133,6 +134,16 @@ describe('api', () => {
   // Contrato com o backend: se uma rota mudar de um lado, o teste avisa.
   it.each([
     ['checkHealth', () => checkHealth(), 'GET', '/health/db'],
+    [
+      'consultarResumoDashboard',
+      () =>
+        consultarResumoDashboard({
+          dataInicio: '2026-11-01T00:00:00.000Z',
+          dataFinal: '2026-11-11T23:59:59.999Z',
+        }),
+      'GET',
+      '/dashboard?dataInicio=2026-11-01T00%3A00%3A00.000Z&dataFinal=2026-11-11T23%3A59%3A59.999Z',
+    ],
     ['loginEntregador', () => loginEntregador('12345678909', 'x'), 'POST', '/auth/login/entregador'],
     ['buscarUsuarioAtual', () => buscarUsuarioAtual(), 'GET', '/auth/minhas-infos'],
     ['trocarSenhaEntregador', () => trocarSenhaEntregador('a', 'b', true), 'POST', '/auth/entregador/trocar-senha'],

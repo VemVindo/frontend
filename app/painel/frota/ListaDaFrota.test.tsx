@@ -37,6 +37,8 @@ const DESEMPENHO: DesempenhoEntregador = {
   entregas_com_distancia_desconhecida: 0,
 };
 
+const TOTAL_PAGO = { [BRUNO.cpf]: 12345 };
+
 describe('ListaDaFrota', () => {
   afterEach(cleanup);
 
@@ -45,6 +47,8 @@ describe('ListaDaFrota', () => {
       <ListaDaFrota
         entregadores={[BRUNO]}
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'carregado', dados: DESEMPENHO } }}
+        totalPagoPorCpf={TOTAL_PAGO}
+        erroTotalPago={false}
         onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
@@ -55,6 +59,7 @@ describe('ListaDaFrota', () => {
     expect(screen.getByText('Disponível')).toBeTruthy();
     expect(screen.getByText('4.5')).toBeTruthy();
     expect(screen.getByText('59 entregas')).toBeTruthy();
+    expect(screen.getByText(/R\$\s*123,45/)).toBeTruthy();
     expect(screen.queryByText('Total')).toBeNull();
   });
 
@@ -68,6 +73,8 @@ describe('ListaDaFrota', () => {
             dados: { ...DESEMPENHO, cpf_entregador: CARLA.cpf, total_entregas: 0, avaliacao_media: null },
           },
         }}
+        totalPagoPorCpf={{ [CARLA.cpf]: 0 }}
+        erroTotalPago={false}
         onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
@@ -77,6 +84,7 @@ describe('ListaDaFrota', () => {
     expect(screen.getByText('Indisponível')).toBeTruthy();
     expect(screen.getByText('Sem avaliação')).toBeTruthy();
     expect(screen.getByText('0 entregas')).toBeTruthy();
+    expect(screen.getByText(/R\$\s*0,00/)).toBeTruthy();
   });
 
   it('mostra o estado de carregamento do desempenho', () => {
@@ -84,12 +92,14 @@ describe('ListaDaFrota', () => {
       <ListaDaFrota
         entregadores={[BRUNO]}
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'carregando' } }}
+        totalPagoPorCpf={{}}
+        erroTotalPago={false}
         onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
 
-    expect(screen.getAllByText('Carregando...')).toHaveLength(2);
+    expect(screen.getAllByText('Carregando...')).toHaveLength(3);
   });
 
   it('mostra a falha ao consultar o desempenho', () => {
@@ -97,6 +107,8 @@ describe('ListaDaFrota', () => {
       <ListaDaFrota
         entregadores={[BRUNO]}
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'erro' } }}
+        totalPagoPorCpf={{}}
+        erroTotalPago={false}
         onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
@@ -106,14 +118,32 @@ describe('ListaDaFrota', () => {
   });
 
   it('avisa quando a frota está vazia', () => {
-    render(<ListaDaFrota entregadores={[]} desempenhoPorCpf={{}} onEditar={vi.fn()} onRemover={vi.fn()} />);
+    render(
+      <ListaDaFrota
+        entregadores={[]}
+        desempenhoPorCpf={{}}
+        totalPagoPorCpf={{}}
+        erroTotalPago={false}
+        onEditar={vi.fn()}
+        onRemover={vi.fn()}
+      />,
+    );
 
     expect(screen.getByText('Nenhum entregador na frota ainda.')).toBeTruthy();
   });
 
   it('abre o menu e seleciona a edição do entregador', () => {
     const onEditar = vi.fn();
-    render(<ListaDaFrota entregadores={[BRUNO]} desempenhoPorCpf={{}} onEditar={onEditar} onRemover={vi.fn()} />);
+    render(
+      <ListaDaFrota
+        entregadores={[BRUNO]}
+        desempenhoPorCpf={{}}
+        totalPagoPorCpf={{}}
+        erroTotalPago={false}
+        onEditar={onEditar}
+        onRemover={vi.fn()}
+      />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
@@ -124,7 +154,16 @@ describe('ListaDaFrota', () => {
 
   it('mostra remover abaixo de editar e solicita a remoção selecionada', () => {
     const onRemover = vi.fn();
-    render(<ListaDaFrota entregadores={[BRUNO]} desempenhoPorCpf={{}} onEditar={vi.fn()} onRemover={onRemover} />);
+    render(
+      <ListaDaFrota
+        entregadores={[BRUNO]}
+        desempenhoPorCpf={{}}
+        totalPagoPorCpf={{}}
+        erroTotalPago={false}
+        onEditar={vi.fn()}
+        onRemover={onRemover}
+      />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
     const acoes = screen.getByRole('menu').querySelectorAll('[role="menuitem"]');

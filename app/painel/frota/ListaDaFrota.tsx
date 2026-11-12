@@ -13,8 +13,14 @@ export type EstadoDesempenho =
 export interface ListaDaFrotaProps {
   entregadores: DadosCompartilhados[];
   desempenhoPorCpf: Record<string, EstadoDesempenho>;
+  totalPagoPorCpf: Record<string, number>;
+  erroTotalPago: boolean;
   onEditar: (entregador: DadosCompartilhados) => void;
   onRemover: (entregador: DadosCompartilhados) => void;
+}
+
+function formatarReais(centavos: number): string {
+  return (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function mostrarAvaliacao(desempenho: EstadoDesempenho | undefined) {
@@ -31,7 +37,14 @@ function mostrarEntregas(desempenho: EstadoDesempenho | undefined) {
   return `${total} ${total === 1 ? 'entrega' : 'entregas'}`;
 }
 
-export default function ListaDaFrota({ entregadores, desempenhoPorCpf, onEditar, onRemover }: ListaDaFrotaProps) {
+export default function ListaDaFrota({
+  entregadores,
+  desempenhoPorCpf,
+  totalPagoPorCpf,
+  erroTotalPago,
+  onEditar,
+  onRemover,
+}: ListaDaFrotaProps) {
   const [menuAbertoPara, setMenuAbertoPara] = useState<string | null>(null);
 
   if (entregadores.length === 0) {
@@ -42,12 +55,13 @@ export default function ListaDaFrota({ entregadores, desempenhoPorCpf, onEditar,
     <>
       <div
         aria-hidden="true"
-        className="mb-[10px] hidden grid-cols-[minmax(190px,1fr)_130px_120px_140px_40px] items-center gap-3 rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio md:grid"
+        className="mb-[10px] hidden grid-cols-[minmax(190px,1fr)_130px_110px_110px_140px_40px] items-center gap-3 rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio md:grid"
       >
         <span>Entregador</span>
         <span>Status</span>
         <span>Avaliação</span>
         <span>Entregas</span>
+        <span>Total ganho</span>
         <span />
       </div>
       <ul className="flex flex-col gap-2">
@@ -56,13 +70,14 @@ export default function ListaDaFrota({ entregadores, desempenhoPorCpf, onEditar,
           const avaliacao = mostrarAvaliacao(desempenho);
           const entregas = mostrarEntregas(desempenho);
           const menuAberto = menuAbertoPara === entregador.cpf;
+          const totalPago = totalPagoPorCpf[entregador.cpf];
 
           return (
             <li
               key={entregador.cpf}
-              className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-[8px] border border-borda px-[13px] py-3 text-xs text-texto-corpo md:grid-cols-[minmax(190px,1fr)_130px_120px_140px_40px] md:gap-3"
+              className="relative grid grid-cols-[minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-[8px] border border-borda px-[13px] py-3 text-xs text-texto-corpo md:grid-cols-[minmax(190px,1fr)_130px_110px_110px_140px_40px] md:gap-3"
             >
-              <span className="col-span-2 flex min-w-0 items-center gap-3 md:col-span-1">
+              <span className="col-span-1 flex min-w-0 items-center gap-3 pr-9 md:pr-0">
                 <Avatar iniciais={iniciais(entregador.nome)} tamanho={36} />
                 <span className="flex min-w-0 flex-col gap-1">
                   <span className="truncate font-semibold">{entregador.nome}</span>
@@ -70,39 +85,49 @@ export default function ListaDaFrota({ entregadores, desempenhoPorCpf, onEditar,
                 </span>
               </span>
 
-              <span
-                className={`flex items-center gap-2 font-medium ${entregador.disponivel ? 'text-sucesso-texto' : 'text-texto-apoio'}`}
-              >
+              <div className="col-span-1 flex flex-wrap items-center gap-x-5 gap-y-2 md:contents">
                 <span
-                  aria-hidden="true"
-                  className={`size-2 rounded-full ${entregador.disponivel ? 'bg-sucesso-texto' : 'bg-texto-suave'}`}
-                />
-                {entregador.disponivel ? 'Disponível' : 'Indisponível'}
-              </span>
-
-              {desempenho?.estado === 'erro' ? (
-                <span role="alert" className="col-span-2 text-[11px] text-erro md:col-span-2">
-                  Não foi possível carregar o desempenho.
+                  className={`flex items-center gap-2 font-medium ${entregador.disponivel ? 'text-sucesso-texto' : 'text-texto-apoio'}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`size-2 rounded-full ${entregador.disponivel ? 'bg-sucesso-texto' : 'bg-texto-suave'}`}
+                  />
+                  {entregador.disponivel ? 'Disponível' : 'Indisponível'}
                 </span>
-              ) : (
-                <>
-                  <span className="font-medium" aria-label={avaliacao ?? 'Sem avaliação'}>
-                    {avaliacao === 'Carregando...' ? (
-                      <span className="text-texto-apoio">{avaliacao}</span>
-                    ) : avaliacao === 'Sem avaliação' ? (
-                      <span className="text-texto-apoio">{avaliacao}</span>
-                    ) : (
-                      <>
-                        <span aria-hidden="true">★ </span>
-                        {avaliacao}
-                      </>
-                    )}
-                  </span>
-                  <span className="text-texto-corpo">{entregas}</span>
-                </>
-              )}
 
-              <div className="relative justify-self-end">
+                {desempenho?.estado === 'erro' ? (
+                  <span role="alert" className="text-[11px] text-erro md:col-span-2">
+                    Não foi possível carregar o desempenho.
+                  </span>
+                ) : (
+                  <>
+                    <span className="font-medium" aria-label={avaliacao ?? 'Sem avaliação'}>
+                      {avaliacao === 'Carregando...' ? (
+                        <span className="text-texto-apoio">{avaliacao}</span>
+                      ) : avaliacao === 'Sem avaliação' ? (
+                        <span className="text-texto-apoio">{avaliacao}</span>
+                      ) : (
+                        <>
+                          <span aria-hidden="true">★ </span>
+                          {avaliacao}
+                        </>
+                      )}
+                    </span>
+                    <span className="text-texto-corpo">{entregas}</span>
+                  </>
+                )}
+                <span className="text-[11px] font-medium text-texto-corpo">
+                  <span className="text-texto-apoio md:hidden">Total ganho: </span>
+                  {erroTotalPago
+                    ? 'Indisponível'
+                    : totalPago === undefined
+                      ? 'Carregando...'
+                      : formatarReais(totalPago)}
+                </span>
+              </div>
+
+              <div className="absolute right-2 top-2 md:relative md:right-auto md:top-auto md:justify-self-end">
                 <button
                   type="button"
                   aria-label={`Ações de ${entregador.nome}`}
