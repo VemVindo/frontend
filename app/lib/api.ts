@@ -14,11 +14,12 @@ import type {
   DadosCadastraisDaEmpresa,
   DadosCompartilhados,
   DetalheDoPedido,
-  EdicaoDoEntregador,
+  EdicaoDoPerfil,
   FiltroDeAvaliacoes,
   LinkDeRastreio,
   NovaEmpresa,
   NovoEntregador,
+  PerfilDoEntregador,
   Empresa,
   Entregador,
   EntregadorCadastrado,
@@ -138,6 +139,14 @@ export async function buscarDadosCompartilhados(): Promise<{ dados: DadosCompart
   return requisitar('/entregador/dados-compartilhados', { method: 'GET' });
 }
 
+export async function buscarPerfilDoEntregador(): Promise<PerfilDoEntregador> {
+  return requisitar('/entregador/perfil', { method: 'GET' });
+}
+
+export async function atualizarPerfilDoEntregador(edicao: EdicaoDoPerfil): Promise<PerfilDoEntregador> {
+  return requisitar('/entregador/perfil', { method: 'PATCH', body: JSON.stringify(edicao) });
+}
+
 export async function listarVinculos(): Promise<Vinculo[]> {
   return requisitar('/entregador/vinculos', { method: 'GET' });
 }
@@ -169,13 +178,6 @@ export async function buscarDesempenhoEntregador(
 export async function cadastrarEntregador(dados: NovoEntregador): Promise<EntregadorCadastrado> {
   return requisitar('/entregadores', {
     method: 'POST',
-    body: JSON.stringify(dados),
-  });
-}
-
-export async function editarEntregador(dados: EdicaoDoEntregador): Promise<boolean> {
-  return requisitar('/entregadores', {
-    method: 'PATCH',
     body: JSON.stringify(dados),
   });
 }

@@ -6,7 +6,6 @@ import {
   cadastrarEntregador,
   consultarResumoDashboard,
   convidarEntregador,
-  editarEntregador,
   listarFrota,
   removerEntregador,
 } from '@/app/lib/api';
@@ -20,7 +19,6 @@ vi.mock('@/app/lib/api', async (original) => ({
   consultarResumoDashboard: vi.fn(),
   convidarEntregador: vi.fn(),
   listarFrota: vi.fn(),
-  editarEntregador: vi.fn(),
   removerEntregador: vi.fn(),
 }));
 
@@ -161,18 +159,14 @@ describe('PaginaFrota', () => {
     expect(new Date(vi.mocked(buscarDesempenhoEntregador).mock.calls[0][1].ate).getTime()).not.toBeNaN();
   });
 
-  it('abre a edição pelo menu e atualiza os dados da linha', async () => {
-    vi.mocked(editarEntregador).mockResolvedValue(true);
+  it('mostra os dados só para leitura, sem opção de editar o entregador', async () => {
     render(<PaginaFrota />);
 
     await screen.findByText('Bruno Lima');
     fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
-    preencher('Nome do entregador', 'Bruno Lima Souza');
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
 
-    expect(await screen.findByText('Bruno Lima Souza')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Salvar alterações' })).toBeNull();
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Remover entregador']);
+    expect(screen.queryByRole('textbox', { name: /nome do entregador/i })).toBeNull();
   });
 
   it('confirma a remoção e mostra o resultado da redistribuição dos pedidos', async () => {
@@ -367,22 +361,6 @@ describe('PaginaFrota', () => {
     expect(within(screen.getByRole('dialog')).getByRole('heading', { name: 'Convidar entregador' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Fechar convidar entregador' }));
     expect(screen.queryByRole('dialog')).toBeNull();
-  });
-
-  it('fecha a edição pelo botão de cancelar e pelo de fechar', async () => {
-    render(<PaginaFrota />);
-    await screen.findByText('Bruno Lima');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Fechar editar bruno lima' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    expect(editarEntregador).not.toHaveBeenCalled();
   });
 
   describe('respostas que chegam depois de sair da tela', () => {

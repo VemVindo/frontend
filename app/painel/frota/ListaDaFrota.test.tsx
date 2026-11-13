@@ -49,7 +49,6 @@ describe('ListaDaFrota', () => {
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'carregado', dados: DESEMPENHO } }}
         totalPagoPorCpf={TOTAL_PAGO}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
@@ -75,7 +74,6 @@ describe('ListaDaFrota', () => {
         }}
         totalPagoPorCpf={{ [CARLA.cpf]: 0 }}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
@@ -94,7 +92,6 @@ describe('ListaDaFrota', () => {
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'carregando' } }}
         totalPagoPorCpf={{}}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
@@ -109,7 +106,6 @@ describe('ListaDaFrota', () => {
         desempenhoPorCpf={{ [BRUNO.cpf]: { estado: 'erro' } }}
         totalPagoPorCpf={{}}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
@@ -124,7 +120,6 @@ describe('ListaDaFrota', () => {
         desempenhoPorCpf={{}}
         totalPagoPorCpf={{}}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={vi.fn()}
       />,
     );
@@ -132,27 +127,7 @@ describe('ListaDaFrota', () => {
     expect(screen.getByText('Nenhum entregador na frota ainda.')).toBeTruthy();
   });
 
-  it('abre o menu e seleciona a edição do entregador', () => {
-    const onEditar = vi.fn();
-    render(
-      <ListaDaFrota
-        entregadores={[BRUNO]}
-        desempenhoPorCpf={{}}
-        totalPagoPorCpf={{}}
-        erroTotalPago={false}
-        onEditar={onEditar}
-        onRemover={vi.fn()}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Editar dados' }));
-
-    expect(onEditar).toHaveBeenCalledWith(BRUNO);
-    expect(screen.queryByRole('menu')).toBeNull();
-  });
-
-  it('mostra remover abaixo de editar e solicita a remoção selecionada', () => {
+  it('o menu só oferece remover e solicita a remoção selecionada', () => {
     const onRemover = vi.fn();
     render(
       <ListaDaFrota
@@ -160,16 +135,14 @@ describe('ListaDaFrota', () => {
         desempenhoPorCpf={{}}
         totalPagoPorCpf={{}}
         erroTotalPago={false}
-        onEditar={vi.fn()}
         onRemover={onRemover}
       />,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Ações de Bruno Lima' }));
     const acoes = screen.getByRole('menu').querySelectorAll('[role="menuitem"]');
-    expect(acoes[0].textContent).toBe('Editar dados');
-    expect(acoes[1].textContent).toBe('Remover entregador');
-    fireEvent.click(acoes[1]);
+    expect([...acoes].map((acao) => acao.textContent)).toEqual(['Remover entregador']);
+    fireEvent.click(acoes[0]);
 
     expect(onRemover).toHaveBeenCalledWith(BRUNO);
     expect(screen.queryByRole('menu')).toBeNull();
