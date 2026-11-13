@@ -26,7 +26,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["**/*.test.ts", "**/*.test.tsx"],
+    files: ["**/*.test.ts", "**/*.test.tsx", "e2e/**/*.ts"],
     rules: {
       "max-lines-per-function": "off",
       "max-lines": "off",

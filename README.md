@@ -60,6 +60,44 @@ npm test        # testes (Vitest)
 npm run test:ci # testes com cobertura e relatorios (o mesmo do CI)
 ```
 
+## Testes de tela (Selenium)
+
+Os roteiros de `e2e/` abrem o Chrome e percorrem as telas como a empresa, o
+entregador e o recebedor. Precisam do backend em `http://localhost:8000` (com o
+seed) e do frontend em `http://localhost:3000`.
+
+```bash
+npm run test:e2e
+```
+
+- `e2e/autenticacao.e2e.ts`: login das duas personas, menu do painel, rota
+  protegida e link de rastreio inexistente. Só lê os dados do seed.
+- `e2e/jornada-da-entrega.e2e.ts`: cadastra uma empresa e um entregador novos a
+  cada execução e leva um pedido do cadastro até a avaliação do recebedor.
+- `e2e/caminhos-alternativos.e2e.ts`: cadastro por CPF, CPF já cadastrado que
+  vira convite, recusa de convite, saída da frota, reatribuição com histórico,
+  troca do link de rastreio, filtros de data, menu de celular, compartilhamento
+  da localização (posição simulada no Chrome) e bloqueio do código do recebedor.
+
+Sem as chaves do Google Maps o mapa não aparece, e o backend só aceita pedido
+com o pino da empresa e o da entrega. Por isso os roteiros conferem na tela que
+o pedido sem pino é recusado e depois gravam os pinos e criam o pedido pela API,
+com a sessão da própria empresa.
+
+Quando um teste falha, a captura da tela e o texto da página ficam em
+`reports/e2e/`.
+
+| Variável | Para que serve | Padrão |
+|---|---|---|
+| `E2E_SEM_TELA` | `1` roda sem abrir a janela | janela visível |
+| `E2E_PAUSA_MS` | pausa antes de cada clique, para dar tempo de acompanhar | `350` |
+| `E2E_NAVEGADOR` | `chrome` ou `firefox` | `chrome` |
+| `E2E_URL_FRONT` e `E2E_URL_API` | endereços do frontend e do backend | `localhost:3000` e `localhost:8000` |
+
+O backend aceita 5 tentativas de login por minuto em cada rota. Quando o limite
+estoura, os roteiros esperam 20 segundos e tentam de novo, então a execução
+pode demorar mais, mas não falha por isso.
+
 ## CI/CD
 
 Cada PR para a `main` roda `.github/workflows/ci.yml`. O merge só é liberado com:
