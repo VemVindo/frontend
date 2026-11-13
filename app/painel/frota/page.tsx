@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import TituloPagina from '@/app/components/ui/TituloPagina';
 import { buscarDesempenhoEntregador, consultarResumoDashboard, listarFrota } from '@/app/lib/api';
-import { comEntregadorAtualizado, semEntregador } from '@/app/lib/entregadores';
+import { semEntregador } from '@/app/lib/entregadores';
 import type { DadosCompartilhados } from '@/app/lib/tipos';
 import type { ResumoDoDashboard } from '@/app/lib/tiposDashboard';
 import AcoesDaFrota from './AcoesDaFrota';
@@ -11,7 +11,6 @@ import ConfirmacaoRemocaoEntregador from './ConfirmacaoRemocaoEntregador';
 import DialogoFrota from './DialogoFrota';
 import FormularioCadastroEntregador from './FormularioCadastroEntregador';
 import FormularioConviteEntregador from './FormularioConviteEntregador';
-import FormularioEdicaoEntregador from './FormularioEdicaoEntregador';
 import PainelDaFrota from './PainelDaFrota';
 import { type EstadoDesempenho } from './ListaDaFrota';
 import useRemocaoEntregador from './useRemocaoEntregador';
@@ -23,7 +22,6 @@ export default function PaginaFrota() {
   const [desempenhoPorCpf, setDesempenhoPorCpf] = useState<Record<string, EstadoDesempenho>>({});
   const [totalPagoPorCpf, setTotalPagoPorCpf] = useState<Record<string, number>>({});
   const [erroTotalPago, setErroTotalPago] = useState(false);
-  const [emEdicao, setEmEdicao] = useState<DadosCompartilhados | null>(null);
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [conviteAberto, setConviteAberto] = useState(false);
   const remocao = useRemocaoEntregador((cpf) => {
@@ -101,11 +99,6 @@ export default function PaginaFrota() {
     };
   }, []);
 
-  function registrarEdicao(atualizado: DadosCompartilhados) {
-    setFrota((atuais) => comEntregadorAtualizado(atuais, atualizado));
-    setEmEdicao(null);
-  }
-
   function abrirConvite(cpf = '') {
     setCpfParaConvite(cpf);
     setCadastroAberto(false);
@@ -139,7 +132,6 @@ export default function PaginaFrota() {
           totalPagoPorCpf={totalPagoPorCpf}
           erroTotalPago={erroTotalPago}
           onCadastrar={() => setCadastroAberto(true)}
-          onEditar={setEmEdicao}
           onRemover={remocao.escolher}
           onConvidar={() => abrirConvite()}
         />
@@ -152,17 +144,6 @@ export default function PaginaFrota() {
       <DialogoFrota aberto={conviteAberto} titulo="Convidar entregador" onFechar={() => setConviteAberto(false)}>
         <FormularioConviteEntregador key={cpfParaConvite} cpfInicial={cpfParaConvite} />
       </DialogoFrota>
-
-      {emEdicao && (
-        <DialogoFrota aberto titulo={`Editar ${emEdicao.nome}`} onFechar={() => setEmEdicao(null)}>
-          <FormularioEdicaoEntregador
-            key={emEdicao.cpf}
-            entregador={emEdicao}
-            onSalvo={registrarEdicao}
-            onCancelar={() => setEmEdicao(null)}
-          />
-        </DialogoFrota>
-      )}
 
       <ConfirmacaoRemocaoEntregador
         entregador={remocao.paraRemover}

@@ -1,6 +1,6 @@
 import { cpfValido } from '@/app/lib/cpf';
 import type { ErrosDoFormulario } from '@/app/lib/empresa';
-import type { DadosCompartilhados, EdicaoDoEntregador, NovoEntregador, TipoVeiculo } from '@/app/lib/tipos';
+import type { DadosCompartilhados, NovoEntregador, TipoVeiculo } from '@/app/lib/tipos';
 
 export const TIPOS_DE_VEICULO: TipoVeiculo[] = ['MOTO', 'CARRO', 'BICICLETA'];
 
@@ -35,13 +35,21 @@ export function normalizarPlaca(texto: string): string {
     .slice(0, TAMANHO_DA_PLACA);
 }
 
+export function placaValida(placa: string): boolean {
+  return PLACA_ANTIGA_OU_MERCOSUL.test(placa);
+}
+
+export function telefoneValido(telefone: string): boolean {
+  return TELEFONE_COM_DDD.test(telefone);
+}
+
 export function validarEntregador(valores: ValoresDoEntregador): ErrosDoFormulario<ValoresDoEntregador> {
   const erros: ErrosDoFormulario<ValoresDoEntregador> = {};
   if (!valores.nome.trim()) erros.nome = 'Preencha este campo';
   if (!cpfValido(valores.cpf)) erros.cpf = 'CPF inválido';
-  if (!TELEFONE_COM_DDD.test(valores.telefone)) erros.telefone = 'Informe DDD e número (10 ou 11 dígitos)';
+  if (!telefoneValido(valores.telefone)) erros.telefone = 'Informe DDD e número (10 ou 11 dígitos)';
   if (!valores.tipoVeiculo) erros.tipoVeiculo = 'Escolha o tipo de veículo';
-  if (precisaDePlaca(valores.tipoVeiculo) && !PLACA_ANTIGA_OU_MERCOSUL.test(valores.placa)) {
+  if (precisaDePlaca(valores.tipoVeiculo) && !placaValida(valores.placa)) {
     erros.placa = 'Use o formato ABC1234 ou ABC1D23';
   }
   return erros;
@@ -58,45 +66,7 @@ export function paraNovoEntregador(valores: ValoresDoEntregador): NovoEntregador
   };
 }
 
-export function valoresParaEditar(entregador: DadosCompartilhados): ValoresDoEntregador {
-  return {
-    nome: entregador.nome,
-    cpf: entregador.cpf,
-    telefone: entregador.telefone.replace(/\D/g, ''),
-    tipoVeiculo: entregador.tipoVeiculo as TipoVeiculo,
-    placa: entregador.placa ?? '',
-  };
-}
-
-export function paraEdicaoDoEntregador(valores: ValoresDoEntregador): EdicaoDoEntregador {
-  const veiculo = valores.tipoVeiculo as TipoVeiculo;
-  return {
-    cpf: valores.cpf,
-    nome: valores.nome.trim(),
-    telefone: valores.telefone,
-    veiculo,
-    ...(precisaDePlaca(veiculo) && { placa: valores.placa }),
-  };
-}
-
-export function entregadorEditado(antes: DadosCompartilhados, edicao: EdicaoDoEntregador): DadosCompartilhados {
-  return {
-    ...antes,
-    nome: edicao.nome,
-    telefone: edicao.telefone,
-    tipoVeiculo: edicao.veiculo,
-    placa: edicao.placa ?? antes.placa,
-  };
-}
-
-// A frota ainda pode estar carregando (null); nesse caso não há linha para tirar nem para trocar.
+// A frota ainda pode estar carregando (null); nesse caso não há linha para tirar.
 export function semEntregador(frota: DadosCompartilhados[] | null, cpf: string): DadosCompartilhados[] | null {
   return frota?.filter((entregador) => entregador.cpf !== cpf) ?? null;
-}
-
-export function comEntregadorAtualizado(
-  frota: DadosCompartilhados[] | null,
-  atualizado: DadosCompartilhados,
-): DadosCompartilhados[] | null {
-  return frota?.map((atual) => (atual.cpf === atualizado.cpf ? atualizado : atual)) ?? null;
 }

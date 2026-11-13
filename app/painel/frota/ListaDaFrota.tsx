@@ -15,7 +15,6 @@ export interface ListaDaFrotaProps {
   desempenhoPorCpf: Record<string, EstadoDesempenho>;
   totalPagoPorCpf: Record<string, number>;
   erroTotalPago: boolean;
-  onEditar: (entregador: DadosCompartilhados) => void;
   onRemover: (entregador: DadosCompartilhados) => void;
 }
 
@@ -42,7 +41,6 @@ export default function ListaDaFrota({
   desempenhoPorCpf,
   totalPagoPorCpf,
   erroTotalPago,
-  onEditar,
   onRemover,
 }: ListaDaFrotaProps) {
   const [menuAbertoPara, setMenuAbertoPara] = useState<string | null>(null);
@@ -144,18 +142,6 @@ export default function ListaDaFrota({
                     aria-label={`Ações de ${entregador.nome}`}
                     className="absolute right-0 top-full z-10 mt-1 min-w-[180px] rounded-[10px] border border-borda bg-superficie p-1 shadow-lg"
                   >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setMenuAbertoPara(null);
-                        onEditar(entregador);
-                      }}
-                      className="w-full cursor-pointer rounded-md px-3 py-2 text-left text-xs font-semibold text-texto-corpo hover:bg-superficie-suave focus-visible:outline-2 focus-visible:outline-primaria"
-                    >
-                      Editar dados
-                    </button>
-                    <div aria-hidden="true" className="my-1 border-t border-borda" />
                     <button
                       type="button"
                       role="menuitem"
