@@ -195,6 +195,11 @@ export async function criarPedido(dados: CriarPedidoRequisicao): Promise<CriarPe
   return requisitar('/pedidos', { method: 'POST', body: JSON.stringify(dados) });
 }
 
+// Sugere o pino da empresa pelo endereço do formulário, antes de salvar.
+export async function localizarEnderecoDaEmpresa(endereco: EnderecoParaLocalizar): Promise<EnderecoLocalizado> {
+  return requisitar('/empresa/cadastro/localizar', { method: 'POST', body: JSON.stringify(endereco) });
+}
+
 export async function localizarEndereco(endereco: EnderecoParaLocalizar): Promise<EnderecoLocalizado> {
   return requisitar('/pedidos/localizar-endereco', { method: 'POST', body: JSON.stringify(endereco) });
 }

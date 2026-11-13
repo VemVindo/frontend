@@ -1,6 +1,12 @@
 import { cnpjValido, normalizarCnpj } from '@/app/lib/cnpj';
 import { cpfValido, somenteDigitosCpf } from '@/app/lib/cpf';
-import type { CadastroDaEmpresa, DadosCadastraisDaEmpresa, NovaEmpresa, TipoDocumento } from '@/app/lib/tipos';
+import type {
+  CadastroDaEmpresa,
+  DadosCadastraisDaEmpresa,
+  EnderecoParaLocalizar,
+  NovaEmpresa,
+  TipoDocumento,
+} from '@/app/lib/tipos';
 
 export const UFS = [
   'AC',
@@ -93,6 +99,29 @@ export function validarEmpresa(valores: ValoresDaEmpresa): ErrosDoFormulario<Val
   if (!/^[1-9]\d*$/.test(valores.numero)) erros.numero = 'Informe o número do endereço';
   if (!(UFS as readonly string[]).includes(valores.uf)) erros.uf = 'Escolha o estado';
   return erros;
+}
+
+export const CAMPOS_DO_ENDERECO_DA_EMPRESA: ReadonlySet<keyof ValoresDaEmpresa> = new Set([
+  'cep',
+  'logradouro',
+  'numero',
+  'bairro',
+  'cidade',
+  'uf',
+]);
+
+// null enquanto algum campo do endereço estiver inválido: não vale a pena procurar no mapa.
+export function enderecoDaEmpresaParaLocalizar(valores: ValoresDaEmpresa): EnderecoParaLocalizar | null {
+  const erros = validarEmpresa(valores);
+  if ([...CAMPOS_DO_ENDERECO_DA_EMPRESA].some((campo) => erros[campo])) return null;
+  return {
+    cep: valores.cep,
+    logradouro: valores.logradouro.trim(),
+    numero: Number(valores.numero),
+    bairro: valores.bairro.trim(),
+    cidade: valores.cidade.trim(),
+    uf: valores.uf,
+  };
 }
 
 export function validarCadastro(valores: ValoresDoCadastro): ErrosDoFormulario<ValoresDoCadastro> {
