@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { API_URL, atualizarCadastroDaEmpresa, buscarCadastroDaEmpresa, cadastrarEmpresa } from './api';
+import {
+  API_URL,
+  atualizarCadastroDaEmpresa,
+  buscarCadastroDaEmpresa,
+  cadastrarEmpresa,
+  localizarEnderecoDaEmpresa,
+} from './api';
 
 const DADOS = {
   nomeFantasia: 'Cantina Dona Marta',
@@ -27,6 +33,20 @@ describe('api da empresa', () => {
     ],
     ['buscarCadastroDaEmpresa', () => buscarCadastroDaEmpresa(), 'GET', '/empresa/cadastro'],
     ['atualizarCadastroDaEmpresa', () => atualizarCadastroDaEmpresa(DADOS), 'PUT', '/empresa/cadastro'],
+    [
+      'localizarEnderecoDaEmpresa',
+      () =>
+        localizarEnderecoDaEmpresa({
+          cep: '70000000',
+          logradouro: 'SQN 210 Bloco K',
+          numero: 10,
+          bairro: 'Asa Norte',
+          cidade: 'Brasilia',
+          uf: 'DF',
+        }),
+      'POST',
+      '/empresa/cadastro/localizar',
+    ],
   ])('%s chama %s %s', async (_nome, chamar, metodo, caminho) => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
@@ -47,5 +67,15 @@ describe('api da empresa', () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(init.body as string)).toEqual(DADOS);
+  });
+
+  it('manda o pino da empresa junto com os dados', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await atualizarCadastroDaEmpresa({ ...DADOS, origemLat: -15.79, origemLng: -47.88 });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toMatchObject({ origemLat: -15.79, origemLng: -47.88 });
   });
 });
