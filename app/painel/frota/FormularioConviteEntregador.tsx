@@ -65,7 +65,7 @@ export default function FormularioConviteEntregador({ cpfInicial = '' }: Formula
         {aviso && (
           <p
             role={aviso.tipo === 'erro' ? 'alert' : 'status'}
-            className={`text-[13px] ${aviso.tipo === 'erro' ? 'text-erro' : 'text-sucesso-texto'}`}
+            className={`text-sm ${aviso.tipo === 'erro' ? 'text-erro' : 'text-sucesso-texto'}`}
           >
             {aviso.texto}
           </p>

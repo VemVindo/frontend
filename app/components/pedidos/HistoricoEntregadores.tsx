@@ -34,10 +34,7 @@ export default function HistoricoEntregadores({ idPedido }: HistoricoEntregadore
   }, [idPedido]);
 
   return (
-    <Card
-      titulo="Histórico de entregadores"
-      descricao="Cada atribuição e reatribuição do pedido, da mais antiga à mais recente."
-    >
+    <Card titulo="Histórico de entregadores">
       {erro && (
         <p role="alert" className="text-xs text-erro">
           {erro}
@@ -63,7 +60,7 @@ export default function HistoricoEntregadores({ idPedido }: HistoricoEntregadore
                   </>
                 )}
               </span>
-              <span className="text-[11px] text-texto-apoio">{formatarDataHora(troca.data)}</span>
+              <span className="text-xs text-texto-apoio">{formatarDataHora(troca.data)}</span>
             </li>
           ))}
         </ol>

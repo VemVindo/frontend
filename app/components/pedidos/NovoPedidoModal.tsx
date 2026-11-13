@@ -4,6 +4,7 @@ import IconeFechar from '@/app/components/icones/IconeFechar';
 import Botao from '@/app/components/ui/Botao';
 import type { CriarPedidoResposta } from '@/app/lib/tipos';
 import CamposNovoPedido from './CamposNovoPedido';
+import LocalNoMapa from './LocalNoMapa';
 import { useCadastroPedido } from './useCadastroPedido';
 export interface NovoPedidoModalProps {
   aberto: boolean;
@@ -23,6 +24,7 @@ export default function NovoPedidoModal({ aberto, onFechar, onCriado }: NovoPedi
     empresa,
     mensagemDeEstado,
     erroDeEnvio,
+    local,
   } = useCadastroPedido(onFechar, onCriado);
   useEffect(() => {
     if (!aberto || !dialogo.current) return;
@@ -83,6 +85,7 @@ export default function NovoPedidoModal({ aberto, onFechar, onCriado }: NovoPedi
             erros={erros}
             atualizarCampo={atualizarCampo}
             idDoDialogo={idDoDialogo}
+            localNoMapa={<LocalNoMapa {...local} />}
           />
           <p id={`${idDoDialogo}-aviso`} role="status" aria-live="polite" className="text-xs text-texto-apoio">
             {mensagemDeEstado}

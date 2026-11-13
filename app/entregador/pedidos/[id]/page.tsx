@@ -26,7 +26,7 @@ export default function PaginaPedidoDoEntregador() {
       </div>
 
       {erro && (
-        <p role="alert" className="text-[13px] text-erro">
+        <p role="alert" className="text-sm text-erro">
           Não foi possível carregar o status do pedido agora.
         </p>
       )}

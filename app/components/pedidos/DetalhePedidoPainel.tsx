@@ -136,7 +136,7 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
             <EtiquetaStatus status={pedido.status} />
           </div>
 
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-texto-suave">Telefone</dt>
             <dd className="text-texto">{formatarTelefone(pedido.recebedor.telefone)}</dd>
             <dt className="text-texto-suave">Endereço</dt>
@@ -162,7 +162,7 @@ export default function DetalhePedidoPainel({ idPedido }: DetalhePedidoPainelPro
         </section>
 
         <section className={CAIXA}>
-          <h2 className="mb-4 text-[13px] font-semibold text-texto">Andamento</h2>
+          <h2 className="mb-4 text-sm font-semibold text-texto">Andamento</h2>
           <LinhaDoTempoDoPedido passos={montarLinhaDoTempo(pedido.linhaDoTempo, [], pedido.status)} />
         </section>
       </div>

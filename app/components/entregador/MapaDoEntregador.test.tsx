@@ -48,6 +48,7 @@ function estado(parcial: Partial<ReturnType<typeof useCompartilharLocalizacao>> 
     estado: 'parado',
     erro: null,
     posicao: null,
+    precisao: null,
     visao: VISAO,
     iniciar,
     parar,
@@ -66,7 +67,7 @@ describe('MapaDoEntregador', () => {
   it('só compartilha depois do clique do entregador', () => {
     render(<MapaDoEntregador pedido={PEDIDO} />);
 
-    expect(screen.getByText('Localização não compartilhada.')).toBeTruthy();
+    expect(screen.getByText('Localização não compartilhada')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Compartilhar localização' }));
 
     expect(iniciar).toHaveBeenCalledTimes(1);
@@ -102,6 +103,16 @@ describe('MapaDoEntregador', () => {
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
+  it('com a posição do aparelho, o Google Maps parte de onde a entregadora está', () => {
+    estado({ posicao: { lat: -15.801, lng: -47.89 } });
+
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.getByRole('link', { name: 'Abrir no Google Maps' }).getAttribute('href')).toBe(
+      'https://www.google.com/maps/dir/?api=1&origin=-15.801%2C-47.89&destination=-15.8135%2C-47.9046',
+    );
+  });
+
   it('mostra o erro de localização', () => {
     estado({ erro: 'A permissão de localização foi negada.' });
 
@@ -116,5 +127,33 @@ describe('MapaDoEntregador', () => {
     expect(useCompartilharLocalizacao).toHaveBeenCalledWith(7, false);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.queryByTestId('mapa')).toBeNull();
+  });
+
+  it('não mostra mais o aviso sobre o navegador manter a tela aberta', () => {
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.queryByText(/O navegador só envia/)).toBeNull();
+  });
+
+  it('esconde a margem de erro boa e alerta quando a leitura é imprecisa', () => {
+    estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 12 });
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+    expect(screen.queryByText(/Margem de erro/)).toBeNull();
+    cleanup();
+
+    estado({ estado: 'compartilhando', posicao: { lat: -15.8, lng: -47.9 }, precisao: 4000 });
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+    expect(screen.getByText(/Localização imprecisa/).className).toContain('text-erro');
+  });
+
+  it('antes da primeira resposta da rota, pede para compartilhar e navega pelo endereço', () => {
+    estado({ visao: null });
+
+    render(<MapaDoEntregador pedido={PEDIDO} />);
+
+    expect(screen.getByText('A distância e o tempo aparecem quando a localização for compartilhada.')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir no Google Maps' }).getAttribute('href')).toBe(
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PEDIDO.endereco)}`,
+    );
   });
 });

@@ -13,7 +13,7 @@ export default function PilulaTrajeto({ distanciaRestanteM, duracaoRestanteS, cl
 
   return (
     <p
-      className={`flex h-[30px] items-center whitespace-nowrap rounded-[15px] bg-superficie px-5 text-[11.5px] font-bold text-texto md:h-9 md:rounded-[14px] md:pl-10 md:font-titulo md:text-xs ${className}`}
+      className={`flex h-[30px] items-center whitespace-nowrap rounded-[15px] bg-superficie px-5 text-xs font-bold text-texto md:h-9 md:rounded-[14px] md:pl-10 md:font-titulo ${className}`}
     >
       <span aria-hidden className="mr-1">
         ◷

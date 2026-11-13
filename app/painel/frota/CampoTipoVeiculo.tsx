@@ -18,7 +18,7 @@ export default function CampoTipoVeiculo({ id, valor, erro, desabilitado, onChan
       <label htmlFor={id} className="text-xs text-texto-corpo">
         Tipo de veículo
       </label>
-      <p id={idDescricao} className="text-[11px] text-texto-apoio">
+      <p id={idDescricao} className="text-xs text-texto-apoio">
         Moto e carro pedem a placa
       </p>
       <select
@@ -28,7 +28,7 @@ export default function CampoTipoVeiculo({ id, valor, erro, desabilitado, onChan
         aria-invalid={erro ? true : undefined}
         aria-describedby={erro ? `${idDescricao} ${idErro}` : idDescricao}
         onChange={(evento) => onChange(evento.target.value as TipoVeiculo | '')}
-        className={`h-10 rounded-[7px] border bg-superficie-suave px-2 text-[13px] text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${erro ? 'border-erro' : 'border-borda'}`}
+        className={`h-10 rounded-[7px] border bg-superficie-suave px-2 text-sm text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${erro ? 'border-erro' : 'border-borda'}`}
       >
         <option value="">Selecione</option>
         {TIPOS_DE_VEICULO.map((tipo) => (
@@ -38,7 +38,7 @@ export default function CampoTipoVeiculo({ id, valor, erro, desabilitado, onChan
         ))}
       </select>
       {erro && (
-        <p id={idErro} className="text-[11px] text-erro">
+        <p id={idErro} className="text-xs text-erro">
           {erro}
         </p>
       )}

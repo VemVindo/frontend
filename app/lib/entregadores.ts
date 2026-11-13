@@ -88,3 +88,15 @@ export function entregadorEditado(antes: DadosCompartilhados, edicao: EdicaoDoEn
     placa: edicao.placa ?? antes.placa,
   };
 }
+
+// A frota ainda pode estar carregando (null); nesse caso não há linha para tirar nem para trocar.
+export function semEntregador(frota: DadosCompartilhados[] | null, cpf: string): DadosCompartilhados[] | null {
+  return frota?.filter((entregador) => entregador.cpf !== cpf) ?? null;
+}
+
+export function comEntregadorAtualizado(
+  frota: DadosCompartilhados[] | null,
+  atualizado: DadosCompartilhados,
+): DadosCompartilhados[] | null {
+  return frota?.map((atual) => (atual.cpf === atualizado.cpf ? atualizado : atual)) ?? null;
+}

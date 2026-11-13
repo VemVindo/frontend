@@ -30,7 +30,7 @@ export default function LinhaDoTempoDoPedido({ passos }: LinhaDoTempoDoPedidoPro
               >
                 {passo.rotulo}
               </span>
-              <span className="text-[11px] text-texto-apoio">
+              <span className="text-xs text-texto-apoio">
                 {passo.em ? <time dateTime={passo.em}>{formatarHora(passo.em)}</time> : 'Aguardando'}
               </span>
             </span>

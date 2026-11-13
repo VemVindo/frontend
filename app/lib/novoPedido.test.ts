@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  enderecoParaLocalizar,
   gerarDescricaoPedido,
   prepararCriacaoPedido,
   validarNovoPedido,
@@ -147,5 +148,40 @@ describe('prepararCriacaoPedido', () => {
     expect(prepararCriacaoPedido(dadosExternos, empresa)).not.toHaveProperty('valor_entrega');
     expect(prepararCriacaoPedido(dadosExternos, empresa)).not.toHaveProperty('distancia');
     expect(prepararCriacaoPedido(dadosExternos, empresa)).not.toHaveProperty('idEmpresa');
+  });
+});
+
+describe('enderecoParaLocalizar', () => {
+  it('normaliza só os campos usados na busca do endereço', () => {
+    expect(enderecoParaLocalizar(formulario)).toEqual({
+      cep: '70000000',
+      logradouro: 'Rua A',
+      numero: 10,
+      bairro: 'Centro',
+      cidade: 'Brasília',
+      uf: 'DF',
+    });
+  });
+
+  it('não busca com o endereço incompleto, mesmo que o resto do formulário falte', () => {
+    expect(enderecoParaLocalizar({ ...formulario, nome_recebedor: '', telefone: '' })).not.toBeNull();
+    expect(enderecoParaLocalizar({ ...formulario, numero: 'abc' })).toBeNull();
+    expect(enderecoParaLocalizar({ ...formulario, uf: 'XX' })).toBeNull();
+    expect(enderecoParaLocalizar({ ...formulario, bairro: ' ' })).toBeNull();
+  });
+});
+
+describe('prepararCriacaoPedido com ponto no mapa', () => {
+  it('envia a coordenada marcada e omite quando não houver pino', () => {
+    const comPino = prepararCriacaoPedido(formulario, empresa, { lat: -15.6, lng: -47.7 });
+    expect(comPino).toMatchObject({ destino_lat: -15.6, destino_lng: -47.7 });
+    expect(prepararCriacaoPedido(formulario, empresa)).not.toHaveProperty('destino_lat');
+    expect(prepararCriacaoPedido(formulario, empresa, null)).not.toHaveProperty('destino_lng');
+  });
+});
+
+describe('prepararCriacaoPedido com formulário inválido', () => {
+  it('recusa montar o envio quando a UF não está na lista', () => {
+    expect(() => prepararCriacaoPedido({ ...formulario, uf: 'XX' }, empresa)).toThrow('Formulário inválido.');
   });
 });

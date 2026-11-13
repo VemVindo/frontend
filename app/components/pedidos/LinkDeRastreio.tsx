@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import IconeCopiar from '@/app/components/icones/IconeCopiar';
+import IconeLink from '@/app/components/icones/IconeLink';
 import Botao from '@/app/components/ui/Botao';
 import Card from '@/app/components/ui/Card';
 import { ApiError, gerarLinkDeRastreio } from '@/app/lib/api';
@@ -11,6 +13,8 @@ export interface LinkDeRastreioProps {
 }
 
 type Etapa = 'inicio' | 'confirmando' | 'gerando';
+
+const BOTAO_COM_ICONE = 'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap';
 
 export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
   const [etapa, setEtapa] = useState<Etapa>('inicio');
@@ -36,10 +40,9 @@ export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
     }
   }
 
-  async function copiar() {
-    if (!gerado) return;
+  async function copiar(link: string) {
     try {
-      await navigator.clipboard.writeText(gerado.link);
+      await navigator.clipboard.writeText(link);
       setAviso('Link copiado.');
     } catch {
       campo.current?.select();
@@ -48,20 +51,25 @@ export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
   }
 
   return (
-    <Card
-      titulo="Link de rastreio"
-      descricao="O recebedor acompanha a entrega por este link, sem criar conta."
-      acao={
-        etapa !== 'confirmando' && (
-          <Botao variante="claro" disabled={etapa === 'gerando'} onClick={() => setEtapa('confirmando')}>
+    <Card>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="font-titulo text-[15px] font-bold md:text-base">Link de rastreio</h2>
+        {etapa !== 'confirmando' && (
+          <Botao
+            variante="claro"
+            disabled={etapa === 'gerando'}
+            onClick={() => setEtapa('confirmando')}
+            className={`${BOTAO_COM_ICONE} w-full sm:w-auto`}
+          >
+            <IconeLink className="size-5 shrink-0" />
             {gerado ? 'Gerar outro link' : 'Gerar link de rastreio'}
           </Botao>
-        )
-      }
-    >
+        )}
+      </div>
+
       {etapa === 'confirmando' && (
-        <div className="flex flex-col gap-3">
-          <p className="text-[13px] text-texto-apoio">
+        <div className="mt-4 flex flex-col gap-3">
+          <p className="text-sm text-texto-apoio">
             Se este pedido já tiver um link, ele para de funcionar, e quem estiver acompanhando por ele perde o acesso
             na hora.
           </p>
@@ -75,7 +83,7 @@ export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
       )}
 
       {gerado && etapa !== 'confirmando' && (
-        <div className="flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-3">
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               ref={campo}
@@ -83,11 +91,14 @@ export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
               value={gerado.link}
               aria-label="Link de rastreio"
               onFocus={(evento) => evento.currentTarget.select()}
-              className="h-12 min-w-0 flex-1 rounded-[14px] border border-borda bg-superficie-suave px-4 text-[13px] text-texto"
+              className="h-12 min-w-0 flex-1 rounded-[14px] border border-borda bg-superficie-suave px-4 text-sm text-texto"
             />
-            <Botao onClick={copiar}>Copiar link</Botao>
+            <Botao onClick={() => copiar(gerado.link)} className={BOTAO_COM_ICONE}>
+              <IconeCopiar className="size-5 shrink-0" />
+              Copiar link
+            </Botao>
           </div>
-          <p className="text-[12px] text-texto-apoio">
+          <p className="text-xs text-texto-apoio">
             Código de recebimento: <strong className="text-texto">{gerado.codigoRecebedor}</strong>. O link só aparece
             agora; para enviar de novo depois, gere outro.
           </p>
@@ -95,7 +106,7 @@ export default function LinkDeRastreio({ idPedido }: LinkDeRastreioProps) {
       )}
 
       {erro && (
-        <p role="alert" className="text-xs text-erro">
+        <p role="alert" className="mt-3 text-xs text-erro">
           {erro}
         </p>
       )}

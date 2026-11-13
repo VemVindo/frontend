@@ -17,7 +17,7 @@ const estilosPorTom: Record<TomEtiqueta, string> = {
 export default function Etiqueta({ tom = 'neutro', children }: EtiquetaProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 h-[30px] px-3 rounded-full text-[10px] font-semibold ${estilosPorTom[tom]}`}
+      className={`inline-flex shrink-0 items-center gap-1 h-[30px] whitespace-nowrap px-3 rounded-full text-xs font-semibold ${estilosPorTom[tom]}`}
     >
       {children}
     </span>

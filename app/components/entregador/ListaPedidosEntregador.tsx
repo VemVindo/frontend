@@ -44,9 +44,9 @@ export default function ListaPedidosEntregador({ pedidos }: ListaPedidosEntregad
                     className="flex items-center justify-between gap-3 rounded-[10px] border border-borda p-3 transition-colors hover:bg-superficie-suave"
                   >
                     <span className="flex min-w-0 flex-col gap-1">
-                      <span className="text-[11px] font-semibold text-destaque">#{pedido.id}</span>
+                      <span className="text-xs font-semibold text-destaque">#{pedido.id}</span>
                       <span className="text-xs font-semibold text-texto-corpo">{pedido.recebedor}</span>
-                      <span className="text-[10px] text-texto-apoio">{pedido.endereco}</span>
+                      <span className="text-xs text-texto-apoio">{pedido.endereco}</span>
                     </span>
                     <EtiquetaStatus status={pedido.status} />
                   </Link>

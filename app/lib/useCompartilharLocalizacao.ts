@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, consultarRotaDoPedido, registrarPosicao } from '@/app/lib/api';
-import { deveEnviarPosicao, mensagemDeErroDeLocalizacao } from '@/app/lib/mapa';
-import type { Coordenada, VisaoDaEntrega } from '@/app/lib/tipos';
+import { deveEnviarPosicao, deveTrocarLeitura, mensagemDeErroDeLocalizacao, type LeituraDoGps } from '@/app/lib/mapa';
+import type { VisaoDaEntrega } from '@/app/lib/tipos';
 
 export type EstadoCompartilhamento = 'parado' | 'solicitando' | 'compartilhando';
 
@@ -30,11 +30,21 @@ function gravarEscolha(idPedido: number, ligado: boolean) {
   } catch {}
 }
 
+// Guarda a leitura nova só se ela não for pior que a atual; devolve null quando descarta.
+function trocarLeitura(melhor: { current: LeituraDoGps | null }, leitura: GeolocationPosition): LeituraDoGps | null {
+  const coordenada = { lat: leitura.coords.latitude, lng: leitura.coords.longitude };
+  const nova = { coordenada, precisaoM: leitura.coords.accuracy, em: Date.now() };
+  if (!deveTrocarLeitura(melhor.current, nova)) return null;
+  melhor.current = nova;
+  return nova;
+}
+
 export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolean) {
   const [ligado, setLigado] = useState(() => lerEscolha(idPedido));
   const [estado, setEstado] = useState<EstadoCompartilhamento>(() => (lerEscolha(idPedido) ? 'solicitando' : 'parado'));
   const [erro, setErro] = useState<string | null>(null);
-  const [posicao, setPosicao] = useState<Coordenada | null>(null);
+  const [leituraAtual, setLeituraAtual] = useState<LeituraDoGps | null>(null);
+  const melhorLeitura = useRef<LeituraDoGps | null>(null);
   const [visao, setVisao] = useState<VisaoDaEntrega | null>(null);
   const ultimoEnvio = useRef<number | null>(null);
 
@@ -81,11 +91,12 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
     const id = navigator.geolocation.watchPosition(
       (leitura) => {
         if (cancelado) return;
-        const coordenada = { lat: leitura.coords.latitude, lng: leitura.coords.longitude };
-        setPosicao(coordenada);
+        const nova = trocarLeitura(melhorLeitura, leitura);
+        if (!nova) return;
+        const { coordenada, em: agora } = nova;
+        setLeituraAtual(nova);
         setEstado('compartilhando');
 
-        const agora = Date.now();
         if (!deveEnviarPosicao(ultimoEnvio.current, agora)) return;
         ultimoEnvio.current = agora;
         registrarPosicao(idPedido, { ...coordenada, precisao: leitura.coords.accuracy })
@@ -154,7 +165,8 @@ export function useCompartilharLocalizacao(idPedido: number, emAndamento: boolea
   return {
     estado: emAndamento ? estado : 'parado',
     erro,
-    posicao,
+    posicao: leituraAtual?.coordenada ?? null,
+    precisao: leituraAtual?.precisaoM ?? null,
     visao,
     iniciar,
     parar: () => parar(null),

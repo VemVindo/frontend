@@ -112,4 +112,22 @@ describe('FormularioEdicaoEntregador', () => {
     expect(onCancelar).toHaveBeenCalled();
     expect(editarEntregador).not.toHaveBeenCalled();
   });
+
+  it('não aceita números no nome', () => {
+    render(<FormularioEdicaoEntregador entregador={BRUNO} onSalvo={vi.fn()} onCancelar={vi.fn()} />);
+
+    preencher('Nome do entregador', 'Bruno9 Lima');
+
+    expect(campo('Nome do entregador').value).toBe('Bruno Lima');
+  });
+
+  it('sem conexão, pede para tentar de novo', async () => {
+    vi.mocked(editarEntregador).mockRejectedValue(new Error('rede caiu'));
+    render(<FormularioEdicaoEntregador entregador={BRUNO} onSalvo={vi.fn()} onCancelar={vi.fn()} />);
+
+    preencher('Nome do entregador', 'Bruno Souza');
+    salvar();
+
+    expect(await screen.findByText('Não foi possível salvar agora. Tente de novo.')).toBeTruthy();
+  });
 });

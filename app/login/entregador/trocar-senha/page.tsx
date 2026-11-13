@@ -87,7 +87,7 @@ export default function TrocarSenhaEntregador() {
   return (
     <TelaLogin titulo="Crie sua senha">
       <form onSubmit={handleTroca} className="flex flex-col gap-3 xl:gap-6 w-full">
-        <p className="text-[13px] text-texto-suave">
+        <p className="text-sm text-texto-suave">
           Este é seu primeiro acesso. Troque a senha temporária que você recebeu da empresa por uma senha só sua.
         </p>
         <CampoLogin
@@ -108,7 +108,7 @@ export default function TrocarSenhaEntregador() {
           value={novaSenha}
           onChange={alterar(setNovaSenha)}
         />
-        <p className="-mt-1 text-[12px] text-texto-suave">
+        <p className="-mt-1 text-xs text-texto-suave">
           De {TAMANHO_MINIMO} a {TAMANHO_MAXIMO} caracteres: letras sem acento, números e símbolos, sem espaços.
         </p>
         <CampoLogin
@@ -121,7 +121,7 @@ export default function TrocarSenhaEntregador() {
         />
         {dados && <PainelDadosCompartilhados dados={dados} />}
         {convites.length > 0 && (
-          <p className="text-[13px] text-texto-suave">
+          <p className="text-sm text-texto-suave">
             Convites esperando sua resposta:{' '}
             <strong className="text-texto">{convites.map((v) => v.empresa).join(', ')}</strong>. Você aceita ou recusa
             cada um depois de criar a senha.

@@ -104,7 +104,7 @@ export default function ModalAtribuirEntregador({
                 <Avatar iniciais={iniciais(entregador.nome)} tamanho={32} />
                 <span className="flex flex-1 flex-col gap-1">
                   <span className="text-xs text-texto-corpo">{entregador.nome}</span>
-                  <span className="text-[11px] text-texto-apoio">
+                  <span className="text-xs text-texto-apoio">
                     {rotuloDoVeiculo(entregador.tipoVeiculo)}, disponível
                   </span>
                 </span>

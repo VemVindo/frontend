@@ -1,4 +1,12 @@
-import type { CriarPedidoRequisicao, CriarPedidoResposta, Empresa, TipoRotaEntrega } from './tipos';
+import { UFS } from './empresa';
+import type {
+  Coordenada,
+  CriarPedidoRequisicao,
+  CriarPedidoResposta,
+  Empresa,
+  EnderecoParaLocalizar,
+  TipoRotaEntrega,
+} from './tipos';
 
 export interface FormularioNovoPedido {
   nome_recebedor: string;
@@ -17,7 +25,7 @@ export interface FormularioNovoPedido {
 
 export type ErrosNovoPedido = Partial<Record<keyof FormularioNovoPedido, string>>;
 
-const UFS = new Set('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' '));
+const UFS_VALIDAS: ReadonlySet<string> = new Set(UFS);
 
 function telefoneValido(telefone: string): boolean {
   const digitos = telefone.replace(/[\s()+.-]/g, '');
@@ -60,11 +68,33 @@ export function validarNovoPedido(dados: FormularioNovoPedido): ErrosNovoPedido 
   if (!erros.numero && !numeroValido(dados.numero)) {
     erros.numero = 'Informe um número inteiro de 1 a 2147483647.';
   }
-  if (!erros.uf && !UFS.has(dados.uf.trim().toUpperCase())) {
+  if (!erros.uf && !UFS_VALIDAS.has(dados.uf.trim().toUpperCase())) {
     erros.uf = 'Informe uma UF brasileira válida, como DF.';
   }
   validarVeiculo(dados.tipo_veiculo, erros);
   return erros;
+}
+
+export const CAMPOS_DO_ENDERECO: ReadonlySet<keyof FormularioNovoPedido> = new Set([
+  'cep',
+  'logradouro',
+  'numero',
+  'bairro',
+  'cidade',
+  'uf',
+]);
+
+export function enderecoParaLocalizar(dados: FormularioNovoPedido): EnderecoParaLocalizar | null {
+  const erros = validarNovoPedido(dados);
+  if ([...CAMPOS_DO_ENDERECO].some((campo) => erros[campo])) return null;
+  return {
+    cep: dados.cep.trim().replace('-', ''),
+    logradouro: dados.logradouro.trim(),
+    numero: Number(dados.numero),
+    bairro: dados.bairro.trim(),
+    cidade: dados.cidade.trim(),
+    uf: dados.uf.trim().toUpperCase(),
+  };
 }
 
 /** Une somente seções preenchidas, com rótulos e uma linha em branco entre elas.
@@ -77,7 +107,11 @@ export function gerarDescricaoPedido(itens: string, observacoes: string): string
     .join('\n\n');
 }
 
-export function prepararCriacaoPedido(dados: FormularioNovoPedido, empresa: Empresa): CriarPedidoRequisicao {
+export function prepararCriacaoPedido(
+  dados: FormularioNovoPedido,
+  empresa: Empresa,
+  destino: Coordenada | null = null,
+): CriarPedidoRequisicao {
   if (Object.keys(validarNovoPedido(dados)).length) throw new Error('Formulário inválido.');
   if (empresa.cargo !== 'ESTABELECIMENTO' || !Number.isInteger(empresa.id) || empresa.id <= 0) {
     throw new Error('Estabelecimento autenticado inválido.');
@@ -94,6 +128,7 @@ export function prepararCriacaoPedido(dados: FormularioNovoPedido, empresa: Empr
     uf: dados.uf.trim().toUpperCase(),
     descricao: gerarDescricaoPedido(dados.itens, dados.observacoes),
     tipo_veiculo: dados.tipo_veiculo as TipoRotaEntrega,
+    ...(destino ? { destino_lat: destino.lat, destino_lng: destino.lng } : {}),
   };
 }
 
@@ -101,14 +136,18 @@ type ResultadoEnvioPedido = { estado: 'bloqueado' | 'ocupado' } | { estado: 'cri
 
 export function criarFluxoEnvioPedido(enviar: (dados: CriarPedidoRequisicao) => Promise<CriarPedidoResposta>) {
   let enviando = false;
-  return async (dados: FormularioNovoPedido, empresa: Empresa | null): Promise<ResultadoEnvioPedido> => {
+  return async (
+    dados: FormularioNovoPedido,
+    empresa: Empresa | null,
+    destino: Coordenada | null = null,
+  ): Promise<ResultadoEnvioPedido> => {
     if (enviando) return { estado: 'ocupado' };
     if (!empresa) return { estado: 'bloqueado' };
     if (Object.keys(validarNovoPedido(dados)).length) throw new Error('Formulário inválido.');
     enviando = true;
     try {
       const rascunho = Object.freeze({ ...dados });
-      const pedido = await enviar(prepararCriacaoPedido(rascunho, empresa));
+      const pedido = await enviar(prepararCriacaoPedido(rascunho, empresa, destino));
       return { estado: 'criado', pedido };
     } finally {
       enviando = false;

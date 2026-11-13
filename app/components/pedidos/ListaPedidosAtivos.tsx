@@ -18,7 +18,7 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
     <>
       <div
         aria-hidden
-        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}
+        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-xs uppercase text-texto-apoio ${COLUNAS}`}
       >
         {TITULOS.map((titulo) => (
           <span key={titulo}>{titulo}</span>
@@ -64,7 +64,7 @@ export default function ListaPedidosAtivos({ pedidos, onAtribuir }: ListaPedidos
                 Entregador: {pedido.entregador ?? 'Não atribuído'}
               </span>
 
-              <span className="text-[11px] text-texto-apoio">
+              <span className="text-xs text-texto-apoio">
                 Criado em <time dateTime={pedido.criadoEm}>{formatarDataHora(pedido.criadoEm)}</time>
               </span>
 

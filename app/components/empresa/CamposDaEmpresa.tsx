@@ -2,6 +2,7 @@
 
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { somenteDigitos, UFS, type ErrosDoFormulario, type ValoresDaEmpresa } from '@/app/lib/empresa';
+import { somenteLetras } from '@/app/lib/entrada';
 
 export interface CamposDaEmpresaProps {
   valores: ValoresDaEmpresa;
@@ -75,7 +76,13 @@ export default function CamposDaEmpresa({
         {...texto('complemento')}
       />
       <CampoTexto rotulo="Bairro" className="md:col-span-2" {...texto('bairro')} />
-      <CampoTexto rotulo="Cidade" autoComplete="address-level2" className="md:col-span-3" {...texto('cidade')} />
+      <CampoTexto
+        rotulo="Cidade"
+        autoComplete="address-level2"
+        className="md:col-span-3"
+        {...texto('cidade')}
+        onChange={(evento) => onChange('cidade', somenteLetras(evento.target.value))}
+      />
       <div className="flex flex-col gap-1 md:col-span-1">
         <label htmlFor={idUf} className="text-xs text-texto-corpo">
           UF
@@ -87,7 +94,7 @@ export default function CamposDaEmpresa({
           aria-invalid={erros.uf ? true : undefined}
           aria-describedby={erros.uf ? `${idUf}-erro` : undefined}
           onChange={(evento) => onChange('uf', evento.target.value)}
-          className={`h-10 rounded-[7px] border bg-superficie-suave px-2 text-[13px] text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${erros.uf ? 'border-erro' : 'border-borda'}`}
+          className={`h-10 rounded-[7px] border bg-superficie-suave px-2 text-sm text-texto-corpo outline-none focus:border-primaria focus:ring-2 focus:ring-primaria-clara ${erros.uf ? 'border-erro' : 'border-borda'}`}
         >
           <option value="">--</option>
           {UFS.map((uf) => (
@@ -97,7 +104,7 @@ export default function CamposDaEmpresa({
           ))}
         </select>
         {erros.uf && (
-          <p id={`${idUf}-erro`} className="text-[11px] text-erro">
+          <p id={`${idUf}-erro`} className="text-xs text-erro">
             {erros.uf}
           </p>
         )}

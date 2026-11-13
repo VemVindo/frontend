@@ -75,7 +75,7 @@ export default function AvaliacaoDaEntrega({ token }: AvaliacaoDaEntregaProps) {
           <IconeCheck className="size-7" />
         </span>
         <h2 className="font-titulo text-xl font-bold">Avaliação enviada!</h2>
-        <p className="max-w-[300px] text-[13px] text-texto-suave">
+        <p className="max-w-[300px] text-sm text-texto-suave">
           Obrigado por compartilhar sua experiência. Sua opinião ajuda a melhorar as próximas entregas.
         </p>
         {erroAoEnviar && (
@@ -93,7 +93,7 @@ export default function AvaliacaoDaEntrega({ token }: AvaliacaoDaEntregaProps) {
         <IconeCheck className="size-7" />
       </span>
       <h2 className="font-titulo text-xl font-bold">Pedido entregue!</h2>
-      <p className="text-[13px] text-texto-suave">Como foi sua experiência com a entrega?</p>
+      <p className="text-sm text-texto-suave">Como foi sua experiência com a entrega?</p>
 
       <SeletorDeNota nota={nota} desabilitado={enviando} onEscolher={setNota} />
 
@@ -109,9 +109,9 @@ export default function AvaliacaoDaEntrega({ token }: AvaliacaoDaEntregaProps) {
             disabled={enviando}
             onChange={(evento) => setComentario(evento.target.value)}
             rows={4}
-            className="rounded-[14px] border border-borda bg-superficie p-3 text-[13px] outline-none focus:border-primaria"
+            className="rounded-[14px] border border-borda bg-superficie p-3 text-sm outline-none focus:border-primaria"
           />
-          <p className="self-end text-[11px] text-texto-suave">
+          <p className="self-end text-xs text-texto-suave">
             {comentario.length} / {TAMANHO_MAXIMO_COMENTARIO}
           </p>
         </div>

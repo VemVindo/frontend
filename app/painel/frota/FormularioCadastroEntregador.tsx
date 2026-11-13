@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import Botao from '@/app/components/ui/Botao';
+import { somenteLetras } from '@/app/lib/entrada';
 import CampoTexto from '@/app/components/ui/CampoTexto';
 import { ApiError, cadastrarEntregador } from '@/app/lib/api';
 import { somenteDigitosCpf } from '@/app/lib/cpf';
@@ -88,7 +89,7 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
           autoComplete="off"
           className="md:col-span-2"
           value={valores.nome}
-          onChange={(evento) => alterar('nome', evento.target.value)}
+          onChange={(evento) => alterar('nome', somenteLetras(evento.target.value))}
           {...campo('nome')}
         />
         <CampoTexto
@@ -129,7 +130,7 @@ export default function FormularioCadastroEntregador({ onCpfJaCadastrado }: Form
 
         {falhaDoEnvio && (
           <div role="alert" className="flex flex-col items-start gap-2 md:col-span-2">
-            <p className="text-[13px] text-erro">
+            <p className="text-sm text-erro">
               {falhaDoEnvio instanceof ApiError ? falhaDoEnvio.message : falhaDoEnvio}
             </p>
             {cpfJaCadastrado && (

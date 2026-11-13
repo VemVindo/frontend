@@ -37,7 +37,7 @@ export default function NavPainel() {
                 key={item.href}
                 href={item.href}
                 aria-current={ativo ? 'page' : undefined}
-                className={`flex items-center px-[10px] text-[13px] transition-colors hover:text-texto ${ativo ? 'text-texto font-semibold' : 'text-texto-suave'}`}
+                className={`flex items-center px-[10px] text-sm transition-colors hover:text-texto ${ativo ? 'text-texto font-semibold' : 'text-texto-suave'}`}
               >
                 {item.rotulo}
               </Link>

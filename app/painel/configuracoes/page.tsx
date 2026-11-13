@@ -47,11 +47,11 @@ export default function PaginaConfiguracoes() {
   }
 
   const mensagem = erro ? (
-    <p role="alert" className="text-[13px] text-erro">
+    <p role="alert" className="text-sm text-erro">
       {erro}
     </p>
   ) : aviso ? (
-    <p role="status" className="text-[13px] text-sucesso-texto">
+    <p role="status" className="text-sm text-sucesso-texto">
       {aviso}
     </p>
   ) : !configuracoes ? (

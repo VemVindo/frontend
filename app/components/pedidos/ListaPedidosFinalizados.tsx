@@ -22,7 +22,7 @@ export default function ListaPedidosFinalizados({ pedidos }: ListaPedidosFinaliz
     <>
       <div
         aria-hidden
-        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-[11px] uppercase text-texto-apoio ${COLUNAS}`}
+        className={`hidden rounded-[8px] bg-superficie-suave px-[13px] py-[10px] text-xs uppercase text-texto-apoio ${COLUNAS}`}
       >
         {TITULOS.map((titulo) => (
           <span key={titulo}>{titulo}</span>
@@ -55,7 +55,7 @@ export default function ListaPedidosFinalizados({ pedidos }: ListaPedidosFinaliz
               <span className="text-sm text-texto-apoio">Entregador: {pedido.entregador ?? 'Não atribuído'}</span>
               <span className="text-sm text-texto-apoio">Valor: {formatarReais(pedido.valorEntrega)}</span>
               <span className="text-sm text-texto-apoio">Avaliação: {textoDaNota(pedido.nota)}</span>
-              <span className="text-[11px] text-texto-apoio">Concluído em {textoDaConclusao(pedido.finalizadoEm)}</span>
+              <span className="text-xs text-texto-apoio">Concluído em {textoDaConclusao(pedido.finalizadoEm)}</span>
               <Link href={telaPedidoDoPainel(pedido.id)} className={`pt-1 ${ACAO}`}>
                 Ver detalhes
               </Link>

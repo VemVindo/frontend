@@ -62,10 +62,10 @@ export default function Home() {
         <BotaoLogin carregando={carregando} erro={erro}>
           Acessar
         </BotaoLogin>
-        <Link href="/login/entregador" className="text-center text-[13px] text-primaria font-medium">
+        <Link href="/login/entregador" className="text-center text-sm text-primaria font-medium">
           Sou entregador
         </Link>
-        <Link href={TELA_CADASTRO} className="text-center text-[13px] text-primaria font-medium">
+        <Link href={TELA_CADASTRO} className="text-center text-sm text-primaria font-medium">
           Cadastrar meu estabelecimento
         </Link>
       </form>

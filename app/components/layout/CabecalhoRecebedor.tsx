@@ -16,8 +16,8 @@ export default function CabecalhoRecebedor({
       <div className="mx-auto flex h-[76px] max-w-[1280px] items-center gap-3 px-[18px] md:px-9">
         <Avatar iniciais={iniciaisEstabelecimento} variante="marca" tamanho={38} />
         <div>
-          <p className="font-bold md:font-titulo text-[13px] md:text-[15px]">{nomeEstabelecimento}</p>
-          <p className="text-[11px] text-texto-suave">Pedido #{numeroPedido}</p>
+          <p className="font-bold md:font-titulo text-sm md:text-[15px]">{nomeEstabelecimento}</p>
+          <p className="text-xs text-texto-suave">Pedido #{numeroPedido}</p>
         </div>
       </div>
     </header>

@@ -30,7 +30,7 @@ export default function ListaVinculos({ vinculos, ocupado, onResponder }: ListaV
           <ul className="flex flex-col gap-2">
             {pendentes.map((v) => (
               <li key={v.id} className={ITEM}>
-                <span className="flex items-center gap-2 text-[13px]">
+                <span className="flex items-center gap-2 text-sm">
                   <IconeEmpresa className="size-5 text-primaria" />
                   <span>
                     <strong>{v.empresa}</strong> quer você na frota
@@ -59,7 +59,7 @@ export default function ListaVinculos({ vinculos, ocupado, onResponder }: ListaV
               <li key={v.id} className={ITEM}>
                 <Link
                   href={`/entregador/pedidos?empresa=${encodeURIComponent(v.empresa)}`}
-                  className="flex items-center gap-2 text-[13px] font-semibold text-texto transition-colors hover:text-primaria"
+                  className="flex items-center gap-2 text-sm font-semibold text-texto transition-colors hover:text-primaria"
                 >
                   <IconeEmpresa className="size-5 text-primaria" />
                   {v.empresa}

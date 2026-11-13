@@ -25,13 +25,13 @@ export default function EtaSemMapa({ nomeEntregador, distanciaRestanteM, duracao
         <p className="flex h-28 w-full max-w-[285px] items-center justify-center rounded-[12px] bg-destaque-fundo font-titulo text-[44px] font-bold text-primaria-escura">
           {tempo}
         </p>
-        <p className="mt-[29px] max-w-[280px] text-center text-[12.5px] font-bold text-texto-suave">
+        <p className="mt-[29px] max-w-[280px] text-center text-xs font-bold text-texto-suave">
           {quem} está a caminho do seu endereço · {distancia} restantes
         </p>
       </div>
 
       <div className="hidden min-h-[420px] rounded-[16px] border border-borda bg-superficie p-[27px] md:block">
-        <span className="inline-flex h-7 items-center rounded-[14px] bg-sucesso-fundo px-3 text-[10px] font-semibold text-sucesso-texto">
+        <span className="inline-flex h-7 items-center rounded-[14px] bg-sucesso-fundo px-3 text-xs font-semibold text-sucesso-texto">
           A caminho
         </span>
         <div className="mt-8 h-[124px] rounded-[12px] bg-destaque-fundo px-[15px] pt-3">

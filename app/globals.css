@@ -20,8 +20,9 @@
 
   --color-texto: #1d1b2e;
   --color-texto-corpo: #292933;
-  --color-texto-apoio: #6e7080;
-  --color-texto-suave: #8b8a9a;
+  /* Escurecidos para passar de 4.5:1 sobre o fundo cinza (WCAG AA). */
+  --color-texto-apoio: #545565;
+  --color-texto-suave: #646475;
 
   --color-sucesso: #22b07d;
   --color-sucesso-texto: #2e8c57;
@@ -35,6 +36,10 @@
   --color-mapa-fundo: #e4e2f1;
   --color-mapa-destino: #e25b35;
   --color-destaque-fundo: #f7f2fc;
+
+  /* text-xs com 13px: o padrão de 12px ficava pequeno nas legendas e descrições. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
 
   --font-sans: var(--font-inter);
   --font-titulo: var(--font-sora);

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  comEntregadorAtualizado,
   ENTREGADOR_VAZIO,
   entregadorEditado,
   normalizarPlaca,
   paraEdicaoDoEntregador,
   paraNovoEntregador,
+  semEntregador,
   validarEntregador,
   valoresParaEditar,
   type ValoresDoEntregador,
@@ -117,5 +119,32 @@ describe('entregadorEditado', () => {
       tipoVeiculo: 'MOTO',
       placa: placaEsperada,
     });
+  });
+});
+
+describe('linhas da frota', () => {
+  const ana: DadosCompartilhados = {
+    nome: 'Ana',
+    cpf: '11111111111',
+    telefone: '61900000001',
+    tipoVeiculo: 'MOTO',
+    placa: 'AAA1A11',
+    disponivel: true,
+  };
+  const bia: DadosCompartilhados = { ...ana, nome: 'Bia', cpf: '22222222222' };
+
+  it('tira só o entregador do CPF informado', () => {
+    expect(semEntregador([ana, bia], ana.cpf)).toEqual([bia]);
+  });
+
+  it('troca só a linha do entregador editado', () => {
+    const anaEditada = { ...ana, nome: 'Ana Souza' };
+
+    expect(comEntregadorAtualizado([ana, bia], anaEditada)).toEqual([anaEditada, bia]);
+  });
+
+  it('com a frota ainda carregando, continua sem lista', () => {
+    expect(semEntregador(null, ana.cpf)).toBeNull();
+    expect(comEntregadorAtualizado(null, ana)).toBeNull();
   });
 });
