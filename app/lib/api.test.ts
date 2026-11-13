@@ -6,6 +6,7 @@ import {
   aceitarVinculo,
   atribuirEntregadorAoPedido,
   atualizarConfiguracoes,
+  atualizarPerfilDoEntregador,
   buscarConfiguracoes,
   buscarDesempenhoEntregador,
   consultarResumoDashboard,
@@ -13,6 +14,7 @@ import {
   buscarDadosCompartilhados,
   buscarLocalizacaoDoRastreio,
   buscarParametrosRemuneracao,
+  buscarPerfilDoEntregador,
   buscarRastreio,
   consultarAvaliacao,
   consultarRotaDoPedido,
@@ -23,7 +25,6 @@ import {
   cadastrarEntregador,
   checkHealth,
   convidarEntregador,
-  editarEntregador,
   encerrarVinculo,
   listarAvaliacoes,
   finalizarPedido,
@@ -97,20 +98,20 @@ describe('api', () => {
     expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual({ codigo: '482913' });
   });
 
-  it('manda o cpf e os dados novos no corpo da edição do entregador', async () => {
-    const fetchSimulado = vi.fn().mockResolvedValue(resposta(200, true));
-    vi.stubGlobal('fetch', fetchSimulado);
-    const dados = {
-      cpf: '52998224725',
+  it('manda só os campos alterados no corpo da edição do perfil', async () => {
+    const perfil = {
       nome: 'Joana',
+      cpf: '52998224725',
       telefone: '61988887777',
-      veiculo: 'MOTO' as const,
-      placa: 'ABC1D23',
+      tipoVeiculo: 'BICICLETA',
+      placa: null,
     };
+    const fetchSimulado = vi.fn().mockResolvedValue(resposta(200, perfil));
+    vi.stubGlobal('fetch', fetchSimulado);
 
-    await expect(editarEntregador(dados)).resolves.toBe(true);
+    await expect(atualizarPerfilDoEntregador({ tipoVeiculo: 'BICICLETA' })).resolves.toEqual(perfil);
 
-    expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual(dados);
+    expect(JSON.parse(fetchSimulado.mock.calls[0][1].body)).toEqual({ tipoVeiculo: 'BICICLETA' });
   });
 
   it('junta as mensagens quando a validação devolve uma lista', async () => {
@@ -149,6 +150,13 @@ describe('api', () => {
     ['trocarSenhaEntregador', () => trocarSenhaEntregador('a', 'b', true), 'POST', '/auth/entregador/trocar-senha'],
     ['sair', () => sair(), 'POST', '/auth/sair'],
     ['buscarDadosCompartilhados', () => buscarDadosCompartilhados(), 'GET', '/entregador/dados-compartilhados'],
+    ['buscarPerfilDoEntregador', () => buscarPerfilDoEntregador(), 'GET', '/entregador/perfil'],
+    [
+      'atualizarPerfilDoEntregador',
+      () => atualizarPerfilDoEntregador({ nome: 'Joana' }),
+      'PATCH',
+      '/entregador/perfil',
+    ],
     ['listarVinculos', () => listarVinculos(), 'GET', '/entregador/vinculos'],
     ['aceitarVinculo', () => aceitarVinculo(3), 'POST', '/entregador/vinculos/3/aceitar'],
     ['recusarVinculo', () => recusarVinculo(3), 'POST', '/entregador/vinculos/3/recusar'],
@@ -172,12 +180,6 @@ describe('api', () => {
       '/entregadores',
     ],
     ['convidarEntregador', () => convidarEntregador('52998224725'), 'POST', '/entregadores/vinculo'],
-    [
-      'editarEntregador',
-      () => editarEntregador({ cpf: '52998224725', nome: 'Joana', telefone: '61988887777', veiculo: 'BICICLETA' }),
-      'PATCH',
-      '/entregadores',
-    ],
     ['removerEntregador', () => removerEntregador('52998224725'), 'DELETE', '/entregadores/52998224725/vinculo'],
     ['atribuirEntregadorAoPedido', () => atribuirEntregadorAoPedido(7, '11144477735'), 'PATCH', '/pedidos/7/atribuir'],
     [

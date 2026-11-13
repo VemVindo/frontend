@@ -92,13 +92,18 @@ export interface ConviteEnviado {
   mensagem: string;
 }
 
-export interface EdicaoDoEntregador {
-  cpf: string;
+export interface PerfilDoEntregador {
   nome: string;
+  cpf: string;
   telefone: string;
-  veiculo: TipoVeiculo;
-  placa?: string;
+  tipoVeiculo: TipoVeiculo;
+  placa: string | null;
 }
+
+// O CPF fica fora de propósito: o back recusa o campo (forbidNonWhitelisted).
+export type EdicaoDoPerfil = Partial<Pick<PerfilDoEntregador, 'nome' | 'telefone' | 'tipoVeiculo'>> & {
+  placa?: string;
+};
 
 export type StatusVinculo = 'PENDENTE' | 'ATIVO';
 

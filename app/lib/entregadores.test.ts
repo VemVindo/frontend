@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  comEntregadorAtualizado,
   ENTREGADOR_VAZIO,
-  entregadorEditado,
   normalizarPlaca,
-  paraEdicaoDoEntregador,
   paraNovoEntregador,
+  placaValida,
   semEntregador,
+  telefoneValido,
   validarEntregador,
-  valoresParaEditar,
   type ValoresDoEntregador,
 } from './entregadores';
 import type { DadosCompartilhados } from './tipos';
@@ -71,54 +69,23 @@ describe('paraNovoEntregador', () => {
   });
 });
 
-const BRUNO: DadosCompartilhados = {
-  nome: 'Bruno Lima',
-  cpf: '98765432100',
-  telefone: '(61) 91000-0002',
-  tipoVeiculo: 'CARRO',
-  placa: 'XYZ9E87',
-  disponivel: true,
-};
-
-describe('valoresParaEditar', () => {
+describe('placaValida e telefoneValido', () => {
   it.each([
-    ['com placa', BRUNO, '61910000002', 'XYZ9E87'],
-    ['sem placa', { ...BRUNO, tipoVeiculo: 'BICICLETA', placa: null }, '61910000002', ''],
-  ])('preenche o formulário do entregador %s', (_caso, entregador, telefone, placa) => {
-    expect(valoresParaEditar(entregador)).toMatchObject({ cpf: '98765432100', telefone, placa });
+    ['ABC1234', true],
+    ['ABC1D23', true],
+    ['ABC12345', false],
+    ['abc1d23', false],
+  ])('placa %s: %s', (placa, esperado) => {
+    expect(placaValida(placa)).toBe(esperado);
   });
-});
 
-describe('paraEdicaoDoEntregador', () => {
   it.each([
-    ['moto', 'MOTO', { placa: 'ABC1D23' }],
-    ['carro', 'CARRO', { placa: 'ABC1D23' }],
-    ['bicicleta', 'BICICLETA', {}],
-  ] as const)('monta a edição de %s com o nome sem espaços nas pontas', (_caso, tipoVeiculo, placa) => {
-    expect(paraEdicaoDoEntregador({ ...VALIDO, tipoVeiculo })).toEqual({
-      cpf: '52998224725',
-      nome: 'Joana Lima',
-      telefone: '61988887777',
-      veiculo: tipoVeiculo,
-      ...placa,
-    });
-  });
-});
-
-describe('entregadorEditado', () => {
-  it.each([
-    ['troca a placa', { placa: 'ABC1234' }, 'ABC1234'],
-    ['mantém a placa antiga quando não manda placa', {}, 'XYZ9E87'],
-  ])('%s', (_caso, placa, placaEsperada) => {
-    const edicao = { cpf: BRUNO.cpf, nome: 'Bruno L.', telefone: '61999990000', veiculo: 'MOTO' as const, ...placa };
-
-    expect(entregadorEditado(BRUNO, edicao)).toEqual({
-      ...BRUNO,
-      nome: 'Bruno L.',
-      telefone: '61999990000',
-      tipoVeiculo: 'MOTO',
-      placa: placaEsperada,
-    });
+    ['6133334444', true],
+    ['61999990000', true],
+    ['619999', false],
+    ['(61) 99999-0000', false],
+  ])('telefone %s: %s', (telefone, esperado) => {
+    expect(telefoneValido(telefone)).toBe(esperado);
   });
 });
 
@@ -137,14 +104,7 @@ describe('linhas da frota', () => {
     expect(semEntregador([ana, bia], ana.cpf)).toEqual([bia]);
   });
 
-  it('troca só a linha do entregador editado', () => {
-    const anaEditada = { ...ana, nome: 'Ana Souza' };
-
-    expect(comEntregadorAtualizado([ana, bia], anaEditada)).toEqual([anaEditada, bia]);
-  });
-
   it('com a frota ainda carregando, continua sem lista', () => {
     expect(semEntregador(null, ana.cpf)).toBeNull();
-    expect(comEntregadorAtualizado(null, ana)).toBeNull();
   });
 });

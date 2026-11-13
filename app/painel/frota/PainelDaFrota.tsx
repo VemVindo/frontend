@@ -11,7 +11,6 @@ export interface PainelDaFrotaProps {
   totalPagoPorCpf: Record<string, number>;
   erroTotalPago: boolean;
   onCadastrar: () => void;
-  onEditar: (entregador: DadosCompartilhados) => void;
   onRemover: (entregador: DadosCompartilhados) => void;
   onConvidar: () => void;
 }
@@ -24,7 +23,6 @@ export default function PainelDaFrota({
   totalPagoPorCpf,
   erroTotalPago,
   onCadastrar,
-  onEditar,
   onRemover,
   onConvidar,
 }: PainelDaFrotaProps) {
@@ -47,7 +45,6 @@ export default function PainelDaFrota({
           desempenhoPorCpf={desempenhoPorCpf}
           totalPagoPorCpf={totalPagoPorCpf}
           erroTotalPago={erroTotalPago}
-          onEditar={onEditar}
           onRemover={onRemover}
         />
       )}

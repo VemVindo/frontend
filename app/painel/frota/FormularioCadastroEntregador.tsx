@@ -16,7 +16,7 @@ import {
   type ValoresDoEntregador,
 } from '@/app/lib/entregadores';
 import type { EntregadorCadastrado } from '@/app/lib/tipos';
-import CampoTipoVeiculo from './CampoTipoVeiculo';
+import CampoTipoVeiculo from '@/app/components/entregador/CampoTipoVeiculo';
 import SenhaTemporariaGerada from './SenhaTemporariaGerada';
 
 const CPF_JA_CADASTRADO = 409;
