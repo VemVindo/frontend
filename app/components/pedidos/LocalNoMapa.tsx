@@ -1,8 +1,8 @@
 'use client';
 
-import { AdvancedMarker, APIProvider, Map } from '@vis.gl/react-google-maps';
+import MapaDoPino from '@/app/components/mapa/MapaDoPino';
 import { MarcadorDestino } from '@/app/components/mapa/MarcadoresDoMapa';
-import { CENTRO_PADRAO, CHAVE_GOOGLE_MAPS, MAP_ID_GOOGLE_MAPS } from '@/app/lib/mapa';
+import { CHAVE_GOOGLE_MAPS } from '@/app/lib/mapa';
 import type { Coordenada } from '@/app/lib/tipos';
 
 export type EtapaDoLocal =
@@ -61,39 +61,13 @@ export default function LocalNoMapa({
         </p>
       )}
       {mapaVisivel && (
-        <div className="h-56 overflow-hidden rounded-xl bg-mapa-fundo">
-          <APIProvider apiKey={CHAVE_GOOGLE_MAPS} language="pt-BR" region="BR">
-            <Map
-              key={tentativa}
-              mapId={MAP_ID_GOOGLE_MAPS}
-              defaultCenter={destino ?? CENTRO_PADRAO}
-              defaultZoom={destino ? 17 : 12}
-              gestureHandling="greedy"
-              disableDefaultUI
-              zoomControl
-              clickableIcons={false}
-              onClick={(evento) => {
-                if (evento.detail.latLng) aoMarcar(evento.detail.latLng);
-              }}
-              className="h-full w-full"
-            >
-              {destino && (
-                <AdvancedMarker
-                  position={destino}
-                  title="Ponto de entrega"
-                  draggable
-                  onDragEnd={(evento) => {
-                    if (evento.latLng) aoMarcar({ lat: evento.latLng.lat(), lng: evento.latLng.lng() });
-                  }}
-                  anchorLeft="-50%"
-                  anchorTop="-100%"
-                >
-                  <MarcadorDestino rotulo="Entrega" />
-                </AdvancedMarker>
-              )}
-            </Map>
-          </APIProvider>
-        </div>
+        <MapaDoPino
+          pino={destino}
+          tentativa={tentativa}
+          titulo="Ponto de entrega"
+          marcador={<MarcadorDestino rotulo="Entrega" />}
+          aoMarcar={aoMarcar}
+        />
       )}
     </section>
   );

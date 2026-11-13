@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cnpjValido, normalizarCnpj } from './cnpj';
 import {
   EMPRESA_VAZIA,
+  enderecoDaEmpresaParaLocalizar,
   formatarCep,
   formatarDocumento,
   normalizarDocumento,
@@ -146,6 +147,7 @@ describe('conversões', () => {
           cidade: 'Brasilia',
           uf: 'DF',
         },
+        origem: null,
         criadaEm: '2026-09-01T12:00:00Z',
         atualizadaEm: '2026-09-01T12:00:00Z',
       }),
@@ -161,5 +163,31 @@ describe('conversões', () => {
     expect(formatarDocumento('CNPJ', '11222333000181')).toBe('11.222.333/0001-81');
     expect(formatarDocumento('CPF', '52998224725')).toBe('529.982.247-25');
     expect(formatarCep('70000000')).toBe('70000-000');
+  });
+});
+
+describe('enderecoDaEmpresaParaLocalizar', () => {
+  it('monta o endereço sem espaços nas pontas', () => {
+    expect(
+      enderecoDaEmpresaParaLocalizar({
+        ...EMPRESA,
+        logradouro: ' SQN 210 Bloco K ',
+        bairro: ' Asa Norte ',
+        cidade: ' Brasilia ',
+      }),
+    ).toEqual({
+      cep: '70000000',
+      logradouro: 'SQN 210 Bloco K',
+      numero: 10,
+      bairro: 'Asa Norte',
+      cidade: 'Brasilia',
+      uf: 'DF',
+    });
+  });
+
+  it('não procura com o endereço incompleto, mas ignora os outros campos', () => {
+    expect(enderecoDaEmpresaParaLocalizar({ ...EMPRESA, cep: '7000' })).toBeNull();
+    expect(enderecoDaEmpresaParaLocalizar({ ...EMPRESA, uf: '' })).toBeNull();
+    expect(enderecoDaEmpresaParaLocalizar({ ...EMPRESA, email: 'invalido' })).not.toBeNull();
   });
 });

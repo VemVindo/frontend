@@ -21,6 +21,9 @@ export interface DadosCadastraisDaEmpresa {
   bairro: string;
   cidade: string;
   uf: string;
+  // Pino da empresa no mapa: ponto de saída das entregas. Vai sempre em par.
+  origemLat?: number;
+  origemLng?: number;
 }
 
 // E-US01: CNPJ com razão social, ou CPF.
@@ -46,6 +49,8 @@ export interface CadastroDaEmpresa {
     cidade: string;
     uf: string;
   };
+  // null: a empresa ainda não marcou o ponto e o back calcula pelo endereço.
+  origem: Coordenada | null;
   criadaEm: string;
   atualizadaEm: string;
 }
