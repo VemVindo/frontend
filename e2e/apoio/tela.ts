@@ -11,6 +11,10 @@ import {
 } from './ambiente';
 
 const PASTA_DE_EVIDENCIAS = 'reports/e2e';
+const TENTATIVAS_DE_REDIMENSIONAR = 5;
+// A borda da janela tira alguns pixels da largura da página, e o Firefox no
+// Linux não deixa a janela menor que uns 500 px, mesmo pedindo 420.
+const FOLGA_DA_LARGURA_PX = 100;
 
 type RaizDaBusca = WebDriver | WebElement;
 
@@ -309,8 +313,18 @@ export class Tela extends Regiao {
     await pausar(milissegundos);
   }
 
+  // No Wayland, a janela encaixada na tela ignora o pedido de tamanho. Repete o
+  // pedido e confere a largura da página, para não falhar depois por outro motivo.
   async redimensionar(largura: number, altura: number): Promise<void> {
-    await this.navegador.manage().window().setRect({ width: largura, height: altura });
+    for (let tentativa = 0; tentativa < TENTATIVAS_DE_REDIMENSIONAR; tentativa++) {
+      await this.navegador.manage().window().setRect({ width: largura, height: altura });
+      await pausar(PAUSA_ENTRE_ACOES_MS);
+      const larguraDaPagina = await this.navegador.executeScript<number>('return window.innerWidth;');
+      if (Math.abs(largura - larguraDaPagina) <= FOLGA_DA_LARGURA_PX) return;
+    }
+    throw new Error(
+      `A janela não ficou com ${largura} px de largura. Não maximize nem encaixe a janela do navegador durante os testes.`,
+    );
   }
 
   async simularLocalizacao(latitude: number, longitude: number): Promise<void> {
@@ -360,6 +374,13 @@ export class Tela extends Regiao {
     await writeFile(`${PASTA_DE_EVIDENCIAS}/${arquivo}.png`, await this.navegador.takeScreenshot(), 'base64');
     const texto = await this.navegador.findElement(By.css('body')).getText();
     await writeFile(`${PASTA_DE_EVIDENCIAS}/${arquivo}.txt`, `${await this.navegador.getCurrentUrl()}\n\n${texto}`);
+    // Só entram as requisições que terminaram: a que ficou pendente é a que falta na lista.
+    const requisicoes = await this.navegador.executeScript<string>(
+      `return performance.getEntriesByType('resource')
+         .map((r) => Math.round(r.startTime) + ' ms  +' + Math.round(r.duration) + ' ms  ' + r.initiatorType + '  ' + r.name)
+         .join('\\n');`,
+    );
+    await writeFile(`${PASTA_DE_EVIDENCIAS}/${arquivo}.rede.txt`, requisicoes);
   }
 
   async chamarApiComSessao(metodo: string, caminho: string, corpo: unknown): Promise<number> {
