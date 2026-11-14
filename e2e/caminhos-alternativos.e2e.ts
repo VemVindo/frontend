@@ -13,6 +13,7 @@ import {
   type EntregadorDeTeste,
   type PedidoDeTeste,
 } from './apoio/fluxos';
+import { emailDeTeste } from './apoio/ambiente';
 import { abrirNavegador } from './apoio/navegador';
 import {
   entrarNoAppDoEntregador,
@@ -40,7 +41,7 @@ const PRODUTORA: EmpresaDeTeste = {
   tipoDocumento: 'CPF',
   documento: gerarCpf(),
   nomeFantasia: `Horta Selenium ${sufixo}`,
-  email: `horta-${sufixo}@example.com`,
+  email: emailDeTeste('horta', sufixo),
   telefone: '61933330001',
   senha: `Produtora@${sufixo}`,
 };
@@ -51,7 +52,7 @@ const CONCORRENTE: EmpresaDeTeste = {
   documento: gerarCnpj(),
   razaoSocial: `Mercado Selenium ${sufixo} Ltda`,
   nomeFantasia: `Mercado Selenium ${sufixo}`,
-  email: `mercado-${sufixo}@example.com`,
+  email: emailDeTeste('mercado', sufixo),
   telefone: '61933330002',
   senha: `Concorrente@${sufixo}`,
 };

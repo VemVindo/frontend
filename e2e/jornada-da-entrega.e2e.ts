@@ -2,6 +2,7 @@ import type { WebDriver } from 'selenium-webdriver';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { codigoDiferenteDe, gerarCnpj, gerarCpf, gerarSufixo, gerarSufixoDeLetras } from './apoio/dados';
 import { criarPedidoComPino, definirOrigemDaEmpresa, preencherNovoPedido, RECUSA_SEM_PINO } from './apoio/fluxos';
+import { emailDeTeste, PRODUCAO } from './apoio/ambiente';
 import { abrirNavegador } from './apoio/navegador';
 import {
   entrarNoAppDoEntregador,
@@ -21,7 +22,7 @@ const EMPRESA = {
   cnpj: gerarCnpj(),
   razaoSocial: `Restaurante Selenium ${sufixo} Ltda`,
   nomeFantasia: `Restaurante Selenium ${sufixo}`,
-  email: `selenium-${sufixo}@example.com`,
+  email: emailDeTeste('restaurante', sufixo),
   telefone: '61933334444',
   telefoneEditado: '61955556666',
   cep: '70040010',
@@ -186,7 +187,7 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await cadastro.clicarBotao('Fechar cadastrar entregador');
     });
 
-    it('valida o novo pedido e recusa enviar sem o pino da entrega', async () => {
+    it.skipIf(PRODUCAO)('valida o novo pedido e recusa enviar sem o pino da entrega', async () => {
       await irPeloMenu(tela, 'Pedidos');
       await tela.esperarTexto('Nenhum pedido ativo no momento.');
       await tela.clicarBotao('+ Novo pedido');

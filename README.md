@@ -87,6 +87,34 @@ com a sessão da própria empresa.
 Quando um teste falha, a captura da tela e o texto da página ficam em
 `reports/e2e/`.
 
+### Rodar contra o ambiente publicado
+
+```bash
+E2E_PRODUCAO=1 E2E_URL_FRONT=https://frontend-or4i.onrender.com E2E_URL_API=https://backend-ker5.onrender.com npm run test:e2e
+```
+
+Nesse modo a suíte espera o Render acordar (até 3 minutos), usa 30 segundos de
+espera por elemento e pula a checagem do pedido sem pino, que só vale sem as
+chaves do Google. Os roteiros não usam o seed: criam as próprias contas, com
+e-mail `e2e-selenium-...@example.com`.
+
+Cada execução deixa dados no banco, e o app não tem rota para apagar empresa
+nem pedido. Depois de rodar, limpe com o endereço do banco (no Render,
+External Database URL):
+
+```bash
+E2E_DATABASE_URL='postgresql://...' npm run test:e2e:limpar
+```
+
+```bash
+E2E_DATABASE_URL='postgresql://...' npm run test:e2e:limpar -- --apagar
+```
+
+O primeiro só mostra quantas empresas, entregadores e pedidos sairiam. O
+segundo apaga. O comando executa `e2e/limpeza.sql`, que só alcança empresas com
+o e-mail da suíte, os pedidos delas e entregadores que não trabalham para
+nenhuma outra empresa.
+
 | Variável | Para que serve | Padrão |
 |---|---|---|
 | `E2E_SEM_TELA` | `1` roda sem abrir a janela | janela visível |
