@@ -9,7 +9,7 @@ import {
   preencherNovoPedido,
   RECUSA_SEM_PINO,
 } from './apoio/fluxos';
-import { emailDeTeste, PRODUCAO } from './apoio/ambiente';
+import { emailDeTeste } from './apoio/ambiente';
 import { abrirNavegador } from './apoio/navegador';
 import {
   entrarNoAppDoEntregador,
@@ -64,6 +64,8 @@ const PEDIDO = {
   itens: 'Duas marmitas e um suco',
 };
 
+const PONTO_DE_ENTREGA = 'Ponto de entrega no mapa';
+const PINO_AINDA_NAO_LOCALIZADO = 'O endereço será localizado ao criar o pedido';
 const PINO_DA_EMPRESA = { lat: -15.8016, lng: -47.8862 };
 const PINO_DA_ENTREGA = { lat: -15.8139, lng: -47.9016 };
 
@@ -194,7 +196,7 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await cadastro.clicarBotao('Fechar cadastrar entregador');
     });
 
-    it.skipIf(PRODUCAO)('valida o novo pedido e recusa enviar sem o pino da entrega', async () => {
+    it('valida o novo pedido antes de enviar', async () => {
       await irPeloMenu(tela, 'Pedidos');
       await tela.esperarTexto('Nenhum pedido ativo no momento.');
       await tela.clicarBotao('+ Novo pedido');
@@ -204,8 +206,12 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await vazio.clicarBotao('Fechar novo pedido');
       await preencherNovoPedido(tela, PEDIDO);
       const preenchido = await tela.dialogo('Novo pedido');
-      await preenchido.clicarBotao('Criar pedido');
-      await preenchido.esperarTexto(RECUSA_SEM_PINO);
+      if (await preenchido.temRegiao(PONTO_DE_ENTREGA)) {
+        await (await preenchido.regiao(PONTO_DE_ENTREGA)).esperarTexto(PINO_AINDA_NAO_LOCALIZADO);
+      } else {
+        await preenchido.clicarBotao('Criar pedido');
+        await preenchido.esperarTexto(RECUSA_SEM_PINO);
+      }
       await preenchido.clicarBotao('Fechar novo pedido');
     });
 
@@ -357,6 +363,9 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await tela.preencher('Quer contar mais alguma coisa? (opcional)', AVALIACAO.comentario);
       await tela.clicarBotao('Enviar avaliação');
       await tela.esperarTexto('Avaliação enviada!');
+      if (await tela.temTexto('Sua nota foi registrada, mas o comentário não')) {
+        throw new Error(`O comentário não foi gravado: ${await tela.esperarAlerta()}`);
+      }
       await tela.fecharAbaAtualEVoltarPara(abaDoEntregador);
     });
   });
