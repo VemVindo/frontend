@@ -1,7 +1,14 @@
 import type { WebDriver } from 'selenium-webdriver';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { codigoDiferenteDe, gerarCnpj, gerarCpf, gerarSufixo, gerarSufixoDeLetras } from './apoio/dados';
-import { criarPedidoComPino, definirOrigemDaEmpresa, preencherNovoPedido, RECUSA_SEM_PINO } from './apoio/fluxos';
+import {
+  conferirLinkExterno,
+  conferirMapaDaEntrega,
+  criarPedidoPelaTela,
+  marcarPinoDaEmpresa,
+  preencherNovoPedido,
+  RECUSA_SEM_PINO,
+} from './apoio/fluxos';
 import { emailDeTeste, PRODUCAO } from './apoio/ambiente';
 import { abrirNavegador } from './apoio/navegador';
 import {
@@ -203,8 +210,8 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
     });
 
     it('cria o pedido com o pino da empresa e o da entrega', async () => {
-      await definirOrigemDaEmpresa(tela, { ...EMPRESA, telefone: EMPRESA.telefoneEditado }, PINO_DA_EMPRESA);
-      await criarPedidoComPino(tela, PEDIDO, PINO_DA_ENTREGA);
+      await marcarPinoDaEmpresa(tela, { ...EMPRESA, telefone: EMPRESA.telefoneEditado }, PINO_DA_EMPRESA);
+      await criarPedidoPelaTela(tela, PEDIDO, PINO_DA_ENTREGA);
       await tela.esperarTexto('Não atribuído');
       await sairDoPainel(tela);
     });
@@ -258,6 +265,7 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await tela.esperarTexto('Em andamento');
       await tela.esperarTexto('Saiu para entrega');
       await tela.esperarTexto(PEDIDO.itens);
+      await conferirMapaDaEntrega(tela, { origem: 'Estabelecimento', destino: 'Helena' });
       idDoPedido = (await tela.caminhoAtual()).split('/').pop() as string;
       expect(Number(idDoPedido)).toBeGreaterThan(0);
     });
@@ -283,6 +291,11 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await tela.esperarTitulo(`Pedido #${idDoPedido}`);
       await tela.botao('Finalizar entrega');
       await tela.esperarTexto('Saiu para entrega');
+      await conferirLinkExterno(
+        tela,
+        `Conversar com ${EMPRESA.nomeFantasia}`,
+        `https://wa.me/55${EMPRESA.telefoneEditado}?`,
+      );
       abaDoEntregador = await tela.abaAtual();
     });
 
@@ -293,6 +306,12 @@ describe('Jornada da entrega: empresa, entregador e recebedor', () => {
       await tela.esperarTexto('Em andamento');
       await tela.esperarTexto('Código de recebimento');
       await tela.esperarTexto(codigoDoRecebedor);
+      await conferirMapaDaEntrega(tela, { origem: EMPRESA.nomeFantasia, destino: 'Você' });
+      await conferirLinkExterno(
+        tela,
+        'Falar com o estabelecimento no WhatsApp',
+        `https://wa.me/55${EMPRESA.telefoneEditado}?`,
+      );
     });
 
     it('o código errado não finaliza a entrega', async () => {

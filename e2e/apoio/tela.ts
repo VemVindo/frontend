@@ -25,7 +25,7 @@ function pausar(milissegundos: number): Promise<void> {
 export class Regiao {
   constructor(
     protected readonly navegador: WebDriver,
-    private readonly raiz: RaizDaBusca,
+    protected readonly raiz: RaizDaBusca,
   ) {}
 
   private async visiveis(xpath: string): Promise<WebElement[]> {
@@ -154,6 +154,84 @@ export class Regiao {
 
   async textoDe(xpath: string, descricao: string): Promise<string> {
     return (await this.esperarVisivel(xpath, descricao)).getText();
+  }
+
+  async temBotao(nome: string): Promise<boolean> {
+    const nomeNoXpath = literalXpath(nome);
+    return (
+      (await this.visiveis(`.//button[normalize-space()=${nomeNoXpath} or @aria-label=${nomeNoXpath}]`)).length > 0
+    );
+  }
+
+  async temRegiao(rotulo: string): Promise<boolean> {
+    return (await this.raiz.findElements(By.xpath(`.//*[@aria-label=${literalXpath(rotulo)}]`))).length > 0;
+  }
+
+  async regiao(rotulo: string): Promise<Regiao> {
+    const raiz = await this.esperarVisivel(`.//*[@aria-label=${literalXpath(rotulo)}]`, `região "${rotulo}"`);
+    return new Regiao(this.navegador, raiz);
+  }
+
+  async esperarRegiaoOuTexto(rotulo: string, texto: string): Promise<'regiao' | 'texto'> {
+    let encontrado: 'regiao' | 'texto' | undefined;
+    await this.navegador.wait(
+      async () => {
+        if (await this.temRegiao(rotulo)) encontrado = 'regiao';
+        else if (await this.temTexto(texto)) encontrado = 'texto';
+        return encontrado !== undefined;
+      },
+      ESPERA_MAXIMA_MS,
+      `Não apareceu a região "${rotulo}" nem o texto "${texto}"`,
+    );
+    return encontrado as 'regiao' | 'texto';
+  }
+
+  async temElementoComTitulo(titulo: string): Promise<boolean> {
+    const tituloNoXpath = literalXpath(titulo);
+    return (await this.raiz.findElements(By.xpath(`.//*[@title=${tituloNoXpath}]`))).length > 0;
+  }
+
+  async esperarElementoComTitulo(titulo: string): Promise<void> {
+    await this.navegador.wait(
+      () => this.temElementoComTitulo(titulo),
+      ESPERA_MAXIMA_MS,
+      `Não apareceu o elemento com título "${titulo}"`,
+    );
+  }
+
+  async esperarUmDosTextos(textos: string[]): Promise<string> {
+    let encontrado: string | undefined;
+    await this.navegador.wait(
+      async () => {
+        for (const texto of textos) {
+          if (await this.temTexto(texto)) {
+            encontrado = texto;
+            return true;
+          }
+        }
+        return false;
+      },
+      ESPERA_MAXIMA_MS,
+      `Não apareceu nenhum destes textos: ${textos.join(' | ')}`,
+    );
+    return encontrado as string;
+  }
+
+  async esperarAlerta(): Promise<string> {
+    return (await this.esperarVisivel(`.//*[@role='alert'][normalize-space()]`, 'mensagem de erro')).getText();
+  }
+
+  async clicarNoMapa(): Promise<void> {
+    await this.clicar(await this.esperarVisivel(`.//div[contains(@class, 'h-56')]`, 'mapa do pino'));
+  }
+
+  async atributosDoLinkQueContem(trecho: string): Promise<{ href: string; target: string; rel: string }> {
+    const link = await this.esperarVisivel(
+      `.//a[contains(normalize-space(), ${literalXpath(trecho)})]`,
+      `link com "${trecho}"`,
+    );
+    const [href, target, rel] = await Promise.all(['href', 'target', 'rel'].map((nome) => link.getAttribute(nome)));
+    return { href: href ?? '', target: target ?? '', rel: rel ?? '' };
   }
 
   async esperarSumir(texto: string): Promise<void> {

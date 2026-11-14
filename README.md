@@ -79,6 +79,10 @@ npm run test:e2e
   troca do link de rastreio, filtros de data, menu de celular, compartilhamento
   da localização (posição simulada no Chrome) e bloqueio do código do recebedor.
 
+Com as chaves do Google Maps, os roteiros marcam o pino da empresa e o da
+entrega pela tela e conferem os marcadores no mapa. No Firefox, o teste de
+compartilhar a localização é pulado, porque a simulação de GPS é do Chrome.
+
 Sem as chaves do Google Maps o mapa não aparece, e o backend só aceita pedido
 com o pino da empresa e o da entrega. Por isso os roteiros conferem na tela que
 o pedido sem pino é recusado e depois gravam os pinos e criam o pedido pela API,
@@ -121,6 +125,9 @@ nenhuma outra empresa.
 | `E2E_PAUSA_MS` | pausa antes de cada clique, para dar tempo de acompanhar | `350` |
 | `E2E_NAVEGADOR` | `chrome` ou `firefox` | `chrome` |
 | `E2E_URL_FRONT` e `E2E_URL_API` | endereços do frontend e do backend | `localhost:3000` e `localhost:8000` |
+| `E2E_CELULAR` | `1` roda na largura de celular, usando o menu lateral | largura de computador |
+| `E2E_DATABASE_URL` | endereço do banco; liga o teste da senha temporária vencida e o comando de limpeza | sem teste de senha vencida |
+| `E2E_PRODUCAO` | `1` roda contra o ambiente publicado | ambiente local |
 
 O backend aceita 5 tentativas de login por minuto em cada rota. Quando o limite
 estoura, os roteiros esperam 20 segundos e tentam de novo, então a execução

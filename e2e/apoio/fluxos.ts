@@ -1,5 +1,5 @@
 import { entrarNoAppDoEntregador, irPeloMenu } from './sessao';
-import type { Tela } from './tela';
+import type { Regiao, Tela } from './tela';
 
 export interface EnderecoDeTeste {
   cep: string;
@@ -129,6 +129,78 @@ export async function preencherNovoPedido(tela: Tela, pedido: PedidoDeTeste): Pr
   await novoPedido.escolherOpcao('UF', pedido.uf);
   await novoPedido.escolherOpcao('Tipo de veículo', pedido.veiculo);
   await novoPedido.preencher('Itens do pedido (opcional)', pedido.itens);
+}
+
+const PINO_PRONTO = ['Confira o pino', 'Achamos só a região', 'As entregas saem deste ponto', 'Ponto marcado'];
+const PINO_A_MARCAR = ['Não encontramos', 'Não foi possível localizar'];
+
+async function deixarPinoNoMapa(regiao: Regiao, pronto: string): Promise<void> {
+  const situacao = await regiao.esperarUmDosTextos([...PINO_PRONTO, ...PINO_A_MARCAR]);
+  if (PINO_A_MARCAR.includes(situacao)) {
+    await regiao.clicarNoMapa();
+    await regiao.esperarTexto(pronto);
+  }
+}
+
+export async function marcarPinoDaEmpresa(
+  tela: Tela,
+  empresa: EmpresaDeTeste,
+  reserva: Coordenada,
+): Promise<'tela' | 'api'> {
+  await irPeloMenu(tela, 'Empresa');
+  await tela.clicarBotao('Editar');
+  await tela.esperarTexto('Editar dados');
+  if (!(await tela.temRegiao('Ponto de saída das entregas'))) {
+    await tela.clicarBotao('Cancelar');
+    await definirOrigemDaEmpresa(tela, empresa, reserva);
+    return 'api';
+  }
+  await deixarPinoNoMapa(await tela.regiao('Ponto de saída das entregas'), 'Ponto marcado');
+  await tela.clicarBotao('Salvar');
+  await tela.esperarTexto('Dados atualizados.');
+  await tela.esperarTexto('Marcado no mapa');
+  return 'tela';
+}
+
+export async function criarPedidoPelaTela(
+  tela: Tela,
+  pedido: PedidoDeTeste,
+  reserva: Coordenada,
+): Promise<'tela' | 'api'> {
+  await preencherNovoPedido(tela, pedido);
+  const novoPedido = await tela.dialogo('Novo pedido');
+  if (!(await novoPedido.temRegiao('Ponto de entrega no mapa'))) {
+    await novoPedido.clicarBotao('Fechar novo pedido');
+    await criarPedidoComPino(tela, pedido, reserva);
+    return 'api';
+  }
+  const ponto = await novoPedido.regiao('Ponto de entrega no mapa');
+  await ponto.clicarBotao('Localizar no mapa');
+  await deixarPinoNoMapa(ponto, 'Ponto marcado');
+  await novoPedido.clicarBotao('Criar pedido');
+  await tela.esperarTexto('Pedido criado com sucesso.');
+  await tela.esperarTexto(pedido.recebedor);
+  return 'tela';
+}
+
+export async function conferirMapaDaEntrega(
+  tela: Tela,
+  marcadores: { origem: string; destino: string; entregador?: boolean },
+): Promise<'mapa' | 'sem-chave'> {
+  if ((await tela.esperarRegiaoOuTexto('Mapa da entrega', 'Mapa indisponível')) === 'texto') return 'sem-chave';
+  const mapa = await tela.regiao('Mapa da entrega');
+  await mapa.esperarTexto(marcadores.origem);
+  await mapa.esperarTexto(marcadores.destino);
+  if (marcadores.entregador) await mapa.esperarElementoComTitulo('Entregador');
+  return 'mapa';
+}
+
+export async function conferirLinkExterno(tela: Tela, texto: string, comecoDoEndereco: string): Promise<void> {
+  const { href, target, rel } = await tela.atributosDoLinkQueContem(texto);
+  if (!href.startsWith(comecoDoEndereco)) throw new Error(`O link "${texto}" aponta para ${href}`);
+  if (target !== '_blank' || !rel.includes('noopener')) {
+    throw new Error(`O link "${texto}" deveria abrir em nova aba com noopener (target=${target}, rel=${rel})`);
+  }
 }
 
 export async function criarPedidoComPino(tela: Tela, pedido: PedidoDeTeste, destino: Coordenada): Promise<void> {

@@ -14,7 +14,13 @@ export async function entrarComoEntregador(tela: Tela, cpf: string, senha: strin
   await tela.clicarBotao('Acessar');
 }
 
+async function abrirMenuLateralSeFechado(tela: Tela): Promise<void> {
+  if (await tela.temBotao('Fechar menu')) return;
+  if (await tela.temBotao('Abrir menu')) await tela.clicarBotao('Abrir menu');
+}
+
 export async function sairDoPainel(tela: Tela): Promise<void> {
+  await abrirMenuLateralSeFechado(tela);
   await tela.clicarBotao('Sair');
   await tela.esperarCaminho('/');
 }
@@ -25,6 +31,7 @@ export async function sairDoAppDoEntregador(tela: Tela): Promise<void> {
 }
 
 export async function irPeloMenu(tela: Tela, item: string): Promise<void> {
+  await abrirMenuLateralSeFechado(tela);
   await tela.clicarLink(item);
 }
 

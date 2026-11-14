@@ -3,8 +3,10 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { codigoDiferenteDe, gerarCnpj, gerarCpf, gerarSufixo, gerarSufixoDeLetras } from './apoio/dados';
 import {
   cadastrarEmpresa,
-  criarPedidoComPino,
-  definirOrigemDaEmpresa,
+  conferirMapaDaEntrega,
+  conferirLinkExterno,
+  criarPedidoPelaTela,
+  marcarPinoDaEmpresa,
   definirRemuneracao,
   fazerPrimeiroAcesso,
   lerSenhaTemporaria,
@@ -13,9 +15,11 @@ import {
   type EntregadorDeTeste,
   type PedidoDeTeste,
 } from './apoio/fluxos';
-import { emailDeTeste } from './apoio/ambiente';
+import { emailDeTeste, ENDERECO_DO_BANCO, JANELA, NAVEGADOR } from './apoio/ambiente';
+import { renovarSenhaTemporaria, vencerSenhaTemporaria } from './apoio/banco';
 import { abrirNavegador } from './apoio/navegador';
 import {
+  entrarComoEntregador,
   entrarNoAppDoEntregador,
   entrarNoPainel,
   irPeloMenu,
@@ -27,7 +31,7 @@ import { Tela } from './apoio/tela';
 const sufixo = gerarSufixo();
 const sufixoDeLetras = gerarSufixoDeLetras();
 
-const ENDERECO = {
+const ENDERECO_DA_ENTREGA = {
   cep: '70390070',
   logradouro: 'SHCS 706 Bloco B',
   numero: '12',
@@ -36,8 +40,17 @@ const ENDERECO = {
   uf: 'DF',
 };
 
+const ENDERECO_DAS_EMPRESAS = {
+  cep: '70040010',
+  logradouro: 'SBS Quadra 2',
+  numero: '12',
+  bairro: 'Asa Sul',
+  cidade: 'Brasilia',
+  uf: 'DF',
+};
+
 const PRODUTORA: EmpresaDeTeste = {
-  ...ENDERECO,
+  ...ENDERECO_DAS_EMPRESAS,
   tipoDocumento: 'CPF',
   documento: gerarCpf(),
   nomeFantasia: `Horta Selenium ${sufixo}`,
@@ -47,7 +60,7 @@ const PRODUTORA: EmpresaDeTeste = {
 };
 
 const CONCORRENTE: EmpresaDeTeste = {
-  ...ENDERECO,
+  ...ENDERECO_DAS_EMPRESAS,
   tipoDocumento: 'CNPJ',
   documento: gerarCnpj(),
   razaoSocial: `Mercado Selenium ${sufixo} Ltda`,
@@ -75,7 +88,7 @@ const SEGUNDO_ENTREGADOR: EntregadorDeTeste = {
 };
 
 const PEDIDO: PedidoDeTeste = {
-  ...ENDERECO,
+  ...ENDERECO_DA_ENTREGA,
   cep: '70390-070',
   recebedor: `Otavio Selenium ${sufixoDeLetras}`,
   telefone: '(61) 98888-0000',
@@ -90,7 +103,8 @@ const DATA_POSTERIOR = '10102030';
 const DATA_ANTERIOR = '05052020';
 const PERIODO_INVERTIDO = 'A data final precisa ser depois da inicial.';
 const JANELA_DE_CELULAR = { largura: 420, altura: 860 };
-const JANELA_DE_COMPUTADOR = { largura: 1440, altura: 900 };
+const AVISO_DO_LIMITE_DE_LOGIN = 'Não foi possível entrar agora';
+const ESPERA_DO_LIMITE_DE_LOGIN_MS = 20_000;
 const POSICAO_SIMULADA = { latitude: -15.8135, longitude: -47.9046 };
 
 describe('Caminhos alternativos', () => {
@@ -136,8 +150,8 @@ describe('Caminhos alternativos', () => {
     });
 
     it('cria o pedido que será disputado', async () => {
-      await definirOrigemDaEmpresa(tela, PRODUTORA, PINO_DA_PRODUTORA);
-      await criarPedidoComPino(tela, PEDIDO, PINO_DA_ENTREGA);
+      await marcarPinoDaEmpresa(tela, PRODUTORA, PINO_DA_PRODUTORA);
+      await criarPedidoPelaTela(tela, PEDIDO, PINO_DA_ENTREGA);
       await sairDoPainel(tela);
     });
   });
@@ -158,6 +172,23 @@ describe('Caminhos alternativos', () => {
       await navegador.wait(async () => (await convite.valorDoCampo('CPF do entregador')) === '');
       await convite.clicarBotao('Fechar convidar entregador');
       await sairDoPainel(tela);
+    });
+  });
+
+  describe.skipIf(!ENDERECO_DO_BANCO)('senha temporária vencida', () => {
+    it('recusa entrar com a senha temporária depois do prazo', async () => {
+      await vencerSenhaTemporaria(SEGUNDO_ENTREGADOR.cpf);
+      try {
+        let alerta = AVISO_DO_LIMITE_DE_LOGIN;
+        while (alerta.includes(AVISO_DO_LIMITE_DE_LOGIN)) {
+          await entrarComoEntregador(tela, SEGUNDO_ENTREGADOR.cpf, senhaTemporariaDoSegundo);
+          alerta = await tela.esperarAlerta();
+          if (alerta.includes(AVISO_DO_LIMITE_DE_LOGIN)) await tela.aguardar(ESPERA_DO_LIMITE_DE_LOGIN_MS);
+        }
+        expect(await tela.caminhoAtual()).toBe('/login/entregador');
+      } finally {
+        await renovarSenhaTemporaria(SEGUNDO_ENTREGADOR.cpf);
+      }
     });
   });
 
@@ -207,8 +238,16 @@ describe('Caminhos alternativos', () => {
       await tela.esperarTexto('Histórico de entregadores');
       await tela.esperarTexto(`Atribuído a ${PRIMEIRA_ENTREGADORA.nome}`);
       await tela.esperarTexto(`${PRIMEIRA_ENTREGADORA.nome} para ${SEGUNDO_ENTREGADOR.nome}`);
-      expect(await tela.enderecoDoLinkQueContem(`Conversar com ${SEGUNDO_ENTREGADOR.nome}`)).toContain('wa.me');
-      expect(await tela.enderecoDoLinkQueContem(`Conversar com ${PEDIDO.recebedor}`)).toContain('wa.me');
+      await conferirLinkExterno(
+        tela,
+        `Conversar com ${SEGUNDO_ENTREGADOR.nome}`,
+        `https://wa.me/55${SEGUNDO_ENTREGADOR.telefone}?`,
+      );
+      await conferirLinkExterno(
+        tela,
+        `Conversar com ${PEDIDO.recebedor}`,
+        `https://wa.me/55${PEDIDO.telefone.replace(/\D/g, '')}?`,
+      );
     });
 
     it('gerar outro link derruba o anterior', async () => {
@@ -250,25 +289,34 @@ describe('Caminhos alternativos', () => {
       await tela.esperarTexto(SEGUNDO_ENTREGADOR.nome);
       await tela.clicarBotao('Abrir menu');
       await sairDoPainel(tela);
-      await tela.redimensionar(JANELA_DE_COMPUTADOR.largura, JANELA_DE_COMPUTADOR.altura);
+      await tela.redimensionar(JANELA.largura, JANELA.altura);
     });
   });
 
   describe('o segundo entregador na rua', () => {
-    it('compartilha e para de compartilhar a localização', async () => {
+    it('abre a entrega em andamento', async () => {
       await entrarNoAppDoEntregador(tela, SEGUNDO_ENTREGADOR.cpf, SEGUNDO_ENTREGADOR.senha);
-      await tela.simularLocalizacao(POSICAO_SIMULADA.latitude, POSICAO_SIMULADA.longitude);
       await tela.clicarLinkQueContem(PEDIDO.recebedor);
       await tela.esperarTexto('Localização não compartilhada');
+    });
+
+    it.skipIf(NAVEGADOR !== 'chrome')('compartilha e para de compartilhar a localização', async () => {
+      await tela.simularLocalizacao(POSICAO_SIMULADA.latitude, POSICAO_SIMULADA.longitude);
       await tela.clicarBotao('Compartilhar localização');
       await tela.esperarTexto('Compartilhando a localização com o recebedor');
+      await conferirMapaDaEntrega(tela, { origem: PRODUTORA.nomeFantasia, destino: 'Otavio', entregador: true });
       await tela.clicarBotao('Parar de compartilhar');
       await tela.esperarTexto('Localização não compartilhada');
     });
 
     it('tem atalhos para o Google Maps e para o WhatsApp do estabelecimento', async () => {
-      expect(await tela.enderecoDoLinkQueContem('Abrir no Google Maps')).toContain('google.com/maps');
-      expect(await tela.enderecoDoLinkQueContem('Conversar com')).toContain('wa.me');
+      await conferirLinkExterno(tela, 'Abrir no Google Maps', 'https://www.google.com/maps/dir/?api=1&');
+      expect((await tela.atributosDoLinkQueContem('Abrir no Google Maps')).href).toContain('&destination=');
+      await conferirLinkExterno(
+        tela,
+        `Conversar com ${PRODUTORA.nomeFantasia}`,
+        `https://wa.me/55${PRODUTORA.telefone}?`,
+      );
     });
 
     it('fica bloqueado depois de errar o código cinco vezes', async () => {
