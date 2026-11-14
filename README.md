@@ -60,6 +60,94 @@ npm test        # testes (Vitest)
 npm run test:ci # testes com cobertura e relatorios (o mesmo do CI)
 ```
 
+## Testes de tela (Selenium)
+
+Os roteiros de `e2e/` abrem o Chrome e percorrem as telas como a empresa, o
+entregador e o recebedor. Precisam do backend em `http://localhost:8000` (com o
+seed) e do frontend em `http://localhost:3000`.
+
+```bash
+npm run test:e2e
+```
+
+- `e2e/autenticacao.e2e.ts`: login das duas personas, menu do painel, rota
+  protegida e link de rastreio inexistente. Só lê os dados do seed.
+- `e2e/jornada-da-entrega.e2e.ts`: cadastra uma empresa e um entregador novos a
+  cada execução e leva um pedido do cadastro até a avaliação do recebedor.
+- `e2e/caminhos-alternativos.e2e.ts`: cadastro por CPF, CPF já cadastrado que
+  vira convite, recusa de convite, saída da frota, reatribuição com histórico,
+  troca do link de rastreio, filtros de data, menu de celular, compartilhamento
+  da localização (posição simulada no Chrome) e bloqueio do código do recebedor.
+
+Com as chaves do Google Maps, os roteiros marcam o pino da empresa e o da
+entrega pela tela e conferem os marcadores no mapa. No Firefox, o teste de
+compartilhar a localização é pulado, porque a simulação de GPS é do Chrome.
+
+Sem as chaves do Google Maps o mapa não aparece, e o backend só aceita pedido
+com o pino da empresa e o da entrega. Por isso os roteiros conferem na tela que
+o pedido sem pino é recusado e depois gravam os pinos e criam o pedido pela API,
+com a sessão da própria empresa.
+
+Quando um teste falha, a captura da tela e o texto da página ficam em
+`reports/e2e/`.
+
+### Rodar contra o ambiente publicado
+
+```bash
+E2E_PRODUCAO=1 E2E_URL_FRONT=https://frontend-or4i.onrender.com E2E_URL_API=https://backend-ker5.onrender.com npm run test:e2e
+```
+
+Nesse modo a suíte espera o Render acordar (até 3 minutos), usa 30 segundos de
+espera por elemento e pula a checagem do pedido sem pino, que só vale sem as
+chaves do Google, e a vitrine do design system, que não é tela de produção.
+Os roteiros não usam o seed: criam as próprias contas, com e-mail
+`e2e-selenium-...@example.com`.
+
+Cada execução deixa dados no banco, e o app não tem rota para apagar empresa
+nem pedido. Depois de rodar, limpe com o endereço do banco (no Render,
+External Database URL):
+
+```bash
+E2E_DATABASE_URL='postgresql://...' npm run test:e2e:limpar
+```
+
+```bash
+E2E_DATABASE_URL='postgresql://...' npm run test:e2e:limpar -- --apagar
+```
+
+O primeiro só mostra quantas empresas, entregadores e pedidos sairiam. O
+segundo apaga. O comando executa `e2e/limpeza.sql`, que só alcança empresas com
+o e-mail da suíte, os pedidos delas e entregadores que não trabalham para
+nenhuma outra empresa.
+
+### No Windows
+
+O PowerShell não aceita `VAR=valor comando`. Coloque as variáveis `E2E_*` no
+`.env` da pasta do frontend, que `vitest.e2e.config.mts` lê (Node 20.12 ou
+mais novo), e rode só `npm run test:e2e`. Variável definida no terminal vale
+mais que a do `.env`.
+
+A limpeza não lê o `.env`. No PowerShell:
+
+```powershell
+$env:E2E_DATABASE_URL='...'; npm run test:e2e:limpar
+```
+
+| Variável | Para que serve | Padrão |
+|---|---|---|
+| `E2E_SEM_TELA` | `1` roda sem abrir a janela | janela visível |
+| `E2E_PAUSA_MS` | pausa antes de clicar num campo do formulário | `350` |
+| `E2E_PAUSA_TELA_MS` | pausa antes de clicar num botão ou link e depois de cada tela nova | `1500` |
+| `E2E_NAVEGADOR` | `chrome` ou `firefox` | `chrome` |
+| `E2E_URL_FRONT` e `E2E_URL_API` | endereços do frontend e do backend | `localhost:3000` e `localhost:8000` |
+| `E2E_CELULAR` | `1` roda na largura de celular, usando o menu lateral | largura de computador |
+| `E2E_DATABASE_URL` | endereço do banco; liga o teste da senha temporária vencida e o comando de limpeza | sem teste de senha vencida |
+| `E2E_PRODUCAO` | `1` roda contra o ambiente publicado | ambiente local |
+
+O backend aceita 5 tentativas de login por minuto em cada rota. Quando o limite
+estoura, os roteiros esperam 20 segundos e tentam de novo, então a execução
+pode demorar mais, mas não falha por isso.
+
 ## CI/CD
 
 Cada PR para a `main` roda `.github/workflows/ci.yml`. O merge só é liberado com:
