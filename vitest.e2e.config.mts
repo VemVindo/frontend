@@ -1,4 +1,7 @@
 import { defineConfig } from 'vitest/config';
+import { existsSync } from 'node:fs';
+
+if (existsSync('.env')) process.loadEnvFile?.('.env');
 
 const UM_MINUTO_MS = 60_000;
 // Com a janela aberta as pausas deixam cada teste mais longo.

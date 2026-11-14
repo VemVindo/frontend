@@ -120,6 +120,19 @@ segundo apaga. O comando executa `e2e/limpeza.sql`, que só alcança empresas co
 o e-mail da suíte, os pedidos delas e entregadores que não trabalham para
 nenhuma outra empresa.
 
+### No Windows
+
+O PowerShell não aceita `VAR=valor comando`. Coloque as variáveis `E2E_*` no
+`.env` da pasta do frontend, que `vitest.e2e.config.mts` lê (Node 20.12 ou
+mais novo), e rode só `npm run test:e2e`. Variável definida no terminal vale
+mais que a do `.env`.
+
+A limpeza não lê o `.env`. No PowerShell:
+
+```powershell
+$env:E2E_DATABASE_URL='...'; npm run test:e2e:limpar
+```
+
 | Variável | Para que serve | Padrão |
 |---|---|---|
 | `E2E_SEM_TELA` | `1` roda sem abrir a janela | janela visível |
