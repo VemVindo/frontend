@@ -15,7 +15,7 @@ import {
   type EntregadorDeTeste,
   type PedidoDeTeste,
 } from './apoio/fluxos';
-import { emailDeTeste, ENDERECO_DO_BANCO, JANELA, NAVEGADOR } from './apoio/ambiente';
+import { emailDeTeste, ENDERECO_DO_BANCO, JANELA, NAVEGADOR, PRODUCAO } from './apoio/ambiente';
 import { renovarSenhaTemporaria, vencerSenhaTemporaria } from './apoio/banco';
 import { abrirNavegador } from './apoio/navegador';
 import {
@@ -350,7 +350,8 @@ describe('Caminhos alternativos', () => {
     });
   });
 
-  describe('vitrine do design system', () => {
+  // A vitrine é página de desenvolvimento; em produção o roteiro não a abre.
+  describe.skipIf(PRODUCAO)('vitrine do design system', () => {
     it('mostra os componentes base', async () => {
       await tela.abrir('/design-system');
       await tela.esperarTitulo('Componentes base');

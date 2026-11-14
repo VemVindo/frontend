@@ -99,8 +99,9 @@ E2E_PRODUCAO=1 E2E_URL_FRONT=https://frontend-or4i.onrender.com E2E_URL_API=http
 
 Nesse modo a suíte espera o Render acordar (até 3 minutos), usa 30 segundos de
 espera por elemento e pula a checagem do pedido sem pino, que só vale sem as
-chaves do Google. Os roteiros não usam o seed: criam as próprias contas, com
-e-mail `e2e-selenium-...@example.com`.
+chaves do Google, e a vitrine do design system, que não é tela de produção.
+Os roteiros não usam o seed: criam as próprias contas, com e-mail
+`e2e-selenium-...@example.com`.
 
 Cada execução deixa dados no banco, e o app não tem rota para apagar empresa
 nem pedido. Depois de rodar, limpe com o endereço do banco (no Render,
@@ -122,7 +123,8 @@ nenhuma outra empresa.
 | Variável | Para que serve | Padrão |
 |---|---|---|
 | `E2E_SEM_TELA` | `1` roda sem abrir a janela | janela visível |
-| `E2E_PAUSA_MS` | pausa antes de cada clique, para dar tempo de acompanhar | `350` |
+| `E2E_PAUSA_MS` | pausa antes de clicar num campo do formulário | `350` |
+| `E2E_PAUSA_TELA_MS` | pausa antes de clicar num botão ou link e depois de cada tela nova | `1500` |
 | `E2E_NAVEGADOR` | `chrome` ou `firefox` | `chrome` |
 | `E2E_URL_FRONT` e `E2E_URL_API` | endereços do frontend e do backend | `localhost:3000` e `localhost:8000` |
 | `E2E_CELULAR` | `1` roda na largura de celular, usando o menu lateral | largura de computador |

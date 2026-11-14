@@ -1,7 +1,14 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { By, Key, type WebDriver, type WebElement } from 'selenium-webdriver';
 import { Select } from 'selenium-webdriver/lib/select';
-import { ESPERA_MAXIMA_MS, PAUSA_ENTRE_ACOES_MS, URL_DA_API, URL_DO_FRONT } from './ambiente';
+import {
+  ESPERA_MAXIMA_MS,
+  NAVEGADOR,
+  PAUSA_ENTRE_ACOES_MS,
+  PAUSA_NA_TROCA_DE_TELA_MS,
+  URL_DA_API,
+  URL_DO_FRONT,
+} from './ambiente';
 
 const PASTA_DE_EVIDENCIAS = 'reports/e2e';
 
@@ -16,6 +23,13 @@ function literalXpath(texto: string): string {
 function xpathDoTexto(texto: string): string {
   const contemTexto = `contains(normalize-space(.), ${literalXpath(texto)})`;
   return `.//*[not(self::script) and not(self::style)][${contemTexto} and not(.//*[${contemTexto}])]`;
+}
+
+// No Firefox, o campo de data ignora os dígitos digitados um a um e só aceita
+// a data inteira no formato do HTML. Os roteiros escrevem a data como no Chrome
+// em português, DDMMAAAA: 10102030 vira 2030-10-10.
+function dataNoFormatoDoHtml(digitos: string): string {
+  return `${digitos.slice(4)}-${digitos.slice(2, 4)}-${digitos.slice(0, 2)}`;
 }
 
 function pausar(milissegundos: number): Promise<void> {
@@ -47,10 +61,11 @@ export class Regiao {
     return primeiro as WebElement;
   }
 
-  private async clicar(elemento: WebElement): Promise<void> {
+  // Campos usam a pausa curta; botões e links, que trocam a tela, usam a longa.
+  private async clicar(elemento: WebElement, pausa = PAUSA_ENTRE_ACOES_MS): Promise<void> {
     await this.navegador.executeScript('arguments[0].scrollIntoView({ block: "center" })', elemento);
     await this.navegador.wait(() => elemento.isEnabled(), ESPERA_MAXIMA_MS, 'O elemento continuou desabilitado');
-    await pausar(PAUSA_ENTRE_ACOES_MS);
+    await pausar(pausa);
     await elemento.click();
   }
 
@@ -75,6 +90,11 @@ export class Regiao {
   async preencher(rotulo: string, valor: string): Promise<void> {
     const campo = await this.campo(rotulo);
     await this.clicar(campo);
+    if (NAVEGADOR === 'firefox' && (await campo.getAttribute('type')) === 'date') {
+      await campo.clear();
+      await campo.sendKeys(dataNoFormatoDoHtml(valor));
+      return;
+    }
     const valorAtual = (await campo.getAttribute('value')) ?? '';
     await campo.sendKeys(Key.END, ...Array.from(valorAtual, () => Key.BACK_SPACE), valor);
   }
@@ -94,7 +114,7 @@ export class Regiao {
   }
 
   async clicarBotao(nome: string): Promise<void> {
-    await this.clicar(await this.botao(nome));
+    await this.clicar(await this.botao(nome), PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async clicarLink(nome: string): Promise<void> {
@@ -103,7 +123,7 @@ export class Regiao {
       `.//a[normalize-space()=${nomeNoXpath} or @aria-label=${nomeNoXpath}]`,
       `link "${nome}"`,
     );
-    await this.clicar(link);
+    await this.clicar(link, PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async clicarLinkQueContem(trecho: string): Promise<void> {
@@ -111,7 +131,7 @@ export class Regiao {
       `.//a[contains(normalize-space(), ${literalXpath(trecho)})]`,
       `link com "${trecho}"`,
     );
-    await this.clicar(link);
+    await this.clicar(link, PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async clicarRotulo(texto: string): Promise<void> {
@@ -250,10 +270,12 @@ export class Tela extends Regiao {
 
   async abrir(caminho: string): Promise<void> {
     await this.navegador.get(`${URL_DO_FRONT}${caminho}`);
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async abrirEndereco(endereco: string): Promise<void> {
     await this.navegador.get(endereco);
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async esperarCaminho(caminho: string): Promise<void> {
@@ -262,6 +284,7 @@ export class Tela extends Regiao {
       ESPERA_MAXIMA_MS,
       `A tela não foi para ${caminho}`,
     );
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async caminhoAtual(): Promise<string> {
@@ -312,6 +335,7 @@ export class Tela extends Regiao {
   async abrirNovaAba(endereco: string): Promise<string> {
     await this.navegador.switchTo().newWindow('tab');
     await this.navegador.get(endereco);
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
     return this.navegador.getWindowHandle();
   }
 
@@ -321,11 +345,13 @@ export class Tela extends Regiao {
 
   async irParaAba(aba: string): Promise<void> {
     await this.navegador.switchTo().window(aba);
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async fecharAbaAtualEVoltarPara(aba: string): Promise<void> {
     await this.navegador.close();
     await this.navegador.switchTo().window(aba);
+    await pausar(PAUSA_NA_TROCA_DE_TELA_MS);
   }
 
   async guardarEvidencia(nome: string): Promise<void> {
