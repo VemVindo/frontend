@@ -1,10 +1,19 @@
 import { readFile } from 'node:fs/promises';
+import dns from 'node:dns';
+import net from 'node:net';
 import pg from 'pg';
 
 const ARQUIVO_SQL = new URL('./limpeza.sql', import.meta.url);
 const HOSTS_LOCAIS = new Set(['localhost', '127.0.0.1', '::1']);
+const ESPERA_DA_CONEXAO_MS = 20_000;
 const apagar = process.argv.includes('--apagar');
 const enderecoDoBanco = process.env.E2E_DATABASE_URL;
+
+// Por padrão o Node disputa IPv6 e IPv4 com 250 ms para cada um. Em rede com
+// NAT64 o IPv6 não chega ao Render, e o IPv4 até o Oregon pode passar de 3 s.
+// Conectar só pelo IPv4, com um limite próprio, evita o ETIMEDOUT falso.
+net.setDefaultAutoSelectFamily(false);
+dns.setDefaultResultOrder('ipv4first');
 
 if (!enderecoDoBanco) {
   console.error('Defina E2E_DATABASE_URL com o endereço do banco (no Render: External Database URL).');
@@ -16,6 +25,7 @@ const sqlSemDesfazer = (await readFile(ARQUIVO_SQL, 'utf8')).replace(/^ROLLBACK;
 const cliente = new pg.Client({
   connectionString: enderecoDoBanco,
   ssl: HOSTS_LOCAIS.has(hostname) ? false : { rejectUnauthorized: true },
+  connectionTimeoutMillis: ESPERA_DA_CONEXAO_MS,
 });
 
 console.log(`Banco: ${hostname}${pathname}`);
