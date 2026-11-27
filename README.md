@@ -173,6 +173,14 @@ O job **Relatorio** publica no resumo da execução e num comentário fixo do PR
 
 O push na main publica a imagem no GHCR, faz o deploy no Render e confere a URL pública.
 
+`.github/workflows/keepalive.yml` acessa o front (`WEB_PUBLIC_URL`) e a API
+(`API_URL/health/db`) a cada 10 minutos, das 7h às 19h de Brasília, para o
+plano gratuito do Render não desligar os serviços nesse horário. Fora dele o
+primeiro acesso demora cerca de 1 minuto. O horário não é 24h porque o Render
+dá 750 horas de instância por mês ao workspace, e os dois serviços acordados o
+dia todo passariam disso. Para rodar na hora, use Actions > Keepalive > Run
+workflow.
+
 Configuração única, feita por quem é admin do repositório:
 
 ```bash
