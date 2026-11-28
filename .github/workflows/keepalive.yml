@@ -1,0 +1,69 @@
+name: Keepalive
+
+# O plano gratuito do Render desliga o servico depois de 15 minutos sem
+# acesso, e o proximo visitante espera ~50 s ate ele subir de novo. Este
+# workflow acessa o front e a API a cada 10 minutos, das 7h as 19h de
+# Brasilia, para que fiquem acordados nesse horario.
+#
+# Por que nao 24h: o Render da 750 horas de instancia por mes para o
+# workspace inteiro. Front e API acordados 24h somam ~1.490 h e o Render
+# suspende os dois quando as horas acabam. Das 7h as 19h somam ~740 h num
+# mes de 31 dias.
+#
+# O cron do GitHub roda em UTC (Brasilia = UTC-3) e so na branch padrao.
+# Os minutos fogem do :00 porque o GitHub atrasa mais as execucoes no
+# comeco da hora.
+on:
+  schedule:
+    - cron: '5-55/10 10-20 * * *' # 07:05 a 17:55
+    - cron: '5-45/10 21 * * *' # 18:05 a 18:45; dorme por volta das 19h
+  workflow_dispatch:
+  # Roda uma vez no PR que alterar este arquivo, para conferir os enderecos.
+  pull_request:
+    branches: [main]
+    paths: [.github/workflows/keepalive.yml]
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  acordar:
+    name: Acordar front e API
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Acessar os servicos
+        env:
+          WEB_PUBLIC_URL: ${{ vars.WEB_PUBLIC_URL }}
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          if [ -z "$WEB_PUBLIC_URL" ] || [ -z "$API_URL" ]; then
+            echo "::error::Defina WEB_PUBLIC_URL e API_URL em Settings > Secrets and variables > Actions > Variables"
+            exit 1
+          fi
+
+          # Ate 3 tentativas por servico: acordar do zero leva ~1 minuto.
+          acessar() {
+            for tentativa in 1 2 3; do
+              resultado=$(curl --silent --output /dev/null --max-time 120 \
+                --write-out '%{http_code} %{time_total}' "$2" || true)
+              codigo=${resultado%% *}
+              echo "$1: HTTP $codigo em ${resultado#* }s (tentativa $tentativa)"
+              if [ "$codigo" = "200" ]; then
+                return 0
+              fi
+              sleep 20
+            done
+            echo "::error::$1 nao respondeu 200 em $2"
+            return 1
+          }
+
+          falhou=0
+          acessar "Front" "$WEB_PUBLIC_URL/" || falhou=1
+          # /health/db tambem confere o banco com um SELECT 1.
+          acessar "API" "$API_URL/health/db" || falhou=1
+          exit $falhou
